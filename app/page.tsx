@@ -127,13 +127,10 @@ export default async function HomePage() {
         {stats.map(({ label, value }, idx) => (
           <div
             key={label}
-            className="flex flex-col items-center gap-0.5 px-6 py-6"
-            style={{
-              borderRight:
-                idx < stats.length - 1
-                  ? "1px solid rgba(0,0,0,0.08)"
-                  : undefined,
-            }}
+            className={[
+              "flex flex-col items-center gap-0.5 px-6 py-6",
+              idx < stats.length - 1 ? "border-r border-border dark:border-dark-border" : "",
+            ].join(" ")}
           >
             <span
               className="font-serif text-4xl font-bold tabular-nums"
