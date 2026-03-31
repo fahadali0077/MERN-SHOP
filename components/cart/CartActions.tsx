@@ -22,7 +22,7 @@
 
 import { useTransition } from "react";
 import { Minus, Plus, X, Loader2 } from "lucide-react";
-import { removeFromCart, updateCartQty, clearCart } from "@/app/actions/cart";
+import { addToCart, removeFromCart, updateCartQty, clearCart } from "@/app/actions/cart";
 import type { ActionResult } from "@/types";
 
 // ── Remove button ─────────────────────────────────────────────────────────────
@@ -132,8 +132,6 @@ export function AddToCartActionButton({
       if (isInCart) {
         result = await removeFromCart(productId);
       } else {
-        // Import lazily to avoid circular — addToCart is also a server action
-        const { addToCart } = await import("@/app/actions/cart");
         result = await addToCart(productId, 1);
       }
       if (!result.success) {
