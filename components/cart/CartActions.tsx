@@ -1,29 +1,8 @@
 "use client";
-
-/**
- * CartActions — Client Component for interactive cart mutations.
- *
- * MENTAL MODEL — calling Server Actions from Client Components:
- *   Server Actions are imported like regular functions but execute on the server.
- *   When called from a Client Component, React serialises the arguments,
- *   sends a POST request to Next.js, which deserialises and runs the action,
- *   then returns the result. All of this is transparent — no fetch() needed.
- *
- *   useTransition():
- *     Marks the Server Action call as a non-urgent state transition.
- *     isPending = true while the action is running → show loading indicator.
- *     startTransition wraps the async call so React batches UI updates correctly.
- *
- * OPTIMISTIC UI (Module 8 pattern preview):
- *   For now: optimistic updates via useOptimistic would be added here.
- *   The button shows a spinner while isPending, which gives feedback
- *   without a full page re-render.
- */
-
 import { useTransition } from "react";
 import { Minus, Plus, X, Loader2 } from "lucide-react";
 import { removeFromCart, updateCartQty, clearCart } from "@/app/actions/cart";
-import type { ActionResult } from "@/app/actions/cart";
+import type { ActionResult } from "types";
 
 // ── Remove button ─────────────────────────────────────────────────────────────
 interface RemoveButtonProps { productId: string; productName: string; }
