@@ -33,7 +33,7 @@ export async function addToCart(productId: string, qty = 1): Promise<ActionResul
       return { success: false, message: `Product "${parsed.data.productId}" not found` };
     }
 
-    const cart = await getSessionCart();
+    const cart    = await getSessionCart();
     const updated = addItemToCart(cart, product, parsed.data.qty);
     await setSessionCart(updated);
     revalidatePath("/cart");
@@ -52,7 +52,7 @@ export async function removeFromCart(productId: string): Promise<ActionResult<nu
   if (!parsed.success) return { success: false, message: "Invalid product ID" };
 
   try {
-    const cart = await getSessionCart();
+    const cart    = await getSessionCart();
     const updated = removeItemFromCart(cart, parsed.data.productId);
     await setSessionCart(updated);
     revalidatePath("/cart");
@@ -77,7 +77,7 @@ export async function updateCartQty(productId: string, qty: number): Promise<Act
   }
 
   try {
-    const cart = await getSessionCart();
+    const cart    = await getSessionCart();
     const updated = updateItemQtyInCart(cart, parsed.data.productId, parsed.data.qty);
     await setSessionCart(updated);
     revalidatePath("/cart");
@@ -103,8 +103,16 @@ export async function clearCart(): Promise<ActionResult<number>> {
 }
 
 // ── loginAction ───────────────────────────────────────────────────────────────
+/**
+ * loginAction — mock auth that sets the session cookie.
+ *
+ * Any valid email + password (>= 8 chars) succeeds.
+ * Sets the mern_cart cookie so middleware grants access to protected routes.
+ *
+ * MERN-III swap: replace with NextAuth.js signIn() which issues a real JWT.
+ */
 const LoginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  email:    z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 

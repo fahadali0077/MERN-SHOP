@@ -25,7 +25,7 @@ export function NavLinks() {
               "nav-link rounded-lg px-3.5 py-2 text-sm font-medium transition-colors",
               active
                 ? "active text-ink dark:text-white"
-                : "text-ink-muted hover:text-ink dark:text-white/70 dark:hover:text-white",
+                : "text-ink-soft hover:text-ink dark:text-white/85 dark:hover:text-white",
             )}
           >
             {label}

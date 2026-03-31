@@ -19,21 +19,21 @@ function getPasswordStrength(pwd: string): { level: number; label: string; color
   if (/[0-9]/.test(pwd)) level++;
   if (/[^a-zA-Z0-9]/.test(pwd)) level++;
   const map = [
-    { label: "", color: "bg-border" },
-    { label: "Weak", color: "bg-red-500" },
-    { label: "Fair", color: "bg-amber" },
-    { label: "Good", color: "bg-amber-light" },
-    { label: "Strong", color: "bg-green-500" },
+    { label: "",        color: "bg-border"      },
+    { label: "Weak",   color: "bg-red-500"      },
+    { label: "Fair",   color: "bg-amber"        },
+    { label: "Good",   color: "bg-amber-light"  },
+    { label: "Strong", color: "bg-green-500"    },
   ];
   return { level, ...(map[level] ?? map[0]) };
 }
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [avatar, setAvatar] = useState<string | null>(null);
-  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [showConfirm,  setShowConfirm]  = useState(false);
+  const [submitted,    setSubmitted]    = useState(false);
+  const [avatar,       setAvatar]       = useState<string | null>(null);
+  const [avatarError,  setAvatarError]  = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<RegisterFormValues>({
@@ -166,7 +166,7 @@ export function RegisterForm() {
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="Fahad Ali" autoComplete="name" {...field} />
+                <Input placeholder="Fahad Malik" autoComplete="name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -221,8 +221,9 @@ export function RegisterForm() {
                     {[1, 2, 3, 4].map((n) => (
                       <div
                         key={n}
-                        className={`h-1 flex-1 rounded-full transition-all duration-300 ${n <= strength.level ? strength.color : "bg-border"
-                          }`}
+                        className={`h-1 flex-1 rounded-full transition-all duration-300 ${
+                          n <= strength.level ? strength.color : "bg-border"
+                        }`}
                       />
                     ))}
                   </div>

@@ -18,7 +18,6 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: false,
         login: async (email: string, _password: string) => {
           await new Promise((r) => setTimeout(r, 700));
-          const isAdmin = email.toLowerCase().includes("admin");
           set(
             {
               isAuthenticated: true,
@@ -26,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
                 id: `user-${Date.now()}`,
                 name: email.split("@")[0] ?? "User",
                 email,
-                role: isAdmin ? "admin" : "customer",
+                role: "customer",          // always customer — admin has its own gate
                 createdAt: new Date().toISOString(),
               },
             },

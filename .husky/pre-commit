@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged (ESLint + Prettier on staged files)
+npx lint-staged
+
+# Run TypeScript type-check on the whole project
+# This catches cross-file type errors that lint-staged misses
+echo "Running TypeScript type check..."
+npx tsc --noEmit
+
+echo "✓ Pre-commit checks passed"

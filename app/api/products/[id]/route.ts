@@ -12,7 +12,13 @@ const ParamSchema = z.object({
     .regex(/^p-\d{3}$/, "Product ID must match format p-NNN (e.g. p-001)"),
 });
 
-
+/**
+ * GET /api/products/[id]
+ *
+ * Module 8: validates the :id param before hitting the data layer.
+ * A request for /api/products/../../../../etc/passwd would fail Zod validation
+ * before reaching fetchProductById — defence in depth.
+ */
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

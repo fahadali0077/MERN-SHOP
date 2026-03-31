@@ -4,7 +4,16 @@ import { getSessionCart, getSessionCartTotal } from "@/lib/session";
 import { CartItemSchema } from "@/schemas";
 import type { ApiResponse, CartItem } from "@/types";
 
-
+/**
+ * GET /api/cart
+ *
+ * Returns the current session cart as JSON.
+ * Validates each cart item against CartItemSchema for data integrity.
+ *
+ * Use case: mobile app or external client reading the cart.
+ * The /cart page reads the cookie directly (Server Component) — this
+ * endpoint is for external consumers.
+ */
 export async function GET(
   _request: NextRequest,
 ): Promise<NextResponse<ApiResponse<CartItem[]>>> {
@@ -12,6 +21,8 @@ export async function GET(
     const cart = await getSessionCart();
     const total = await getSessionCartTotal();
 
+    // Validate every item in the cart matches our expected shape
+    // This guards against corrupted cookie data
     const validatedItems: CartItem[] = [];
     const invalidItems: string[] = [];
 

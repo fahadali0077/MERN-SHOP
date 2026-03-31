@@ -15,6 +15,23 @@ import {
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 
+/**
+ * Shadcn Form components — wraps React Hook Form with accessible markup.
+ *
+ * USAGE:
+ *   <Form {...form}>
+ *     <FormField name="email" control={form.control} render={({ field }) => (
+ *       <FormItem>
+ *         <FormLabel>Email</FormLabel>
+ *         <FormControl><Input {...field} /></FormControl>
+ *         <FormMessage />
+ *       </FormItem>
+ *     )} />
+ *   </Form>
+ *
+ * FormMessage automatically reads the error from RHF's formState.errors
+ * and renders it inline below the input — no manual error wiring needed.
+ */
 
 const Form = FormProvider;
 

@@ -4,7 +4,10 @@ import { StatCards } from "@/components/admin/StatCards";
 import { RevenueChart } from "@/components/admin/RevenueChart";
 import { LiveOrderFeed } from "@/components/admin/LiveOrderFeed";
 
-
+/**
+ * Admin Dashboard — /admin
+ * Server Component shell; charts and live feed are Client Component islands.
+ */
 export default function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-0 p-6 lg:p-8">

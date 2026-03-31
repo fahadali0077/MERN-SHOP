@@ -1,6 +1,22 @@
 "use client";
 
-
+/**
+ * ServerAddToCartButton — calls addToCart Server Action.
+ *
+ * This replaces the Zustand-based AddToCartButton on the product detail page.
+ * Instead of updating client state, it calls a Server Action which:
+ *   1. Reads the current cart from the session cookie (server)
+ *   2. Adds the product
+ *   3. Writes the updated cart back to the cookie
+ *   4. Calls revalidatePath('/cart') to bust the cart page cache
+ *
+ * useTransition provides isPending for optimistic UI feedback.
+ *
+ * NOTE: On the /products grid, we still use the Zustand AddToCartButton
+ * (fast client-side update, no page reload). On the detail page we use
+ * this Server Action version to demonstrate the full module 6 pattern.
+ * In a real app you'd pick one strategy and be consistent.
+ */
 
 import { useTransition, useState } from "react";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";

@@ -1,6 +1,25 @@
 import { z } from "zod";
 import type { Category } from "@/types";
 
+/**
+ * schemas/product.ts — Zod schemas for Product data.
+ *
+ * MENTAL MODEL — Zod .safeParse() vs .parse():
+ *
+ *   .parse(data):
+ *     → throws a ZodError on failure
+ *     → use when you want to crash on invalid data
+ *     → NOT suitable for API routes (would return unhandled 500)
+ *
+ *   .safeParse(data):
+ *     → returns { success: true, data } | { success: false, error: ZodError }
+ *     → NEVER throws
+ *     → use in API routes and Server Actions — always returns a typed result
+ *     → errors.flatten() → { fieldErrors: {...}, formErrors: [...] }
+ *
+ * We use .safeParse() EVERYWHERE in Module 8.
+ */
+
 export const CATEGORIES = [
   "Electronics",
   "Fashion",
@@ -38,6 +57,7 @@ export const CartItemSchema = z.object({
 export type CartItemSchemaType = z.infer<typeof CartItemSchema>;
 
 // ── AddToCartInputSchema — validates Server Action input ──────────────────────
+// Lightweight: only productId + qty (we look up the full product server-side)
 export const AddToCartInputSchema = z.object({
   productId: z
     .string()

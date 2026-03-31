@@ -1,5 +1,26 @@
 "use client";
 
+/**
+ * CartItemRow — Client Component.
+ *
+ * COMPOSITION PATTERN in the cart page:
+ *   CartPage (Server Component)
+ *     └── renders item data from cookie (server)
+ *     └── CartItemRow (Client Component) ← interactive: qty stepper + remove
+ *
+ * The Server Component owns the data (reads cookie, computes totals).
+ * CartItemRow owns the interactivity (calls Server Actions on button clicks).
+ *
+ * useTransition:
+ *   Server Actions are async. useTransition gives us isPending so we can
+ *   show a loading state while the action runs. Without it, the button
+ *   has no visual feedback during the ~100ms cookie write + revalidation.
+ *
+ * Optimistic UI:
+ *   For the qty stepper we show the new qty immediately (via local state),
+ *   then let the Server Action + revalidatePath sync the server. This makes
+ *   the stepper feel instant even over slow connections.
+ */
 
 import { useTransition, useState } from "react";
 import Link from "next/link";

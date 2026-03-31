@@ -29,7 +29,12 @@ export default function RegisterPage() {
           <RegisterForm />
         </div>
 
-
+        <p className="mt-5 text-center text-sm text-ink-muted">
+          Already have an account?{" "}
+          <Link href="/auth/login" className="font-semibold text-amber hover:underline">
+            Sign in →
+          </Link>
+        </p>
       </div>
     </div>
   );

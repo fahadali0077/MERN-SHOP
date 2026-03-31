@@ -8,7 +8,28 @@ interface ProductRowProps {
   rowIndex: number;
 }
 
-
+/**
+ * ProductRow — one row of 4 product cards.
+ *
+ * Each row is wrapped in its own Suspense boundary.
+ * The first row (rowIndex === 0) uses priority={true} on its cards
+ * to preload images that are immediately visible (above the fold).
+ *
+ * MENTAL MODEL — per-row Suspense:
+ *   A single <Suspense> wrapping the entire grid means ALL cards wait
+ *   for the slowest one before any appear. Per-row Suspense means:
+ *   - Row 1 renders as soon as its data is ready
+ *   - Row 2 renders independently when its data is ready
+ *   - The page progressively fills in, row by row
+ *
+ *   In practice with a single fetch() this doesn't change much — all
+ *   cards come from one request. The pattern becomes significant when
+ *   each card fetches its own data (e.g. inventory count from a separate
+ *   service) — then each card or row streams independently.
+ *
+ *   This is Next.js "Streaming" — partial HTML sent progressively
+ *   rather than waiting for the full page to be ready.
+ */
 export function ProductRow({ products, rowIndex }: ProductRowProps) {
   const isFirstRow = rowIndex === 0;
 

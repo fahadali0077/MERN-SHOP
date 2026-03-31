@@ -1,5 +1,22 @@
 "use client";
 
+/**
+ * CommandPalette — Cmd+K using cmdk.
+ *
+ * MENTAL MODEL:
+ *   cmdk provides a headless Command component that handles:
+ *   - Keyboard navigation (arrow keys, Enter)
+ *   - Fuzzy search filtering
+ *   - Accessible ARIA roles
+ *
+ *   We wrap it in a Radix Dialog for the backdrop + focus trap.
+ *   AnimatePresence adds enter/exit animation.
+ *
+ * USAGE:
+ *   The parent renders <CommandPalette open={open} onClose={() => setOpen(false)} />
+ *   A useEffect in AdminLayout listens for Cmd+K / Ctrl+K.
+ */
+
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import { motion, AnimatePresence } from "framer-motion";

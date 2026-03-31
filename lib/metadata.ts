@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import type { Product } from "@/types";
 import { env } from "@/env";
 
+/**
+ * lib/metadata.ts — Module 8 update:
+ * Uses env.NEXT_PUBLIC_BASE_URL instead of process.env fallback.
+ * This is now type-safe and validated at startup.
+ */
 export const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
 export const DEFAULT_METADATA: Metadata = {

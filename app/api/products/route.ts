@@ -4,10 +4,28 @@ import { fetchProducts } from "@/lib/products";
 import { ProductsQuerySchema } from "@/schemas";
 import type { ApiResponse, Product } from "@/types";
 
-
+/**
+ * GET /api/products
+ *
+ * MODULE 8 CHANGE: query params now validated with ProductsQuerySchema.safeParse().
+ *
+ * MENTAL MODEL — safeParse in API routes:
+ *   1. Parse the raw query params into a plain object
+ *   2. Run ProductsQuerySchema.safeParse(params)
+ *   3. If invalid → return 400 with field-level errors (never run business logic)
+ *   4. If valid → result.data is fully typed — no type assertions needed
+ *
+ *   Before Zod:  const category = searchParams.get("category") as Category
+ *   After Zod:   result.data.category  ← typed as Category | undefined
+ *
+ *   This prevents passing garbage values into fetchProducts() and
+ *   provides meaningful error messages to API consumers.
+ */
 export async function GET(request: NextRequest): Promise<NextResponse<ApiResponse<Product[]>>> {
   try {
     const { searchParams } = new URL(request.url);
+
+    // Parse query params into a plain object for Zod
     const rawParams = Object.fromEntries(searchParams.entries());
 
     const parsed = ProductsQuerySchema.safeParse(rawParams);
@@ -18,6 +36,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
           success: false as const,
           error: "Invalid query parameters",
           code: "VALIDATION_ERROR",
+          // Attach field-level errors so API consumers know exactly what's wrong
           ...{ details: parsed.error.flatten().fieldErrors },
         },
         { status: 400 },
@@ -32,9 +51,9 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
       products = products.filter((p) => p.category === category);
     }
 
-    if (sort === "price-asc") products = [...products].sort((a, b) => a.price - b.price);
-    if (sort === "price-desc") products = [...products].sort((a, b) => b.price - a.price);
-    if (sort === "rating-desc") products = [...products].sort((a, b) => b.rating - a.rating);
+    if (sort === "price-asc")    products = [...products].sort((a, b) => a.price - b.price);
+    if (sort === "price-desc")   products = [...products].sort((a, b) => b.price - a.price);
+    if (sort === "rating-desc")  products = [...products].sort((a, b) => b.rating - a.rating);
     if (sort === "reviews-desc") products = [...products].sort((a, b) => b.reviewCount - a.reviewCount);
 
     return NextResponse.json(

@@ -1,5 +1,23 @@
 "use client";
 
+/**
+ * ImageGallery — Framer Motion animated image gallery.
+ *
+ * MENTAL MODEL — motion.div + AnimatePresence:
+ *   When the user selects a thumbnail, the main image swaps.
+ *   Without animation: instant swap (jarring).
+ *   With AnimatePresence + motion.img: the old image fades out while
+ *   the new one slides in simultaneously (crossfade).
+ *
+ * layoutId:
+ *   When a motion element with the same layoutId is unmounted and remounted
+ *   elsewhere in the DOM, Framer Motion animates the transition automatically.
+ *   We use this to "zoom" the selected thumbnail into the main slot.
+ *
+ * whileHover / whileTap:
+ *   Inline gesture variants — no state needed for hover/press effects.
+ */
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Product } from "@/types";
@@ -8,7 +26,7 @@ interface ImageGalleryProps {
   product: Product;
 }
 
-
+// Generate variant images using different Picsum seeds
 function getGalleryImages(product: Product): string[] {
   const seed = product.id.replace("p-", "");
   return [
@@ -97,10 +115,11 @@ export function ImageGallery({ product }: ImageGalleryProps) {
             onClick={() => { selectImage(i); }}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-colors ${i === selectedIndex
+            className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-colors ${
+              i === selectedIndex
                 ? "border-amber"
                 : "border-border hover:border-ink-muted dark:border-dark-border"
-              }`}
+            }`}
             aria-label={`View image ${i + 1}`}
             aria-pressed={i === selectedIndex}
           >

@@ -2,6 +2,24 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { CART_COOKIE } from "@/lib/session";
 
+/**
+ * middleware.ts — Edge middleware running before every request.
+ *
+ * PROTECTED ROUTES:
+ *   /admin/**      → requires mernshop_admin cookie (set on /admin/login)
+ *   /checkout      → requires mern_cart session cookie (set on login)
+ *   /account       → requires mern_cart session cookie
+ *   /cart          → requires mern_cart session cookie
+ *
+ * IMPORTANT — login pages are always public:
+ *   /admin/login   → never redirected (would cause infinite loop)
+ *   /auth/login    → never redirected
+ *   /auth/register → never redirected
+ *
+ * MERN-IV UPGRADE:
+ *   Replace cookie checks with: getToken({ req }) from next-auth/jwt
+ *   Check token.role === "admin" for admin routes.
+ */
 
 const ADMIN_COOKIE = "mernshop_admin";
 
