@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as LabelPrimitive from "@radix-ui/react-label";
 import type { Slot } from "@radix-ui/react-slot";
-import {
+import type {
   Controller,
   type ControllerProps,
   type FieldPath,
