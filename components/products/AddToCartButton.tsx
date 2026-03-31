@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { ShoppingCart, Check, Loader2, Minus } from "lucide-react";
+import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { addToCart, removeFromCart } from "@/app/actions/cart";
 import { useCartStore, type CartState } from "@/stores/cartStore";
@@ -59,6 +59,7 @@ export function AddToCartButton({ product, isInCartSession = false, size = "lg" 
         <><Check size={14} strokeWidth={2.5} /> In Cart · Remove</>
       ) : (
         <><ShoppingCart size={14} strokeWidth={2} /> Add to Cart</>
+      
       )}
     </motion.button>
   );
