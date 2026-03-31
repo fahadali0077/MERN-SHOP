@@ -22,6 +22,7 @@ export function LoginForm() {
 
   const router = useRouter();
   const login = useAuthStore((s) => s.login);
+  const getUser = useAuthStore.getState;
 
   // ----- validation helpers -----
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,8 +66,11 @@ export function LoginForm() {
     setLoading(false);
     setShowToast(true);
 
+    const { user } = getUser();
+    const redirectTo = user?.role === "admin" ? "/admin" : "/account";
+
     setTimeout(() => {
-      router.push("/account");
+      router.push(redirectTo);
     }, 1500);
   };
 

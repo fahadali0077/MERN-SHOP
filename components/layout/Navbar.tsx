@@ -32,8 +32,7 @@ export function Navbar() {
 
   return (
     <header
-      className="sticky top-0 z-50 will-change-transform border-b border-border/70 backdrop-blur-xl dark:border-dark-border/70"
-      style={{ background: "rgba(245, 243, 235, 0.85)" }}
+      className="sticky top-0 z-50 will-change-transform border-b border-border/70 backdrop-blur-xl bg-parchment/85 dark:border-dark-border/70 dark:bg-dark-bg/85"
     >
       <div className="mx-auto flex max-w-screen-xl items-center gap-6 px-4 py-0 md:px-6">
 

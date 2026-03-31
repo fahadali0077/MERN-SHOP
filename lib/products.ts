@@ -1,5 +1,6 @@
 import type { Product, Category, SortOption } from "@/types";
-
+import path from "path";
+import fs from "fs/promises";
 
 export interface FetchProductsOptions {
   q?: string;
@@ -7,15 +8,11 @@ export interface FetchProductsOptions {
   sort?: SortOption | "featured" | string;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-
-/** Raw data fetch — reads the static JSON file. Cached by Next.js. */
+/** Raw data fetch — reads the static JSON file directly from disk. */
 async function getProductsData(): Promise<Product[]> {
-  const res = await fetch(`${BASE_URL}/api/products.json`, {
-    next: { revalidate: 60 },
-  });
-  if (!res.ok) throw new Error(`Failed to load products: ${res.status}`);
-  return res.json() as Promise<Product[]>;
+  const filePath = path.join(process.cwd(), "public", "api", "products.json");
+  const raw = await fs.readFile(filePath, "utf-8");
+  return JSON.parse(raw) as Product[];
 }
 
 /** Apply filters and sorting in memory. */
