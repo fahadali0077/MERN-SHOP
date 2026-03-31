@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { fetchProductById, fetchProductIds } from "@/lib/products";
 import { buildProductMetadata } from "@/lib/metadata";
-import { SHIMMER_BLUR, DETAIL_IMAGE_SIZES } from "@/lib/imageUtils";
 import { StarRating } from "@/components/products/StarRating";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { ImageGallery } from "@/components/products/ImageGallery";
