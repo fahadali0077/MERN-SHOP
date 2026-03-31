@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+
+/* Navbar anchor offset */
+:root { scroll-padding-top: 80px; }
+
+/* On-brand text selection */
+::selection { background: #fbbf24; color: #1a1612; }
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*:focus-visible {
+  outline: 2px solid #C47F17;
+  outline-offset: 2px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up-1 {
+  animation: fadeUp 0.5s ease forwards;
+}
+.animate-fade-up-2 {
+  opacity: 0;
+  animation: fadeUp 0.5s ease 0.15s forwards;
+}
+.animate-fade-up-3 {
+  opacity: 0;
+  animation: fadeUp 0.5s ease 0.3s forwards;
+}
+
+/* Stagger row 4 for hero trust badges */
+.animate-fade-up-4 {
+  opacity: 0;
+  animation: fadeUp 0.5s ease 0.45s forwards;
+}
+
+/* Nav link underline slide-in animation */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 0.875rem;
+  right: 0.875rem;
+  height: 1.5px;
+  background: #C47F17;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+.nav-link:hover::after,
+.nav-link.active::after {
+  transform: scaleX(1);
+}
+
+@layer base {
+  * { @apply border-border; }
+
+  body {
+    @apply bg-parchment text-ink antialiased;
+    font-family: var(--font-inter, system-ui, sans-serif);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-playfair, Georgia, serif);
+    letter-spacing: -0.02em;
+  }
+
+  /* Refined scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full bg-border dark:bg-dark-border; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-ink-muted; }
+
+  :focus-visible {
+    @apply outline-none;
+  }
+}
+
+@layer utilities {
+  .tabular { font-variant-numeric: tabular-nums; }
+  .text-balance { text-wrap: balance; }
+}
