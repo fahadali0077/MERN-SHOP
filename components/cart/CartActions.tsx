@@ -128,7 +128,7 @@ export function AddToCartActionButton({
 
   const handleClick = () => {
     startTransition(async () => {
-      let result: ActionResult;
+      let result: ActionResult<number>;
       if (isInCart) {
         result = await removeFromCart(productId);
       } else {
