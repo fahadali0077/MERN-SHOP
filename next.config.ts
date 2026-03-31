@@ -1,10 +1,5 @@
 import type { NextConfig } from "next";
 import bundleAnalyzer from "@next/bundle-analyzer";
-const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
 
 module.exports = nextConfig;
 
@@ -21,8 +16,6 @@ const nextConfig: NextConfig = {
         hostname: "picsum.photos",
       },
     ],
-    // Enable blur placeholder generation for remote images
-    // (only works with local images natively; for remote we supply blurDataURL manually)
     formats: ["image/avif", "image/webp"],
   },
 };
