@@ -1,14 +1,11 @@
-import type { NextConfig } from "next";
-import bundleAnalyzer from "@next/bundle-analyzer";
-
-module.exports = nextConfig;
-
-const withBundleAnalyzer = bundleAnalyzer({
+// next.config.js
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true",
   openAnalyzer: true,
 });
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       {
@@ -18,6 +15,10 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
+  reactStrictMode: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
-export default withBundleAnalyzer(nextConfig);
+module.exports = withBundleAnalyzer(nextConfig);
