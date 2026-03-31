@@ -110,11 +110,11 @@ export function AddToCartActionButton({
 
   const handleClick = () => {
     startTransition(async () => {
-      let result: ActionResult; | void>;
+      let result: ActionResult<number | void>;
       if (isInCart) {
         result = await removeFromCart(productId);
       } else {
-        const { addToCart } = await import("@/types");
+        const { addToCart } = await import("@/app/actions/cart");
         result = await addToCart(productId, 1);
       }
       if (!result.success) {
