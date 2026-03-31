@@ -155,7 +155,7 @@ export function SearchBar() {
           <span className="text-xs text-ink-muted">Filtering:</span>
           {query && (
             <span className="inline-flex items-center gap-1 rounded-full bg-primary-dim px-2.5 py-1 text-xs font-medium text-primary">
-              "{query}"
+              {`"${query}"`}
               <button onClick={() => { setQuery(""); push({ q: "" }); }} className="ml-0.5 hover:opacity-70">
                 <X size={10} strokeWidth={2.5} />
               </button>
