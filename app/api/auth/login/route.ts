@@ -12,17 +12,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Password must be at least 8 characters" });
     }
 
-    const cookieStore = await cookies();
+    const cookieStore = cookies();
+    cookieStore.set("session", JSON.stringify({ email }), {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+      secure: true,
+    });
+
+    // existing cart cookie
     cookieStore.set("mern_cart", JSON.stringify([]), {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
     });
 
-    return NextResponse.json({ success: true, message: "Logged in successfully" });
+    return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ success: false, message: "Login failed. Please try again." }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Login failed" },
+      { status: 500 }
+    );
   }
 }

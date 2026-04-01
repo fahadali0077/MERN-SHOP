@@ -1,24 +1,6 @@
 import { cookies } from "next/headers";
 import type { CartItem, Product } from "@/types";
 
-/**
- * Session cart — cookie-based storage.
- *
- * MENTAL MODEL:
- *   We store the cart as JSON in an HttpOnly cookie.
- *   HttpOnly = never accessible via document.cookie (XSS protection).
- *   Sent automatically on every request — server always has access.
- *   Set/read in Server Actions and Route Handlers via next/headers.
- *
- *   In MERN-III this is replaced by MongoDB session. Server Action
- *   signatures stay the same — only the storage layer changes.
- *
- * WHY NOT LOCALSTORAGE?
- *   localStorage is client-only. Server Components and middleware cannot
- *   read it. Cookies are sent on every HTTP request.
- *
- * NOTE: cookies() is async in Next.js 15 — must be awaited.
- */
 
 export const CART_COOKIE = "mern_cart";
 
