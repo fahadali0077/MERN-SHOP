@@ -8,6 +8,7 @@ import { z } from "zod";
 import Link from "next/link";
 import { ShoppingBag, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { adminLoginAction } from "@/app/actions/cart";
 
 const Schema = z.object({
   email:    z.string().email("Valid email required"),
@@ -15,8 +16,7 @@ const Schema = z.object({
 });
 type FormValues = z.infer<typeof Schema>;
 
-const ADMIN_EMAIL    = "admin@mernshop.com";
-const ADMIN_PASSWORD = "Admin@1234";
+const ADMIN_EMAIL = "admin@mernshop.com";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -29,45 +29,42 @@ export default function AdminLoginPage() {
 
   const onSubmit = async (data: FormValues) => {
     setError(null);
-    await new Promise((r) => setTimeout(r, 600));
 
-    if (data.email === ADMIN_EMAIL && data.password === ADMIN_PASSWORD) {
-      // 1. Session cookie read by middleware
-      document.cookie = "mernshop_admin=true; path=/; max-age=28800";
+    // Server action sets the HttpOnly cookie middleware can read
+    const result = await adminLoginAction(data.email, data.password);
 
-      // 2. Populate Zustand so navbar shows Admin + Account links immediately
-      useAuthStore.setState({
-        isAuthenticated: true,
-        user: {
-          id: "admin-1",
-          name: "Admin",
-          email: ADMIN_EMAIL,
-          role: "admin",
-          createdAt: new Date().toISOString(),
-        },
-      });
-      window.dispatchEvent(new Event("storage"));
-
-      router.push("/admin");
-    } else {
-      setError("Invalid credentials. Access denied.");
+    if (!result.success) {
+      setError(result.message);
+      return;
     }
+
+    // Populate Zustand so navbar shows Admin Dashboard immediately
+    useAuthStore.setState({
+      isAuthenticated: true,
+      user: {
+        id: "admin-1",
+        name: "Admin",
+        email: ADMIN_EMAIL,
+        role: "admin",
+        createdAt: new Date().toISOString(),
+      },
+    });
+    window.dispatchEvent(new Event("storage"));
+
+    router.push("/admin");
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-parchment px-4 dark:bg-dark-bg">
       <div className="w-full max-w-sm">
 
-        {/* Back link */}
         <Link href="/" className="mb-8 flex items-center gap-1.5 text-sm text-ink-muted hover:text-ink dark:text-white/50 dark:hover:text-white">
           <ArrowLeft size={14} strokeWidth={2} />
           Back to store
         </Link>
 
-        {/* Card */}
         <div className="rounded-2xl border border-border bg-white p-8 shadow-sm dark:border-dark-border dark:bg-dark-surface">
 
-          {/* Logo — always amber for admin */}
           <div className="mb-7 flex flex-col items-center gap-3 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber">
               <ShoppingBag size={22} className="text-white" strokeWidth={2} />
@@ -121,7 +118,6 @@ export default function AdminLoginPage() {
               </div>
             )}
 
-            {/* Locked-access notice */}
             <div className="flex items-center gap-2 rounded-lg border border-border bg-cream px-3 py-2.5 dark:border-dark-border dark:bg-dark-surface-2">
               <ShieldCheck size={14} className="flex-shrink-0 text-amber" strokeWidth={2} />
               <p className="text-xs text-ink-muted">
