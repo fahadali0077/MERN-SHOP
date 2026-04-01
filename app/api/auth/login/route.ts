@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Password must be at least 8 characters" });
     }
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set("session", JSON.stringify({ email }), {
       httpOnly: true,
       sameSite: "lax",
