@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { ShoppingBag, Github, Twitter, Linkedin } from "lucide-react";
+import {
+  ShoppingBag, Github,
+  Linkedin
+} from "lucide-react";
 
 const LINKS = {
   Shop: [
@@ -42,9 +45,8 @@ export function Footer() {
             {/* Social links */}
             <div className="mt-5 flex items-center gap-2">
               {[
-                { href: "#", Icon: Github, label: "GitHub" },
-                { href: "#", Icon: Twitter, label: "Twitter" },
-                { href: "#", Icon: Linkedin, label: "LinkedIn" },
+                { href: "https://github.com/fahadali0077", Icon: Github, label: "GitHub" },
+                { href: "https://www.linkedin.com/in/fahad-ali-840a093a8/", Icon: Linkedin, label: "LinkedIn" },
               ].map(({ href, Icon, label }) => (
                 <a
                   key={label}
