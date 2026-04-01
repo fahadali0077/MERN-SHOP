@@ -36,24 +36,26 @@ export function LoginForm() {
     if (emailErr || passErr) { setErrors({ email: emailErr, password: passErr }); return; }
 
     setLoading(true);
+    try {
+      // Server action — sets mern_cart cookie so middleware allows /account
+      const result = await loginAction(email, password);
+      if (!result.success) {
+        setSubmitError(result.message);
+        return;
+      }
 
-    // 1. Call server action — sets the mern_cart cookie so middleware
-    //    allows access to /account, /checkout, /cart
-    const result = await loginAction(email, password);
-    if (!result.success) {
-      setSubmitError(result.message);
+      // Update Zustand client-side auth state
+      await login(email, password);
+      window.dispatchEvent(new Event("storage"));
+
+      setSuccess(true);
+      setTimeout(() => router.push("/account"), 1400);
+    } catch (err) {
+      console.error(err);
+      setSubmitError("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // 2. Update Zustand store — syncs client-side auth state
-    await login(email, password);
-    window.dispatchEvent(new Event("storage"));
-
-    setLoading(false);
-    setSuccess(true);
-
-    setTimeout(() => router.push("/account"), 1400);
   };
 
   return (
@@ -140,7 +142,7 @@ export function LoginForm() {
         )}
 
         <p className="text-center text-xs text-ink-muted">
-          Use any valid email and a password of 6+ characters.
+          Use any valid email and a password of 8+ characters.
         </p>
 
         <button
