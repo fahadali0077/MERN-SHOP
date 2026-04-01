@@ -29,29 +29,28 @@ export default function AdminLoginPage() {
 
   const onSubmit = async (data: FormValues) => {
     setError(null);
-
-    // Server action sets the HttpOnly cookie middleware can read
-    const result = await adminLoginAction(data.email, data.password);
-
-    if (!result.success) {
-      setError(result.message);
-      return;
+    try {
+      const result = await adminLoginAction(data.email, data.password);
+      if (!result.success) {
+        setError(result.message);
+        return;
+      }
+      useAuthStore.setState({
+        isAuthenticated: true,
+        user: {
+          id: "admin-1",
+          name: "Admin",
+          email: ADMIN_EMAIL,
+          role: "admin",
+          createdAt: new Date().toISOString(),
+        },
+      });
+      window.dispatchEvent(new Event("storage"));
+      router.push("/admin");
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
     }
-
-    // Populate Zustand so navbar shows Admin Dashboard immediately
-    useAuthStore.setState({
-      isAuthenticated: true,
-      user: {
-        id: "admin-1",
-        name: "Admin",
-        email: ADMIN_EMAIL,
-        role: "admin",
-        createdAt: new Date().toISOString(),
-      },
-    });
-    window.dispatchEvent(new Event("storage"));
-
-    router.push("/admin");
   };
 
   return (
