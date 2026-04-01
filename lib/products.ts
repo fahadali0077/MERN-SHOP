@@ -1,22 +1,16 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 import type { Product, Category, SortOption } from "@/types";
 
 /**
  * lib/products.ts — data fetching layer (Server Components only).
  *
- * ARCHITECTURE:
- *   This file reads the mock JSON directly (public/api/products.json)
- *   and applies filtering/sorting in memory.
+ * Reads the mock JSON directly from the filesystem at build time.
+ * This avoids the circular HTTP fetch to localhost:3000 which breaks
+ * during Vercel's static build phase (no server is running then).
  *
- *   The API Route (/api/products) also imports from here — so this file
- *   must NOT call the API route itself (would be a circular fetch).
- *
- *   MERN-III swap: replace getProductsData() with a MongoDB query.
- *   All function signatures stay the same — only the data source changes.
- *
- * FILTERING PARAMS:
- *   q        — full-text search (name, category, description)
- *   category — category filter
- *   sort     — sort order
+ * MERN-III swap: replace getProductsData() with a MongoDB query.
+ * All function signatures stay the same — only the data source changes.
  */
 
 export interface FetchProductsOptions {
@@ -25,15 +19,11 @@ export interface FetchProductsOptions {
   sort?: SortOption | "featured" | string;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-
-/** Raw data fetch — reads the static JSON file. Cached by Next.js. */
-async function getProductsData(): Promise<Product[]> {
-  const res = await fetch(`${BASE_URL}/api/products.json`, {
-    next: { revalidate: 60 },
-  });
-  if (!res.ok) throw new Error(`Failed to load products: ${res.status}`);
-  return res.json() as Promise<Product[]>;
+/** Raw data fetch — reads the static JSON file directly from disk. */
+function getProductsData(): Product[] {
+  const filePath = join(process.cwd(), "public", "api", "products.json");
+  const raw = readFileSync(filePath, "utf-8");
+  return JSON.parse(raw) as Product[];
 }
 
 /** Apply filters and sorting in memory. */
@@ -55,9 +45,9 @@ function applyFilters(products: Product[], opts: FetchProductsOptions): Product[
   }
 
   switch (opts.sort) {
-    case "price-asc":    list.sort((a, b) => a.price - b.price);           break;
-    case "price-desc":   list.sort((a, b) => b.price - a.price);           break;
-    case "rating-desc":  list.sort((a, b) => b.rating - a.rating);         break;
+    case "price-asc":    list.sort((a, b) => a.price - b.price);            break;
+    case "price-desc":   list.sort((a, b) => b.price - a.price);            break;
+    case "rating-desc":  list.sort((a, b) => b.rating - a.rating);          break;
     case "reviews-desc": list.sort((a, b) => b.reviewCount - a.reviewCount); break;
     default: break; // "featured" — keep original order
   }
@@ -68,16 +58,16 @@ function applyFilters(products: Product[], opts: FetchProductsOptions): Product[
 // ── Public API ────────────────────────────────────────────────────────────────
 
 export async function fetchProducts(opts: FetchProductsOptions = {}): Promise<Product[]> {
-  const data = await getProductsData();
+  const data = getProductsData();
   return applyFilters(data, opts);
 }
 
 export async function fetchProductById(id: string): Promise<Product | null> {
-  const products = await getProductsData();
+  const products = getProductsData();
   return products.find((p) => p.id === id) ?? null;
 }
 
 export async function fetchProductIds(): Promise<string[]> {
-  const products = await getProductsData();
+  const products = getProductsData();
   return products.map((p) => p.id);
 }
