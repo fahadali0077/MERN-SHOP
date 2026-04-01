@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { loginAction } from "@/app/actions/cart";
+import { loginAction } from "@/app/actions/auth";
 
 interface FieldErrors {
   email?: string;
