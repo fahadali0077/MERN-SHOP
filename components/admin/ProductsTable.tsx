@@ -1,10 +1,5 @@
 "use client";
 
-/**
- * ProductsTable — TanStack Table with sort, filter, pagination.
- * Polished with sticky header, row striping, hover effects, status badges.
- */
-
 import { useState, useMemo } from "react";
 import {
   useReactTable,
@@ -148,9 +143,9 @@ export function ProductsTable() {
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {header.column.getCanSort() && (
-                          header.column.getIsSorted() === "asc"  ? <ChevronUp size={13}/> :
-                          header.column.getIsSorted() === "desc" ? <ChevronDown size={13}/> :
-                          <ChevronsUpDown size={13} className="opacity-40"/>
+                          header.column.getIsSorted() === "asc" ? <ChevronUp size={13} /> :
+                            header.column.getIsSorted() === "desc" ? <ChevronDown size={13} /> :
+                              <ChevronsUpDown size={13} className="opacity-40" />
                         )}
                       </button>
                     )}
@@ -191,14 +186,14 @@ export function ProductsTable() {
             disabled={!table.getCanPreviousPage()}
             className="flex h-7 w-7 items-center justify-center rounded border border-border text-ink-muted hover:border-amber hover:text-amber disabled:opacity-30 dark:border-dark-border dark:text-white"
           >
-            <ChevronLeft size={14}/>
+            <ChevronLeft size={14} />
           </button>
           <button
             onClick={() => { table.nextPage(); }}
             disabled={!table.getCanNextPage()}
             className="flex h-7 w-7 items-center justify-center rounded border border-border text-ink-muted hover:border-amber hover:text-amber disabled:opacity-30 dark:border-dark-border dark:text-white"
           >
-            <ChevronRight size={14}/>
+            <ChevronRight size={14} />
           </button>
         </div>
       </div>

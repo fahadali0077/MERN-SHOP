@@ -1,24 +1,5 @@
 "use client";
 
-/**
- * CartActions — Client Component for interactive cart mutations.
- *
- * MENTAL MODEL — calling Server Actions from Client Components:
- *   Server Actions are imported like regular functions but execute on the server.
- *   When called from a Client Component, React serialises the arguments,
- *   sends a POST request to Next.js, which deserialises and runs the action,
- *   then returns the result. All of this is transparent — no fetch() needed.
- *
- *   useTransition():
- *     Marks the Server Action call as a non-urgent state transition.
- *     isPending = true while the action is running → show loading indicator.
- *     startTransition wraps the async call so React batches UI updates correctly.
- *
- * OPTIMISTIC UI (Module 8 pattern preview):
- *   For now: optimistic updates via useOptimistic would be added here.
- *   The button shows a spinner while isPending, which gives feedback
- *   without a full page re-render.
- */
 
 import { useTransition } from "react";
 import { Minus, Plus, X, Loader2 } from "lucide-react";
@@ -146,11 +127,10 @@ export function AddToCartActionButton({
       disabled={isPending}
       aria-pressed={isInCart}
       aria-label={isInCart ? `Remove ${productName} from cart` : `Add ${productName} to cart`}
-      className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-all disabled:opacity-60 ${
-        isInCart
+      className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-all disabled:opacity-60 ${isInCart
           ? "bg-green-600 text-white hover:bg-green-700"
           : "bg-ink text-white hover:bg-ink-soft dark:bg-amber dark:hover:bg-amber-600"
-      }`}
+        }`}
     >
       {isPending ? (
         <Loader2 size={15} className="animate-spin" />

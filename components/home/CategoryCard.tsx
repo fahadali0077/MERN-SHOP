@@ -8,13 +8,12 @@ const ICON_MAP: Record<string, ComponentType<{ size?: number; color?: string }>>
   Cpu, Shirt, HomeIcon, BookOpen, Dumbbell, Package,
 };
 
-// Category → CSS gradient class + icon color
 const CAT_STYLE: Record<string, { bg: string; iconColor: string; darkIconColor: string }> = {
-  "Electronics":    { bg: "cat-bg-electronics", iconColor: "#3b82f6", darkIconColor: "#60a5fa" },
-  "Fashion":        { bg: "cat-bg-fashion",      iconColor: "#ec4899", darkIconColor: "#f472b6" },
-  "Home & Kitchen": { bg: "cat-bg-home",          iconColor: "#10b981", darkIconColor: "#34d399" },
-  "Books":          { bg: "cat-bg-books",          iconColor: "#d97706", darkIconColor: "#fbbf24" },
-  "Sports":         { bg: "cat-bg-sports",         iconColor: "#ef4444", darkIconColor: "#f87171" },
+  "Electronics": { bg: "cat-bg-electronics", iconColor: "#3b82f6", darkIconColor: "#60a5fa" },
+  "Fashion": { bg: "cat-bg-fashion", iconColor: "#ec4899", darkIconColor: "#f472b6" },
+  "Home & Kitchen": { bg: "cat-bg-home", iconColor: "#10b981", darkIconColor: "#34d399" },
+  "Books": { bg: "cat-bg-books", iconColor: "#d97706", darkIconColor: "#fbbf24" },
+  "Sports": { bg: "cat-bg-sports", iconColor: "#ef4444", darkIconColor: "#f87171" },
 };
 
 interface CategoryCardProps {
@@ -25,7 +24,7 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ cat, count, iconName }: CategoryCardProps) {
-  const Icon  = ICON_MAP[iconName] ?? Package;
+  const Icon = ICON_MAP[iconName] ?? Package;
   const style = CAT_STYLE[cat] ?? { bg: "cat-bg-default", iconColor: "#6366f1", darkIconColor: "#818cf8" };
 
   return (
@@ -63,7 +62,7 @@ export function CategoryCard({ cat, count, iconName }: CategoryCardProps) {
       {/* Arrow — appears on hover */}
       <div className="absolute right-3 top-1/2 -translate-y-1/2 translate-x-2 text-ink-muted opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
     </Link>

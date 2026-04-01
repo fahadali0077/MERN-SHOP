@@ -12,10 +12,6 @@ interface StatsBarProps {
   stats: Stat[];
 }
 
-/**
- * StatsBar — animated count-up numbers when scrolled into view.
- * Uses IntersectionObserver + requestAnimationFrame for smooth counting.
- */
 export function StatsBar({ stats }: StatsBarProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [counts, setCounts] = useState<number[]>(stats.map(() => 0));

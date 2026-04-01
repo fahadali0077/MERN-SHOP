@@ -51,7 +51,6 @@ Visit `http://localhost:3000`
 /admin/orders         → Live order feed (useSocket + Framer Motion)
 /admin/users          → Users (placeholder for MERN-III)
 /sitemap.xml          → Auto-generated sitemap
-/robots.txt           → Crawler rules
 ```
 
 ---

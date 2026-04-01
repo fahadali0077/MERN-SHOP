@@ -2,11 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-/**
- * ScrollRevealSection — wraps a section and activates
- * IntersectionObserver to trigger `.reveal → .revealed` on children.
- * Works with `.reveal-delay-{n}` utility classes for staggering.
- */
 export function ScrollRevealSection({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLElement>(null);
 

@@ -2,16 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import type { Product, Category, SortOption } from "@/types";
 
-/**
- * lib/products.ts — data fetching layer (Server Components only).
- *
- * Reads the mock JSON directly from the filesystem at build time.
- * This avoids the circular HTTP fetch to localhost:3000 which breaks
- * during Vercel's static build phase (no server is running then).
- *
- * MERN-III swap: replace getProductsData() with a MongoDB query.
- * All function signatures stay the same — only the data source changes.
- */
+
 
 export interface FetchProductsOptions {
   q?: string;
@@ -45,9 +36,9 @@ function applyFilters(products: Product[], opts: FetchProductsOptions): Product[
   }
 
   switch (opts.sort) {
-    case "price-asc":    list.sort((a, b) => a.price - b.price);            break;
-    case "price-desc":   list.sort((a, b) => b.price - a.price);            break;
-    case "rating-desc":  list.sort((a, b) => b.rating - a.rating);          break;
+    case "price-asc": list.sort((a, b) => a.price - b.price); break;
+    case "price-desc": list.sort((a, b) => b.price - a.price); break;
+    case "rating-desc": list.sort((a, b) => b.rating - a.rating); break;
     case "reviews-desc": list.sort((a, b) => b.reviewCount - a.reviewCount); break;
     default: break; // "featured" — keep original order
   }

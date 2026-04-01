@@ -1,8 +1,3 @@
-/**
- * ProductCardSkeleton — Google Material-grade shimmer loading skeleton.
- * Uses the .skeleton class from globals.css for animated shimmer wave.
- */
-
 export function ProductCardSkeleton() {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-white dark:border-dark-border dark:bg-dark-surface">

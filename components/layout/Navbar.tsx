@@ -11,7 +11,6 @@ import { MobileMenu } from "./MobileMenu";
 import { useAuthStore } from "@/stores/authStore";
 import { useWishlistStore } from "@/stores/wishlistStore";
 
-// ── Google-style User Avatar Dropdown ─────────────────────────────────────────
 function UserAvatar({
   user,
   onSignOut,
@@ -119,12 +118,12 @@ function UserAvatar({
 
 // ── Main Navbar ────────────────────────────────────────────────────────────────
 export function Navbar() {
-  const user   = useAuthStore((s) => s.user);
+  const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const isAuth = useAuthStore((s) => s.isAuthenticated);
   const router = useRouter();
 
-  const [mounted,  setMounted]  = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [elevated, setElevated] = useState(false);
 
   useEffect(() => {

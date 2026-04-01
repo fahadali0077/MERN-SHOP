@@ -1,28 +1,14 @@
 "use client";
 
-/**
- * LiveOrderFeed — real-time order feed with Framer Motion slide-in.
- *
- * MENTAL MODEL:
- *   useSocket() provides orders as they arrive (mock interval).
- *   AnimatePresence wraps the list so new items animate IN when added.
- *   Each order gets initial={{ opacity:0, y:-20 }} → animate({opacity:1, y:0}).
- *   layout prop on motion.li causes existing items to slide DOWN smoothly
- *   when a new item is prepended — no jump.
- *
- * The pattern mirrors a real Socket.IO implementation:
- *   socket.on("new_order", (order) => setOrders(prev => [order, ...prev]))
- */
-
 import { motion, AnimatePresence } from "framer-motion";
 import { useSocket } from "@/hooks/useSocket";
 import { cn } from "@/lib/utils";
 
 const STATUS_STYLES = {
-  pending:    "bg-amber-dim text-amber dark:bg-amber/10",
+  pending: "bg-amber-dim text-amber dark:bg-amber/10",
   processing: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  shipped:    "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
-  delivered:  "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+  shipped: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+  delivered: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
 };
 
 function formatTime(iso: string): string {
@@ -41,9 +27,9 @@ export function LiveOrderFeed() {
           <span className={cn(
             "flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold",
             connected ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                      : "bg-cream text-ink-muted dark:bg-dark-surface-2",
+              : "bg-cream text-ink-muted dark:bg-dark-surface-2",
           )}>
-            <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "animate-pulse bg-green-500" : "bg-ink-muted")}/>
+            <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "animate-pulse bg-green-500" : "bg-ink-muted")} />
             {connected ? "Connected" : "Disconnected"}
           </span>
         </div>

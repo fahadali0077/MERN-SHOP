@@ -1,7 +1,3 @@
-/**
- * Cart — Server Component reads from HttpOnly cookie session.
- * Interactive parts (qty stepper, remove, clear) are Client Component islands.
- */
 import Link from "next/link";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { getSessionCart, getSessionCartTotal } from "@/lib/session";
@@ -10,7 +6,7 @@ import { RemoveButton, QtyStepper, ClearCartButton } from "@/components/cart/Car
 export const dynamic = "force-dynamic";
 
 export default async function CartPage() {
-  const cart  = await getSessionCart();
+  const cart = await getSessionCart();
   const total = await getSessionCartTotal();
 
   if (cart.length === 0) {

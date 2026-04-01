@@ -2,20 +2,19 @@ import Link from "next/link";
 import { ShoppingBag, Github, Twitter, Linkedin } from "lucide-react";
 
 const LINKS = {
-  Shop:    [
+  Shop: [
     { href: "/products", label: "All Products" },
-    { href: "/cart",     label: "My Cart"      },
-    { href: "/account",  label: "Account"      },
-    { href: "/wishlist", label: "Wishlist"      },
+    { href: "/cart", label: "My Cart" },
+    { href: "/account", label: "Account" },
+    { href: "/wishlist", label: "Wishlist" },
   ],
   Company: [
-    { href: "/", label: "About"         },
+    { href: "/", label: "About" },
     { href: "/sitemap.xml", label: "Sitemap" },
-    { href: "/robots.txt",  label: "Robots"  },
   ],
-  Admin:   [
+  Admin: [
     { href: "/admin/login", label: "Admin Login" },
-    { href: "/admin",       label: "Dashboard"   },
+    { href: "/admin", label: "Dashboard" },
   ],
 };
 
@@ -43,8 +42,8 @@ export function Footer() {
             {/* Social links */}
             <div className="mt-5 flex items-center gap-2">
               {[
-                { href: "#", Icon: Github,   label: "GitHub" },
-                { href: "#", Icon: Twitter,  label: "Twitter" },
+                { href: "#", Icon: Github, label: "GitHub" },
+                { href: "#", Icon: Twitter, label: "Twitter" },
                 { href: "#", Icon: Linkedin, label: "LinkedIn" },
               ].map(({ href, Icon, label }) => (
                 <a

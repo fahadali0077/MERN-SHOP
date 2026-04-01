@@ -1,21 +1,5 @@
 import { z } from "zod";
 
-/**
- * schemas/auth.ts — Zod schemas for auth forms and API.
- *
- * REUSE ACROSS THE STACK:
- *   - LoginForm (Client): zodResolver(LoginSchema) → RHF validation
- *   - POST /api/auth/login (Server): LoginSchema.safeParse(body) → API validation
- *   - Server Action (Server): LoginSchema.safeParse(input) → action validation
- *
- *   One schema, three contexts. No duplication.
- *
- * PASSWORD STRENGTH RULES (curriculum spec):
- *   - min 8 characters
- *   - at least one letter
- *   - at least one number
- */
-
 // ── RegisterSchema ─────────────────────────────────────────────────────────────
 export const RegisterSchema = z
   .object({
@@ -72,11 +56,6 @@ export const UserSchema = z.object({
 export type UserSchemaType = z.infer<typeof UserSchema>;
 
 // ── Zod helpers ───────────────────────────────────────────────────────────────
-
-/**
- * formatZodErrors — converts ZodError into a flat { field: message } map.
- * Use in API routes to return structured field-level errors.
- */
 export function formatZodErrors(
   error: z.ZodError,
 ): Record<string, string> {

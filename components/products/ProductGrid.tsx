@@ -1,13 +1,7 @@
 import { fetchProducts, type FetchProductsOptions } from "@/lib/products";
 import { ProductRow } from "./ProductRow";
 
-/**
- * ProductGrid — async Server Component.
- *
- * Accepts optional search/filter params forwarded from the page's
- * searchParams prop. Products stream row-by-row via per-row Suspense
- * boundaries inside ProductRow.
- */
+
 
 const ROW_SIZE = 4;
 

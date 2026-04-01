@@ -1,23 +1,3 @@
-/**
- * types/index.ts — shared types for the whole stack.
- *
- * MENTAL MODEL — types vs schemas:
- *   Types (TypeScript):  compile-time only — erased at runtime.
- *   Schemas (Zod):       runtime validation — survives compilation.
- *
- *   We define types HERE as the single source of truth.
- *   Zod schemas in /schemas/ use z.infer<> to derive matching TS types,
- *   ensuring they never drift apart.
- *
- *   Flow:
- *     types/index.ts        → TypeScript types for IDE + tsc
- *     schemas/*.ts          → Zod schemas for runtime validation
- *     z.infer<typeof Schema> → TypeScript type derived FROM the Zod schema
- *
- *   In Module 8, ALL API route bodies and Server Action inputs are
- *   validated with Zod.safeParse() before any business logic runs.
- */
-
 // ── Product ────────────────────────────────────────────────────────────────────
 export type Category =
   | "Electronics"
@@ -46,11 +26,6 @@ export interface CartItem {
 }
 
 // ── User ───────────────────────────────────────────────────────────────────────
-/**
- * User — the shape returned after authentication.
- * In MERN-IV this will be NextAuth.js's Session['user'] type.
- * We define it here so all auth-related code references one type.
- */
 export interface User {
   id: string;
   name: string;
@@ -61,32 +36,11 @@ export interface User {
 }
 
 // ── API Response wrapper ───────────────────────────────────────────────────────
-/**
- * ApiResponse<T> — generic wrapper for all API Route responses.
- *
- * MENTAL MODEL:
- *   Every GET/POST/PUT/DELETE from our API returns this shape.
- *   Consumers can always check `success` before accessing `data`.
- *   This is a discriminated union — TypeScript narrows the type
- *   based on the `success` field.
- *
- *   Usage:
- *     const res: ApiResponse<Product[]> = await fetch(...).then(r => r.json())
- *     if (res.success) {
- *       res.data   // typed as Product[]
- *     } else {
- *       res.error  // typed as string
- *     }
- */
 export type ApiResponse<T> =
-  | { success: true;  data: T;     message?: string }
+  | { success: true; data: T; message?: string }
   | { success: false; error: string; code?: string };
 
 // ── Server Action result ───────────────────────────────────────────────────────
-/**
- * ActionResult — return type for all Server Actions.
- * Mirrors ApiResponse<T> but simpler — actions don't need full HTTP semantics.
- */
 export interface ActionResult<T = void> {
   success: boolean;
   message: string;

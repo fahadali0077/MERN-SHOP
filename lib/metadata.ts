@@ -2,11 +2,7 @@ import type { Metadata } from "next";
 import type { Product } from "@/types";
 import { env } from "@/env";
 
-/**
- * lib/metadata.ts — Module 8 update:
- * Uses env.NEXT_PUBLIC_BASE_URL instead of process.env fallback.
- * This is now type-safe and validated at startup.
- */
+
 export const BASE_URL = env.NEXT_PUBLIC_BASE_URL;
 
 export const DEFAULT_METADATA: Metadata = {
@@ -18,7 +14,7 @@ export const DEFAULT_METADATA: Metadata = {
   description: "Production-grade e-commerce frontend built with Next.js 15.",
   openGraph: { type: "website", siteName: env.NEXT_PUBLIC_APP_NAME, locale: "en_US" },
   twitter: { card: "summary_large_image" },
-  robots: { index: true, follow: true },
+
 };
 
 export function buildProductMetadata(product: Product): Metadata {
