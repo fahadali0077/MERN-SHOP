@@ -151,3 +151,43 @@ export async function logoutAction(): Promise<ActionResult> {
     return { success: false, message: "Logout failed" };
   }
 }
+
+// ── adminLoginAction ───────────────────────────────────────────────────────────
+/**
+ * Sets the mernshop_admin cookie server-side so middleware can read it.
+ * document.cookie (client-side) is unreliable on HTTPS deployments.
+ */
+const ADMIN_EMAIL    = "admin@mernshop.com";
+const ADMIN_PASSWORD = "Admin@1234";
+
+export async function adminLoginAction(email: string, password: string): Promise<ActionResult> {
+  if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    return { success: false, message: "Invalid credentials. Access denied." };
+  }
+  try {
+    const cookieStore = await cookies();
+    cookieStore.set("mernshop_admin", "true", {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 8, // 8 hours
+      secure: process.env.NODE_ENV === "production",
+    });
+    return { success: true, message: "Welcome, Admin!" };
+  } catch (error) {
+    console.error("[adminLoginAction]", error);
+    return { success: false, message: "Login failed. Please try again." };
+  }
+}
+
+// ── adminLogoutAction ──────────────────────────────────────────────────────────
+export async function adminLogoutAction(): Promise<ActionResult> {
+  try {
+    const cookieStore = await cookies();
+    cookieStore.delete("mernshop_admin");
+    return { success: true, message: "Logged out." };
+  } catch (error) {
+    console.error("[adminLogoutAction]", error);
+    return { success: false, message: "Logout failed." };
+  }
+}
