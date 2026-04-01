@@ -37,17 +37,15 @@ export function LoginForm() {
 
     setLoading(true);
     try {
-      // Server action — sets mern_cart cookie so middleware allows /account
       const result = await loginAction(email, password);
+
       if (!result.success) {
         setSubmitError(result.message);
         return;
       }
 
-      // Update Zustand client-side auth state
       await login(email, password);
       window.dispatchEvent(new Event("storage"));
-
       setSuccess(true);
       setTimeout(() => router.push("/account"), 1400);
     } catch (err) {

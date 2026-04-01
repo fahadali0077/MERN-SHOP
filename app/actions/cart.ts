@@ -101,3 +101,4 @@ export async function clearCart(): Promise<ActionResult<number>> {
     return { success: false, message: "Failed to clear cart" };
   }
 }
+

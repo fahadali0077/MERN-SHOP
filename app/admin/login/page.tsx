@@ -31,10 +31,12 @@ export default function AdminLoginPage() {
     setError(null);
     try {
       const result = await adminLoginAction(data.email, data.password);
+
       if (!result.success) {
         setError(result.message);
         return;
       }
+
       useAuthStore.setState({
         isAuthenticated: true,
         user: {

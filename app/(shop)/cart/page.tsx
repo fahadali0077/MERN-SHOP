@@ -1,5 +1,8 @@
+/**
+ * Cart — Server Component reads from HttpOnly cookie session.
+ * Interactive parts (qty stepper, remove, clear) are Client Component islands.
+ */
 import Link from "next/link";
-import Image from "next/image";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { getSessionCart, getSessionCartTotal } from "@/lib/session";
 import { RemoveButton, QtyStepper, ClearCartButton } from "@/components/cart/CartActions";
@@ -43,7 +46,7 @@ export default async function CartPage() {
         <div className="divide-y divide-border/60 overflow-hidden rounded-xl border border-border bg-white dark:divide-dark-border dark:border-dark-border dark:bg-dark-surface">
           {cart.map(({ product, qty }) => (
             <div key={product.id} className="flex items-center gap-4 p-5">
-              <Image src={product.image} alt={product.name}
+              <img src={product.image} alt={product.name}
                 className="h-18 w-18 flex-shrink-0 rounded-lg object-cover bg-cream" style={{ height: 72, width: 72 }} />
 
               <div className="min-w-0 flex-1">

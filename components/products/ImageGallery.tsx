@@ -1,11 +1,26 @@
 "use client";
 
-
+/**
+ * ImageGallery — Framer Motion animated image gallery.
+ *
+ * MENTAL MODEL — motion.div + AnimatePresence:
+ *   When the user selects a thumbnail, the main image swaps.
+ *   Without animation: instant swap (jarring).
+ *   With AnimatePresence + motion.img: the old image fades out while
+ *   the new one slides in simultaneously (crossfade).
+ *
+ * layoutId:
+ *   When a motion element with the same layoutId is unmounted and remounted
+ *   elsewhere in the DOM, Framer Motion animates the transition automatically.
+ *   We use this to "zoom" the selected thumbnail into the main slot.
+ *
+ * whileHover / whileTap:
+ *   Inline gesture variants — no state needed for hover/press effects.
+ */
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Product } from "@/types";
-import Image from "next/image";
 
 interface ImageGalleryProps {
   product: Product;
@@ -108,7 +123,7 @@ export function ImageGallery({ product }: ImageGalleryProps) {
             aria-label={`View image ${i + 1}`}
             aria-pressed={i === selectedIndex}
           >
-            <Image
+            <img
               src={src}
               alt={`${product.name} thumbnail ${i + 1}`}
               className="h-full w-full object-cover"
