@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { loginAction } from "@/app/actions/cart";
 
 interface FieldErrors {
   email?: string;
@@ -24,7 +25,7 @@ export function LoginForm() {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validateEmail    = (v: string) => emailRegex.test(v) ? undefined : "Please enter a valid email address";
-  const validatePassword = (v: string) => v.length >= 6     ? undefined : "Password must be at least 6 characters";
+  const validatePassword = (v: string) => v.length >= 8     ? undefined : "Password must be at least 8 characters";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +36,20 @@ export function LoginForm() {
     if (emailErr || passErr) { setErrors({ email: emailErr, password: passErr }); return; }
 
     setLoading(true);
+
+    // 1. Call server action — sets the mern_cart cookie so middleware
+    //    allows access to /account, /checkout, /cart
+    const result = await loginAction(email, password);
+    if (!result.success) {
+      setSubmitError(result.message);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Update Zustand store — syncs client-side auth state
     await login(email, password);
     window.dispatchEvent(new Event("storage"));
+
     setLoading(false);
     setSuccess(true);
 
