@@ -8,7 +8,7 @@ import { z } from "zod";
 import Link from "next/link";
 import { ShoppingBag, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { adminLoginAction } from "@/app/actions/cart";
+import { adminLoginAction } from "@/app/actions/auth";
 
 const Schema = z.object({
   email:    z.string().email("Valid email required"),
