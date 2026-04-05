@@ -1,4 +1,4 @@
-# MERNShop — MERN-II Final Assembly
+# MERNShop
 
 > **Live frontend** built with Next.js 15, TypeScript, Tailwind CSS, Zustand, TanStack Query, Recharts, Framer Motion, and cmdk. Ready to deploy on Vercel and connect to the MERN-III Express + MongoDB backend.
 
