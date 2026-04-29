@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.env.local
+uploads/*
+!uploads/.gitkeep
+products.json
+*.log
+.DS_Store
+coverage/
+.github/
+*.md
+docker-compose*.yml
