@@ -17,6 +17,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import { swaggerSpec } from "./config/swagger.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requestLogger } from "./middleware/requestLogger.js";
+import seedRoute from "./routes/seedRoute.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -67,6 +68,8 @@ app.get("/api/health", (_req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/orders", orderRoutes);
+
+app.use("/api/seed", seedRoute);
 
 app.use((_req, res) => { res.status(404).json({ success: false, error: "Route not found", code: "NOT_FOUND" }); });
 app.use(errorHandler);
