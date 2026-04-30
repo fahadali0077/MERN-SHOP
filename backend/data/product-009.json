@@ -1,1 +1,15 @@
-{"name":"Classic Chelsea Boots — Tan Suede","price":189.99,"originalPrice":249.99,"image":"https://picsum.photos/seed/prod009/600/600","rating":4.7,"reviewCount":1203,"category":"Fashion","badge":"Sale","description":"Handcrafted from premium tan suede with a leather lining. Elastic side panels ensure a snug fit. Durable rubber sole.","stock":40}
+{
+    "name": "Classic Wool Overcoat",
+    "price": 189.99,
+    "originalPrice": 249.99,
+    "image": "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=500",
+    "images": [
+        "https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=500"
+    ],
+    "rating": 4.7,
+    "reviewCount": 892,
+    "category": "Fashion",
+    "badge": "Sale",
+    "description": "Timeless double-breasted wool overcoat. Crafted from premium wool blend for warmth and style.",
+    "stock": 35
+}

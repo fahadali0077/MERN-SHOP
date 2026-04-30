@@ -1,1 +1,14 @@
-{"name":"Merino Wool Crewneck Sweater","price":129.99,"image":"https://picsum.photos/seed/prod010/600/600","rating":4.8,"reviewCount":543,"category":"Fashion","badge":"New","description":"Extra-fine 18.5-micron Merino wool. Naturally temperature-regulating and odor-resistant. Machine washable.","stock":60}
+{
+    "name": "Ray-Ban Aviator Sunglasses",
+    "price": 154.99,
+    "image": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500",
+    "images": [
+        "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500"
+    ],
+    "rating": 4.8,
+    "reviewCount": 3210,
+    "category": "Fashion",
+    "badge": "Hot",
+    "description": "The iconic aviator style with crystal lenses and a metal frame. UV400 protection and polarized lenses available.",
+    "stock": 55
+}
