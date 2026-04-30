@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import type { MetadataRoute } from "next";
 import { fetchProductIds } from "@/lib/products";
 import { BASE_URL } from "@/lib/metadata";

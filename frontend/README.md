@@ -61,7 +61,7 @@ Visit `http://localhost:3000`
 |---|---|---|---|
 | `NEXT_PUBLIC_BASE_URL` | Yes | `http://localhost:3000` | App URL (used for absolute fetches) |
 | `NEXT_PUBLIC_APP_NAME` | No | `MERNShop` | App display name |
-| `NEXT_PUBLIC_API_URL` | MERN-III | — | Express backend URL (e.g. Render) |
+| `NEXT_PUBLIC_API_URL` | MERN-III | — | Express backend URL (e.g. Railway) |
 | `DATABASE_URL` | MERN-III | — | MongoDB connection string |
 | `NEXTAUTH_SECRET` | MERN-IV | — | NextAuth.js secret (min 32 chars) |
 | `NEXTAUTH_URL` | MERN-IV | — | Full app URL for NextAuth callbacks |
@@ -201,11 +201,11 @@ Preview deployments are automatically created for every PR/push to non-main bran
 
 ### Connecting to MERN-III backend
 
-Once your Express + MongoDB backend is deployed on Render/Render:
+Once your Express + MongoDB backend is deployed on Railway/Render:
 
 ```bash
 # In Vercel dashboard → Settings → Environment Variables:
-NEXT_PUBLIC_API_URL=https://your-backend.render.app
+NEXT_PUBLIC_API_URL=https://your-backend.railway.app
 ```
 
 No code changes needed — `lib/products.ts` reads this variable automatically.
