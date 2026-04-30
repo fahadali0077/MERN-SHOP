@@ -12,7 +12,7 @@
     "seed:sports": "tsx src/cli/seed.ts --filter Sports",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/server.js && node dist/utils/seed.js",
     "db:seed": "tsx src/cli/dbSeed.ts",
     "test": "jest --forceExit",
     "test:coverage": "jest --coverage --forceExit",
