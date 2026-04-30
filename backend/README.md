@@ -12,7 +12,7 @@ Fully wired to the MERN-II Next.js frontend.
 - Cloudinary (product image storage)
 - Jest + Supertest (integration tests)
 - Swagger UI (API documentation)
-- Docker + Render (deployment)
+- Docker + Railway (deployment)
 
 ## Quick Start
 ```bash
@@ -82,5 +82,5 @@ npm install && npm run dev
 ## Deploy
 ```bash
 docker compose up --build       # local Docker
-render up                      # Render production
+railway up                      # Railway production
 ```
