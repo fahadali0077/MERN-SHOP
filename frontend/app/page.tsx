@@ -42,7 +42,7 @@ export default async function HomePage() {
     <div className="flex flex-col gap-24">
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="hero-gradient-overlay relative grid gap-10 py-10 md:grid-cols-[1fr_420px] md:items-center md:gap-12 md:py-16 lg:grid-cols-[1fr_460px] lg:py-20">
+      <section className="hero-gradient-overlay relative grid gap-10 pt-6 pb-12 md:grid-cols-[1fr_420px] md:items-center md:gap-12 md:pt-8 md:pb-16 lg:grid-cols-[1fr_460px] lg:pt-10 lg:pb-20">
 
         <div>
           {/* Announcement pill */}
