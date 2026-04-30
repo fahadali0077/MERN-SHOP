@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <AnimatedCartDrawer />
           <Navbar />
-          <main className="mx-auto w-full max-w-screen-xl flex-1 px-4 py-10 md:px-6 md:py-12">
+          <main className="mx-auto w-full max-w-screen-xl flex-1 px-5 py-8 sm:px-8 md:px-10 md:py-12">
             {children}
           </main>
           <Footer />

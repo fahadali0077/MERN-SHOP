@@ -42,7 +42,7 @@ export default async function HomePage() {
     <div className="flex flex-col gap-24">
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="hero-gradient-overlay relative grid gap-12 py-4 lg:grid-cols-[1fr_460px] lg:items-center">
+      <section className="hero-gradient-overlay relative grid gap-10 py-10 md:grid-cols-[1fr_420px] md:items-center md:gap-12 md:py-16 lg:grid-cols-[1fr_460px] lg:py-20">
 
         <div>
           {/* Announcement pill */}
@@ -111,8 +111,8 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Featured product image grid */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Featured product image grid — hidden on mobile so text shows first */}
+        <div className="hidden grid-cols-2 gap-3 md:grid">
           {featured.map((p, i) => (
             <Link
               key={p.id}
@@ -134,7 +134,7 @@ export default async function HomePage() {
                 priority={i < 2}
                 placeholder="blur"
                 blurDataURL={SHIMMER_BLUR}
-                sizes="(max-width: 768px) 90vw, 460px"
+                sizes="(max-width: 768px) 90vw, (max-width: 1024px) 420px, 460px"
                 className="object-cover transition-transform duration-600 ease-expo-out group-hover:scale-[1.06]"
               />
               {/* Gradient overlay */}
