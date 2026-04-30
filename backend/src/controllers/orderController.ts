@@ -124,6 +124,32 @@ export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: orders, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
 });
 
+
+// ── GET /api/v1/orders/stats  (admin + moderator) ────────────────────────────
+export const getOrderStats = asyncHandler(async (_req: Request, res: Response) => {
+  const [revenueData, statusData, recentCount] = await Promise.all([
+    Order.aggregate([
+      { $match: { status: { $in: ["delivered", "shipped", "processing", "pending"] } } },
+      { $group: { _id: null, total: { $sum: "$totalAmount" }, count: { $sum: 1 } } },
+    ]),
+    Order.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+    Order.countDocuments({
+      createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+    }),
+  ]);
+
+  const row = revenueData[0] as { total: number; count: number } | undefined;
+  res.json({
+    success: true,
+    data: {
+      totalRevenue:  row?.total  ?? 0,
+      totalOrders:   row?.count  ?? 0,
+      recentOrders:  recentCount,
+      byStatus:      statusData,
+    },
+  });
+});
+
 // ── GET /api/v1/orders ────────────────────────────────────────────────────────
 export const getAllOrders = asyncHandler(async (_req: Request, res: Response) => {
   const orders = await Order.find().populate("user", "name email").populate("items.product", "name price").sort({ createdAt: -1 }).lean();

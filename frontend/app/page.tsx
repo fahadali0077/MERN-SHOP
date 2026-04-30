@@ -19,23 +19,23 @@ export const metadata: Metadata = {
 };
 
 const CATEGORY_CONFIG: Record<string, { color: string; icon: string }> = {
-  "Electronics": { color: "#3B82F6", icon: "Cpu" },
-  "Fashion": { color: "#EC4899", icon: "Shirt" },
-  "Home & Kitchen": { color: "#10B981", icon: "HomeIcon" },
-  "Books": { color: "#F59E0B", icon: "BookOpen" },
-  "Sports": { color: "#EF4444", icon: "Dumbbell" },
+  "Electronics":    { color: "#3B82F6", icon: "Cpu"      },
+  "Fashion":        { color: "#EC4899", icon: "Shirt"     },
+  "Home & Kitchen": { color: "#10B981", icon: "HomeIcon"  },
+  "Books":          { color: "#F59E0B", icon: "BookOpen"  },
+  "Sports":         { color: "#EF4444", icon: "Dumbbell"  },
 };
 
 export default async function HomePage() {
-  const products = await fetchProducts();
-  const featured = products.slice(0, 3);
+  const products   = await fetchProducts();
+  const featured   = products.slice(0, 3);
   const categories = [...new Set(products.map((p) => p.category))];
 
   const stats = [
-    { label: "Products", value: products.length, suffix: "+" },
-    { label: "Categories", value: categories.length, suffix: "" },
-    { label: "In Stock", value: 100, suffix: "%" },
-    { label: "Avg. Rating", value: 4.8, suffix: "★" },
+    { label: "Products",   value: products.length,     suffix: "+"  },
+    { label: "Categories", value: categories.length,   suffix: ""   },
+    { label: "In Stock",   value: 100,                 suffix: "%"  },
+    { label: "Avg. Rating", value: 4.8,                suffix: "★"  },
   ];
 
   return (
@@ -98,8 +98,8 @@ export default async function HomePage() {
           <div className="animate-hero-4 mt-10 flex flex-wrap items-center gap-6">
             {[
               { icon: ShieldCheck, label: "Secure Checkout" },
-              { icon: Package, label: "Easy Returns" },
-              { icon: Zap, label: "Fast Delivery" },
+              { icon: Package,     label: "Easy Returns"    },
+              { icon: Zap,         label: "Fast Delivery"   },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-2 text-xs font-medium text-ink-muted">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-light">
@@ -171,7 +171,7 @@ export default async function HomePage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {categories.map((cat, i) => {
             const count = products.filter((p) => p.category === cat).length;
-            const cfg = CATEGORY_CONFIG[cat] ?? { color: "#6366f1", icon: "Package" };
+            const cfg   = CATEGORY_CONFIG[cat] ?? { color: "#6366f1", icon: "Package" };
             return (
               <div key={cat} className="reveal" style={{ transitionDelay: `${i * 0.07}s` }}>
                 <CategoryCard

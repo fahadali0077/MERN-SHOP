@@ -1,139 +1,236 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, AlertTriangle, Package, Loader2 } from "lucide-react";
+import { TrendingUp, DollarSign, ShoppingCart, Users, Package, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// Still use mock stats for revenue/orders/users since those need aggregation,
-// but fetch real product count and low-stock count from the API.
-import { DASHBOARD_STATS } from "@/lib/mock/adminData";
+import { useAuthStore } from "@/stores/authStore";
 
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
-const ICONS = {
-  revenue: DollarSign,
-  orders: ShoppingCart,
-  users: Users,
-  stock: AlertTriangle,
+interface StatData {
+  id:      string;
+  label:   string;
+  value:   string;
+  delta:   string;
+  trend:   "up" | "down" | "neutral";
+  loading: boolean;
+}
+
+const CARD_CONFIG: Record<string, {
+  icon:       React.ElementType;
+  border:     string;
+  iconBg:     string;
+  iconColor:  string;
+  valueCls:   string;
+}> = {
+  revenue: {
+    icon:      DollarSign,
+    border:    "border-t-blue-500",
+    iconBg:    "bg-blue-500/10",
+    iconColor: "text-blue-400",
+    valueCls:  "text-blue-400",
+  },
+  orders: {
+    icon:      ShoppingCart,
+    border:    "border-t-violet-500",
+    iconBg:    "bg-violet-500/10",
+    iconColor: "text-violet-400",
+    valueCls:  "text-violet-400",
+  },
+  users: {
+    icon:      Users,
+    border:    "border-t-emerald-500",
+    iconBg:    "bg-emerald-500/10",
+    iconColor: "text-emerald-400",
+    valueCls:  "text-emerald-400",
+  },
+  products: {
+    icon:      Package,
+    border:    "border-t-amber-500",
+    iconBg:    "bg-amber-500/10",
+    iconColor: "text-amber-400",
+    valueCls:  "text-amber-400",
+  },
 };
 
-const ACCENT: Record<string, { bg: string; text: string; border: string; iconBg: string }> = {
-  revenue: { bg: "bg-blue-50", text: "text-blue-600", border: "border-t-blue-500", iconBg: "bg-blue-100" },
-  orders: { bg: "bg-violet-50", text: "text-violet-600", border: "border-t-violet-500", iconBg: "bg-violet-100" },
-  users: { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-t-emerald-500", iconBg: "bg-emerald-100" },
-  stock: { bg: "bg-red-50", text: "text-red-600", border: "border-t-red-500", iconBg: "bg-red-100" },
-};
+const DEFAULT_STATS: StatData[] = [
+  { id: "revenue",  label: "Total Revenue",  value: "—", delta: "from orders", trend: "up",     loading: true },
+  { id: "orders",   label: "Orders",         value: "—", delta: "all time",    trend: "up",     loading: true },
+  { id: "users",    label: "Registered Users", value: "—", delta: "accounts", trend: "up",     loading: true },
+  { id: "products", label: "Products",       value: "—", delta: "in catalogue", trend: "neutral", loading: true },
+];
 
 export function StatCards() {
-  const [stats, setStats] = useState(DASHBOARD_STATS);
-  const [loading, setLoading] = useState(true);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
+
+  const [stats, setStats] = useState<StatData[]>(DEFAULT_STATS);
 
   useEffect(() => {
-    const fetchRealStats = async () => {
-      try {
-        // Fetch product stats to get real counts
-        const [productsRes, statsRes] = await Promise.all([
-          fetch(`${API_URL}/api/v1/products?limit=1`),
-          fetch(`${API_URL}/api/v1/products/stats`),
-        ]);
+    if (!hydrated) return;
 
-        if (productsRes.ok) {
-          const productsData = await productsRes.json() as {
+    const fetchStats = async () => {
+      const headers: Record<string, string> = {};
+      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+
+      const [ordersRes, usersRes, productsRes] = await Promise.allSettled([
+        fetch(`${API_URL}/api/v1/orders/stats`,    { headers }),
+        fetch(`${API_URL}/api/v1/users?limit=1`,   { headers }),
+        fetch(`${API_URL}/api/v1/products?limit=1`),
+      ]);
+
+      setStats((prev) => {
+        const next = [...prev];
+
+        // ── Revenue + Orders ─────────────────────────────────────────────────
+        if (ordersRes.status === "fulfilled" && ordersRes.value.ok) {
+          ordersRes.value.json().then((data: {
             success: boolean;
-            pagination?: { total: number };
-          };
-          if (productsData.success && productsData.pagination) {
-            // Update the stock card with real product total
-            setStats((prev) =>
-              prev.map((s) =>
-                s.id === "stock"
-                  ? { ...s, label: "Total Products", value: String(productsData.pagination!.total), delta: "in DB", trend: "up" as const }
-                  : s
-              )
-            );
-          }
+            data: { totalRevenue: number; totalOrders: number; recentOrders: number };
+          }) => {
+            if (!data.success) return;
+            setStats((s) => s.map((card) => {
+              if (card.id === "revenue") return {
+                ...card,
+                value:   `$${data.data.totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+                delta:   "from all orders",
+                trend:   "up" as const,
+                loading: false,
+              };
+              if (card.id === "orders") return {
+                ...card,
+                value:   data.data.totalOrders.toLocaleString(),
+                delta:   `${data.data.recentOrders} this month`,
+                trend:   "up" as const,
+                loading: false,
+              };
+              return card;
+            }));
+          }).catch(() => {
+            setStats((s) => s.map((c) =>
+              c.id === "revenue" || c.id === "orders"
+                ? { ...c, value: "N/A", loading: false }
+                : c
+            ));
+          });
+        } else {
+          setStats((s) => s.map((c) =>
+            c.id === "revenue" || c.id === "orders"
+              ? { ...c, value: "N/A", loading: false }
+              : c
+          ));
         }
 
-        if (statsRes.ok) {
-          const statsData = await statsRes.json() as {
+        // ── Users ─────────────────────────────────────────────────────────────
+        if (usersRes.status === "fulfilled" && usersRes.value.ok) {
+          usersRes.value.json().then((data: {
             success: boolean;
-            data: Array<{ _id: string; count: number; avgPrice: number }>;
-          };
-          if (statsData.success) {
-            // Total products across all categories
-            const totalProducts = statsData.data.reduce((sum, cat) => sum + cat.count, 0);
-            const categoryCount = statsData.data.length;
-            setStats((prev) =>
-              prev.map((s) =>
-                s.id === "stock"
-                  ? { ...s, label: "Products", value: String(totalProducts), delta: `${categoryCount} categories`, trend: "up" as const }
-                  : s
-              )
-            );
-          }
+            pagination: { total: number };
+          }) => {
+            if (!data.success) return;
+            setStats((s) => s.map((c) =>
+              c.id === "users"
+                ? { ...c, value: data.pagination.total.toLocaleString(), delta: "registered accounts", trend: "up" as const, loading: false }
+                : c
+            ));
+          }).catch(() => {
+            setStats((s) => s.map((c) => c.id === "users" ? { ...c, value: "N/A", loading: false } : c));
+          });
+        } else {
+          setStats((s) => s.map((c) => c.id === "users" ? { ...c, value: "N/A", loading: false } : c));
         }
-      } catch {
-        // silently keep mock data on error
-      } finally {
-        setLoading(false);
-      }
+
+        // ── Products ──────────────────────────────────────────────────────────
+        if (productsRes.status === "fulfilled" && productsRes.value.ok) {
+          productsRes.value.json().then((data: {
+            success: boolean;
+            pagination: { total: number };
+          }) => {
+            if (!data.success) return;
+            setStats((s) => s.map((c) =>
+              c.id === "products"
+                ? { ...c, value: String(data.pagination.total), delta: "in catalogue", trend: "neutral" as const, loading: false }
+                : c
+            ));
+          }).catch(() => {
+            setStats((s) => s.map((c) => c.id === "products" ? { ...c, value: "N/A", loading: false } : c));
+          });
+        } else {
+          setStats((s) => s.map((c) => c.id === "products" ? { ...c, value: "N/A", loading: false } : c));
+        }
+
+        return next;
+      });
     };
-    void fetchRealStats();
-  }, []);
+
+    void fetchStats();
+  }, [hydrated, accessToken]);
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {stats.map((stat, i) => {
-        const Icon = ICONS[stat.id as keyof typeof ICONS] ?? Package;
-        const isUp = stat.trend === "up";
-        const isDown = stat.trend === "down";
-        const TrendIcon = isUp ? TrendingUp : TrendingDown;
-        const accent = ACCENT[stat.id] ?? ACCENT.revenue;
+        const cfg = CARD_CONFIG[stat.id] ?? CARD_CONFIG.products;
+        const Icon = cfg.icon;
 
         return (
           <div
             key={stat.id}
             className={cn(
-              "group relative overflow-hidden rounded-xl border border-border bg-white p-5",
-              "shadow-sm ring-1 ring-black/[0.04] transition-all duration-300",
-              "hover:-translate-y-1 hover:shadow-lg hover:ring-black/[0.07]",
-              "dark:border-dark-border dark:bg-dark-surface dark:ring-white/[0.04]",
+              // ── base — dark-mode safe: no bg-white ──────────────────────────
+              "group relative overflow-hidden rounded-xl p-5",
+              "border border-white/[0.06] bg-dark-surface",
+              "shadow-sm transition-all duration-300",
+              "hover:-translate-y-1 hover:shadow-xl hover:border-white/10",
+              // top accent bar
               "border-t-[3px]",
-              accent.border,
+              cfg.border,
             )}
             style={{ animationDelay: `${i * 0.08}s` }}
           >
-            {/* Background tint on hover */}
-            <div className={cn("absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100", accent.bg, "dark:opacity-0")} />
+            {/* Subtle glow on hover */}
+            <div className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              style={{ background: "radial-gradient(ellipse at top left, rgba(255,255,255,0.03) 0%, transparent 70%)" }}
+            />
 
             <div className="relative">
-              {/* Top row: trend + icon */}
+              {/* Top row */}
               <div className="mb-4 flex items-start justify-between">
-                <span
-                  className={cn(
-                    "flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
-                    isUp ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400" :
-                      isDown ? "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400" :
-                        "bg-surface-raised text-ink-muted",
-                  )}
-                >
-                  <TrendIcon size={10} strokeWidth={2.5} />
-                  {stat.delta}
+                {/* Delta badge */}
+                <span className={cn(
+                  "flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                  stat.trend === "up"
+                    ? "bg-green-500/10 text-green-400"
+                    : stat.trend === "down"
+                    ? "bg-red-500/10 text-red-400"
+                    : "bg-white/5 text-white/40",
+                )}>
+                  {stat.trend === "up" && <TrendingUp size={9} strokeWidth={2.5} />}
+                  {stat.loading ? "…" : stat.delta}
                 </span>
 
-                <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl", accent.iconBg, "dark:bg-white/10")}>
-                  {loading && stat.id === "stock"
-                    ? <Loader2 size={17} className="animate-spin text-ink-muted" />
-                    : <Icon size={17} className={cn(accent.text, "dark:text-white/80")} strokeWidth={2} />
+                {/* Icon */}
+                <div className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-xl",
+                  cfg.iconBg,
+                )}>
+                  {stat.loading
+                    ? <Loader2 size={16} className="animate-spin text-white/30" />
+                    : <Icon size={16} className={cfg.iconColor} strokeWidth={2} />
                   }
                 </div>
               </div>
 
-              {/* Value + label */}
-              <p className={cn("text-3xl font-bold tabular-nums", accent.text, "dark:text-white")}>
-                {stat.value}
+              {/* Value */}
+              <p className={cn(
+                "text-3xl font-bold tabular-nums tracking-tight",
+                stat.loading ? "text-white/20" : cfg.valueCls,
+              )}>
+                {stat.loading ? "——" : stat.value}
               </p>
-              <p className="mt-1 text-sm font-medium text-ink-muted uppercase tracking-wide">
+
+              {/* Label */}
+              <p className="mt-1 text-[11px] font-semibold uppercase tracking-widest text-white/40">
                 {stat.label}
               </p>
             </div>
