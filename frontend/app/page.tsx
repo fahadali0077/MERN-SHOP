@@ -42,9 +42,9 @@ export default async function HomePage() {
     <div className="flex flex-col gap-24">
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="hero-gradient-overlay relative grid min-h-[calc(100vh-68px)] items-center gap-10 py-8 md:grid-cols-[1fr_420px] md:gap-12 lg:grid-cols-[1fr_460px]">
+      <section className="hero-gradient-overlay relative grid gap-10 pt-8 pb-12 md:grid-cols-[1fr_420px] md:items-start md:gap-12 lg:grid-cols-[1fr_460px]">
 
-        <div>
+        <div className="self-start">
           {/* Announcement pill */}
           <div className="animate-hero-5 mb-4 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary-light px-3.5 py-1.5 text-xs font-semibold text-primary dark:border-primary/20 dark:bg-primary/10">
             <Zap size={11} strokeWidth={2.5} className="animate-pulse" />
@@ -112,7 +112,7 @@ export default async function HomePage() {
         </div>
 
         {/* Featured product image grid — hidden on mobile so text shows first */}
-        <div className="hidden grid-cols-2 gap-3 md:grid">
+        <div className="hidden grid-cols-2 gap-3 self-start md:grid">
           {featured.map((p, i) => (
             <Link
               key={p.id}
