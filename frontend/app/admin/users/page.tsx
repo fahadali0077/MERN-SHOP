@@ -36,6 +36,8 @@ export default function AdminUsersPage() {
   // ── Wait for Zustand hydration before using token ────────────────────────
   const accessToken   = useAuthStore((s) => s.accessToken);
   const currentUserId = useAuthStore((s) => s.user?.id);
+  const currentRole   = useAuthStore((s) => s.user?.role ?? "customer");
+  const isAdmin = currentRole === "admin";
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
 
@@ -243,6 +245,8 @@ export default function AdminUsersPage() {
                       <td className="px-5 py-3.5 text-right">
                         {isActioning
                           ? <Loader2 size={14} className="ml-auto animate-spin text-ink-muted" />
+                          : !isAdmin
+                          ? <span className="text-[10px] text-ink-muted/50">View only</span>
                           : (
                             <div className="relative inline-block">
                               <button

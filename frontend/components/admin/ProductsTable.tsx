@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
 
 // Use the real Product type from the API (includes stock)
 interface AdminProduct {
@@ -102,6 +103,8 @@ const columns = [
 ];
 
 export function ProductsTable() {
+  const currentRole = useAuthStore((s) => s.user?.role ?? "customer");
+  const isAdmin = currentRole === "admin";
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -150,6 +153,11 @@ export function ProductsTable() {
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3 border-b border-border p-4 dark:border-dark-border">
         <h2 className="font-serif text-lg font-normal dark:text-white">Products</h2>
+        {!isAdmin && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-600 dark:border-purple-500/20 dark:bg-purple-900/10 dark:text-purple-400">
+            View & Edit only — cannot create or delete
+          </span>
+        )}
         <button
           onClick={() => { void fetchProducts(); }}
           disabled={loading}

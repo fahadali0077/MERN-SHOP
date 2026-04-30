@@ -5,15 +5,44 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   ShoppingBag, LayoutDashboard, Package, Zap,
-  Users, Store, Home, ChevronRight
+  Users, Store, Home, ChevronRight, Shield
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { useAuthStore } from "@/stores/authStore";
 
-const NAV_ITEMS = [
-  { href: "/admin",          label: "Dashboard",   icon: LayoutDashboard, exact: true,  badge: null },
-  { href: "/admin/products", label: "Products",    icon: Package,         exact: false, badge: null },
-  { href: "/admin/orders",   label: "Live Orders", icon: Zap,             exact: false, badge: "Live" },
-  { href: "/admin/users",    label: "Users",       icon: Users,           exact: false, badge: null },
+type Role = "admin" | "moderator" | "customer";
+
+interface NavItem {
+  href:    string;
+  label:   string;
+  icon:    React.ElementType;
+  exact:   boolean;
+  badge:   string | null;
+  roles:   Role[];  // which roles can see this item
+  tooltip: string;  // shown when hover-locked for moderator
+}
+
+const NAV_ITEMS: NavItem[] = [
+  {
+    href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true, badge: null,
+    roles: ["admin", "moderator"],
+    tooltip: "",
+  },
+  {
+    href: "/admin/products", label: "Products", icon: Package, exact: false, badge: null,
+    roles: ["admin", "moderator"],
+    tooltip: "",
+  },
+  {
+    href: "/admin/orders", label: "Live Orders", icon: Zap, exact: false, badge: "Live",
+    roles: ["admin", "moderator"],
+    tooltip: "",
+  },
+  {
+    href: "/admin/users", label: "Users", icon: Users, exact: false, badge: null,
+    roles: ["admin", "moderator"],  // moderators can view; the page hides edit/delete actions
+    tooltip: "",
+  },
 ];
 
 const STORE_ITEMS = [
@@ -21,8 +50,28 @@ const STORE_ITEMS = [
   { href: "/products", label: "Storefront", icon: Store },
 ];
 
+// What moderators can and cannot do — shown in the sidebar info block
+const MODERATOR_PERMISSIONS = {
+  can: [
+    "View all orders",
+    "Update order status",
+    "Edit product details",
+    "Delete reviews",
+    "View users list",
+  ],
+  cannot: [
+    "Create or delete products",
+    "Change user roles",
+    "Delete users",
+    "View financial stats",
+  ],
+};
+
 export function AdminSidebar() {
   const pathname = usePathname();
+  const user     = useAuthStore((s) => s.user);
+  const role     = (user?.role ?? "admin") as Role;
+  const isMod    = role === "moderator";
 
   return (
     <aside className="flex h-full w-[220px] flex-shrink-0 flex-col border-r border-border bg-white dark:border-dark-border dark:bg-dark-surface">
@@ -36,9 +85,22 @@ export function AdminSidebar() {
           <p className="font-serif text-sm tracking-tight text-ink dark:text-white">
             MERN<span className="text-amber">Shop</span>
           </p>
-          <p className="text-[9px] font-semibold uppercase tracking-widest text-ink-muted">Admin Panel</p>
+          <p className="text-[9px] font-semibold uppercase tracking-widest text-ink-muted">
+            {isMod ? "Moderator" : "Admin Panel"}
+          </p>
         </div>
       </div>
+
+      {/* Moderator role badge */}
+      {isMod && (
+        <div className="mx-3 mb-1 flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 dark:border-purple-500/20 dark:bg-purple-900/10">
+          <Shield size={13} className="flex-shrink-0 text-purple-500" strokeWidth={2} />
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-purple-700 dark:text-purple-400">Moderator Access</p>
+            <p className="truncate text-[9px] text-purple-500/70">Limited permissions</p>
+          </div>
+        </div>
+      )}
 
       <div className="mx-4 h-px bg-border dark:bg-dark-border" />
 
@@ -48,7 +110,7 @@ export function AdminSidebar() {
           Management
         </p>
         <ul className="space-y-0.5">
-          {NAV_ITEMS.map(({ href, label, icon: Icon, exact, badge }) => {
+          {NAV_ITEMS.filter(item => item.roles.includes(role)).map(({ href, label, icon: Icon, exact, badge }) => {
             const isActive = exact ? pathname === href : pathname.startsWith(href);
             return (
               <li key={href}>
@@ -64,7 +126,9 @@ export function AdminSidebar() {
                 >
                   <Icon
                     size={15}
-                    className={cn("flex-shrink-0 transition-colors", isActive ? "text-primary" : "text-ink-muted group-hover:text-ink dark:text-white/40 dark:group-hover:text-white")}
+                    className={cn("flex-shrink-0 transition-colors",
+                      isActive ? "text-primary" : "text-ink-muted group-hover:text-ink dark:text-white/40 dark:group-hover:text-white"
+                    )}
                     strokeWidth={isActive ? 2.5 : 2}
                   />
                   <span className="flex-1 truncate">{label}</span>
@@ -88,8 +152,7 @@ export function AdminSidebar() {
         <ul className="space-y-0.5">
           {STORE_ITEMS.map(({ href, label, icon: Icon }) => (
             <li key={href}>
-              <Link
-                href={href}
+              <Link href={href}
                 className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-soft transition-all duration-150 hover:bg-surface-raised hover:text-ink dark:text-white/70 dark:hover:bg-dark-surface-2 dark:hover:text-white"
               >
                 <Icon size={15} className="flex-shrink-0 text-ink-muted dark:text-white/40" strokeWidth={2} />
@@ -98,9 +161,31 @@ export function AdminSidebar() {
             </li>
           ))}
         </ul>
+
+        {/* Moderator permissions info box */}
+        {isMod && (
+          <div className="mt-4 rounded-lg border border-border bg-surface-raised/60 p-3 dark:border-dark-border dark:bg-dark-surface-2/40">
+            <p className="mb-2 text-[9px] font-bold uppercase tracking-widest text-ink-muted">Your Access</p>
+            <div className="space-y-1">
+              {MODERATOR_PERMISSIONS.can.map((item) => (
+                <p key={item} className="flex items-center gap-1.5 text-[10px] text-green-600 dark:text-green-400">
+                  <span className="text-[8px]">✓</span> {item}
+                </p>
+              ))}
+            </div>
+            <div className="my-2 h-px bg-border dark:bg-dark-border" />
+            <div className="space-y-1">
+              {MODERATOR_PERMISSIONS.cannot.map((item) => (
+                <p key={item} className="flex items-center gap-1.5 text-[10px] text-ink-muted/60 line-through">
+                  <span className="text-[8px] no-underline">✗</span> {item}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
-      {/* Footer — theme toggle only (sign out is in header) */}
+      {/* Footer */}
       <div className="mx-4 h-px bg-border dark:bg-dark-border" />
       <div className="flex items-center justify-between px-5 py-4">
         <span className="text-xs text-ink-muted">Theme</span>

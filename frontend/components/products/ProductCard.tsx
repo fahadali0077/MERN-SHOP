@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import type { Product } from "@/types";
 import { StarRating } from "./StarRating";
 import { AddToCartButton } from "./AddToCartButton";
@@ -10,7 +9,7 @@ import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { SHIMMER_BLUR, CARD_IMAGE_SIZES } from "@/lib/imageUtils";
 
 interface ProductCardProps {
-  product: Product;
+  product:  Product;
   priority?: boolean;
 }
 
@@ -21,16 +20,15 @@ const BADGE_STYLES: Record<string, string> = {
 };
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
-  const [imageHovered, setImageHovered] = useState(false);
-
   const discount = product.originalPrice != null
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
   return (
+    // ── group triggers on the whole card, not just the image ─────────────────
     <article className="product-card group relative flex flex-col overflow-hidden rounded-xl border border-border bg-white ring-1 ring-black/[0.04] dark:border-dark-border dark:bg-dark-surface dark:ring-white/[0.04]">
 
-      {/* Badge — spring entrance */}
+      {/* Badge */}
       {product.badge && (
         <div className="absolute left-3 top-3 z-10 badge-entrance">
           <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide shadow-sm ${BADGE_STYLES[product.badge] ?? "bg-ink text-white"}`}>
@@ -57,8 +55,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         className="block"
         tabIndex={-1}
         aria-hidden="true"
-        onMouseEnter={() => setImageHovered(true)}
-        onMouseLeave={() => setImageHovered(false)}
       >
         <div className="relative aspect-square overflow-hidden bg-surface-raised dark:bg-dark-surface-2">
           <Image
@@ -69,30 +65,18 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             placeholder="blur"
             blurDataURL={SHIMMER_BLUR}
             sizes={CARD_IMAGE_SIZES}
-            className={[
-              "object-cover transition-transform duration-600 ease-expo-out",
-              imageHovered ? "scale-[1.07]" : "scale-100",
-            ].join(" ")}
+            className="object-cover transition-transform duration-600 ease-expo-out group-hover:scale-[1.07]"
           />
 
-          {/* Warm overlay tint on hover */}
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent transition-opacity duration-400"
-            style={{ opacity: imageHovered ? 1 : 0 }}
-          />
+          {/* Dark gradient overlay — always present so text is readable */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-400 group-hover:opacity-100" />
 
-          {/* Bottom accent line — animates on hover */}
+          {/* Bottom accent line */}
           <span className="absolute bottom-0 h-[3px] w-full origin-left scale-x-0 bg-primary transition-transform duration-400 ease-expo-out group-hover:scale-x-100" />
 
-          {/* Quick-add overlay */}
-          <div
-            className="absolute bottom-3 left-0 right-0 flex justify-center transition-all duration-300"
-            style={{
-              opacity: imageHovered ? 1 : 0,
-              transform: imageHovered ? "translateY(0)" : "translateY(6px)",
-            }}
-          >
-            <span className="rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-ink shadow-lg backdrop-blur-sm dark:bg-dark-surface/90 dark:text-white">
+          {/* Quick view pill — fixed contrast: dark bg + white text always */}
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+            <span className="rounded-full bg-black/70 px-4 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-sm">
               Quick view →
             </span>
           </div>
@@ -130,14 +114,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           )}
         </div>
 
-        {/* Add to Cart — smooth reveal on hover */}
-        <div
-          className="mt-3 transition-all duration-300"
-          style={{
-            opacity: imageHovered ? 1 : 0,
-            transform: imageHovered ? "translateY(0)" : "translateY(4px)",
-          }}
-        >
+        {/* Add to Cart — reveals on group (card) hover, not just image hover */}
+        <div className="mt-3 translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
           <AddToCartButton product={product} size="default" />
         </div>
       </div>

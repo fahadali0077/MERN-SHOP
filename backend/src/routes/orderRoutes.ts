@@ -12,8 +12,8 @@ router.post("/", ctrl.createOrder);           // place order (transaction)
 router.get("/my", ctrl.getMyOrders);          // my orders (paginated)
 
 // Admin routes
-router.get("/", authorize("admin"), ctrl.getAllOrders);
+router.get("/", authorize("admin", "moderator"), ctrl.getAllOrders);
 router.get("/:id", ctrl.getOrderById);              // get single order (owner or admin)
-router.put("/:id/status", authorize("admin"), ctrl.updateOrderStatus);
+router.put("/:id/status", authorize("admin", "moderator"), ctrl.updateOrderStatus);
 
 export default router;

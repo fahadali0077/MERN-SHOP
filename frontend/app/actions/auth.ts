@@ -158,8 +158,8 @@ export async function adminLoginAction(
       return { success: false, message: data.error ?? "Login failed" };
     }
 
-    if (data.data.user.role !== "admin") {
-      return { success: false, message: "Access denied. Admin role required." };
+    if (data.data.user.role !== "admin" && data.data.user.role !== "moderator") {
+      return { success: false, message: "Access denied. Admin or Moderator role required." };
     }
 
     const cookieStore = await cookies();
