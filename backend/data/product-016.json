@@ -1,13 +1,1 @@
-{
-    "name": "Clean Code by Robert C. Martin",
-    "price": 34.99,
-    "image": "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500"
-    ],
-    "rating": 4.7,
-    "reviewCount": 12345,
-    "category": "Books",
-    "description": "A handbook of agile software craftsmanship. Essential reading for every professional software developer.",
-    "stock": 150
-}
+{"name":"Philips Hue Starter Kit — 4 Bulbs","price":199.99,"originalPrice":249.99,"image":"https://picsum.photos/seed/prod016/600/600","rating":4.5,"reviewCount":1654,"category":"Home & Kitchen","badge":"Sale","description":"16 million colors. Voice control via Alexa, Google Assistant, and Siri. 25000-hour lifespan. Zigbee hub included.","stock":50}

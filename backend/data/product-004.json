@@ -1,14 +1,1 @@
-{
-    "name": "iPhone 15 Pro Max",
-    "price": 1199.99,
-    "image": "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=500"
-    ],
-    "rating": 4.9,
-    "reviewCount": 8901,
-    "category": "Electronics",
-    "badge": "New",
-    "description": "A17 Pro chip, titanium design, and the most powerful iPhone camera system ever. Pro camera system with 5x optical zoom.",
-    "stock": 30
-}
+{"name":"Samsung 4K QLED Smart TV 55-inch","price":749.99,"originalPrice":999.99,"image":"https://picsum.photos/seed/prod004/600/600","rating":4.6,"reviewCount":1532,"category":"Electronics","badge":"Sale","description":"Quantum HDR with Quantum Dot technology. Neural Quantum Processor 4K upscales content. Object Tracking Sound follows the action.","stock":20}

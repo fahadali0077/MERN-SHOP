@@ -1,15 +1,1 @@
-{
-    "name": "Wilson Pro Staff Tennis Racket",
-    "price": 189.99,
-    "originalPrice": 229.99,
-    "image": "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=500"
-    ],
-    "rating": 4.8,
-    "reviewCount": 1234,
-    "category": "Sports",
-    "badge": "Sale",
-    "description": "Used by Roger Federer for most of his Grand Slam titles. Braided graphite construction for excellent control and feel.",
-    "stock": 30
-}
+{"name":"Deep Work — Cal Newport","price":16.99,"image":"https://picsum.photos/seed/prod020/600/600","rating":4.7,"reviewCount":9872,"category":"Books","description":"Rules for focused success in a distracted world. Deep work is both rare and extremely valuable in our economy.","stock":350}

@@ -1,15 +1,1 @@
-{
-    "name": "Atomic Habits by James Clear",
-    "price": 16.99,
-    "originalPrice": 27.0,
-    "image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500"
-    ],
-    "rating": 4.9,
-    "reviewCount": 45678,
-    "category": "Books",
-    "badge": "Hot",
-    "description": "The #1 New York Times bestseller about tiny changes that lead to remarkable results. A proven framework for building good habits.",
-    "stock": 200
-}
+{"name":"Dyson V15 Detect Cordless Vacuum","price":699.99,"image":"https://picsum.photos/seed/prod015/600/600","rating":4.7,"reviewCount":3411,"category":"Home & Kitchen","badge":"New","description":"Laser reveals microscopic dust. Acoustic piezo sensor counts and sizes particles. 60 minutes of run time.","stock":25}

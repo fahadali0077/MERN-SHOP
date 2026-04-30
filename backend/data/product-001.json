@@ -1,16 +1,1 @@
-{
-    "name": "Sony WH-1000XM5 Wireless Headphones",
-    "price": 279.99,
-    "originalPrice": 349.99,
-    "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
-        "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=500"
-    ],
-    "rating": 4.8,
-    "reviewCount": 2341,
-    "category": "Electronics",
-    "badge": "Sale",
-    "description": "Industry-leading noise canceling headphones with 30-hour battery life, crystal clear hands-free calling, and Multipoint Bluetooth connection.",
-    "stock": 45
-}
+{"name":"Sony WH-1000XM5 Wireless Headphones","price":279.99,"originalPrice":349.99,"image":"https://picsum.photos/seed/prod001/600/600","rating":4.8,"reviewCount":2341,"category":"Electronics","badge":"Sale","description":"Industry-leading noise cancellation with 30-hour battery life. Multipoint connection lets you pair two devices simultaneously. Crystal clear hands-free calling.","stock":45}

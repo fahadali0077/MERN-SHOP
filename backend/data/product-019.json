@@ -1,15 +1,1 @@
-{
-    "name": "Peloton Bike+ Indoor Cycle",
-    "price": 2195.0,
-    "originalPrice": 2495.0,
-    "image": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500"
-    ],
-    "rating": 4.7,
-    "reviewCount": 3456,
-    "category": "Sports",
-    "badge": "Sale",
-    "description": "The ultimate home fitness experience. Auto-Follow resistance, rotating HD touchscreen, and access to thousands of live and on-demand classes.",
-    "stock": 8
-}
+{"name":"The Pragmatic Programmer — 20th Anniversary Edition","price":49.99,"image":"https://picsum.photos/seed/prod019/600/600","rating":4.8,"reviewCount":4231,"category":"Books","badge":"New","description":"Completely revised and updated. The core process of writing robust, adaptable, maintainable code. Essential for every developer.","stock":180}

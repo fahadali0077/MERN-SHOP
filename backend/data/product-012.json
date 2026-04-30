@@ -1,15 +1,1 @@
-{
-    "name": "Dyson V15 Detect Vacuum",
-    "price": 649.99,
-    "originalPrice": 749.99,
-    "image": "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=500"
-    ],
-    "rating": 4.8,
-    "reviewCount": 2341,
-    "category": "Home & Kitchen",
-    "badge": "Sale",
-    "description": "Laser detects invisible dust. Automatically adapts suction power to scientifically prove what you've vacuumed.",
-    "stock": 25
-}
+{"name":"Leather Bifold Wallet — Cognac","price":49.99,"image":"https://picsum.photos/seed/prod012/600/600","rating":4.6,"reviewCount":1876,"category":"Fashion","description":"Full-grain vegetable-tanned leather. 6 card slots, 2 cash compartments. Slim profile fits in front pocket.","stock":150}

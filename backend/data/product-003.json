@@ -1,15 +1,1 @@
-{
-    "name": "Samsung 4K OLED Smart TV 55\"",
-    "price": 899.99,
-    "originalPrice": 1099.99,
-    "image": "https://images.unsplash.com/photo-1593359677879-a4bb92f829e1?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1593359677879-a4bb92f829e1?w=500"
-    ],
-    "rating": 4.7,
-    "reviewCount": 1892,
-    "category": "Electronics",
-    "badge": "Sale",
-    "description": "Experience breathtaking 4K OLED picture quality with Quantum HDR and Object Tracking Sound technology.",
-    "stock": 15
-}
+{"name":"Logitech MX Master 3S Wireless Mouse","price":99.99,"image":"https://picsum.photos/seed/prod003/600/600","rating":4.7,"reviewCount":4290,"category":"Electronics","badge":"New","description":"8000 DPI any-surface tracking. MagSpeed electromagnetic scrolling. Quiet clicks. 70-day battery. Works on glass surfaces.","stock":80}

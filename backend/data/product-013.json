@@ -1,15 +1,1 @@
-{
-    "name": "KitchenAid Stand Mixer",
-    "price": 379.99,
-    "originalPrice": 449.99,
-    "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500"
-    ],
-    "rating": 4.9,
-    "reviewCount": 9876,
-    "category": "Home & Kitchen",
-    "badge": "Hot",
-    "description": "5-quart bowl-lift stand mixer with 10 speeds. Includes flat beater, dough hook, and wire whip.",
-    "stock": 18
-}
+{"name":"Lodge Cast Iron Skillet 10.25-inch","price":44.95,"image":"https://picsum.photos/seed/prod013/600/600","rating":4.9,"reviewCount":5122,"category":"Home & Kitchen","badge":"Hot","description":"Pre-seasoned and ready to use. Works on all cooktops including induction. Gets better with every use. Made in the USA.","stock":200}

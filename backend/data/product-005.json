@@ -1,14 +1,1 @@
-{
-    "name": "Sony PlayStation 5",
-    "price": 499.99,
-    "image": "https://images.unsplash.com/photo-1607853202273-797f1c22a38e?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1607853202273-797f1c22a38e?w=500"
-    ],
-    "rating": 4.8,
-    "reviewCount": 12345,
-    "category": "Electronics",
-    "badge": "Hot",
-    "description": "Experience lightning-fast loading with ultra-high speed SSD, deeper immersion with haptic feedback and 3D Audio.",
-    "stock": 10
-}
+{"name":"GoPro HERO12 Black Action Camera","price":349.99,"image":"https://picsum.photos/seed/prod005/600/600","rating":4.5,"reviewCount":987,"category":"Electronics","badge":"New","description":"5.3K60 and 4K120 video. 27MP photos. HyperSmooth 6.0 stabilization. Waterproof to 10m without a housing.","stock":55}

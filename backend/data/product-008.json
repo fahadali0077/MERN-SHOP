@@ -1,13 +1,1 @@
-{
-    "name": "Levi's 501 Original Jeans",
-    "price": 69.99,
-    "image": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500"
-    ],
-    "rating": 4.5,
-    "reviewCount": 7832,
-    "category": "Fashion",
-    "description": "The original blue jean since 1873. Straight fit with a regular waist and straight leg from hip to ankle.",
-    "stock": 120
-}
+{"name":"Minimal Linen Shirt — Cream","price":59.99,"image":"https://picsum.photos/seed/prod008/600/600","rating":4.5,"reviewCount":891,"category":"Fashion","badge":"New","description":"Crafted from 100% European linen. Relaxed-fit, breathes beautifully in warm weather. Classic collar, chest pocket, mother-of-pearl buttons.","stock":75}

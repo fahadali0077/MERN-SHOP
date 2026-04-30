@@ -1,15 +1,1 @@
-{
-    "name": "The Psychology of Money",
-    "price": 14.99,
-    "originalPrice": 22.0,
-    "image": "https://images.unsplash.com/photo-1592496431122-2349e0fbc666?w=500",
-    "images": [
-        "https://images.unsplash.com/photo-1592496431122-2349e0fbc666?w=500"
-    ],
-    "rating": 4.8,
-    "reviewCount": 23456,
-    "category": "Books",
-    "badge": "Sale",
-    "description": "Timeless lessons on wealth, greed, and happiness. Morgan Housel shares 19 short stories exploring the ways people think about money.",
-    "stock": 180
-}
+{"name":"KitchenAid Stand Mixer 5-Quart","price":379.99,"originalPrice":499.99,"image":"https://picsum.photos/seed/prod017/600/600","rating":4.9,"reviewCount":8923,"category":"Home & Kitchen","badge":"Sale","description":"67 touchpoints around the bowl. 10 speeds. 59 available attachments. Tilts back for easy bowl access. Made in the USA.","stock":40}
