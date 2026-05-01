@@ -8,14 +8,14 @@ import { useCartStore, type CartState } from "@/stores/cartStore";
 import { Button } from "@/components/ui/button";
 
 export function CartDrawer() {
-  const isOpen      = useCartStore((s: CartState) => s.isOpen);
-  const items       = useCartStore((s: CartState) => s.items);
+  const isOpen = useCartStore((s: CartState) => s.isOpen);
+  const items = useCartStore((s: CartState) => s.items);
   const closeDrawer = useCartStore((s: CartState) => s.closeDrawer);
-  const removeItem  = useCartStore((s: CartState) => s.removeItem);
-  const updateQty   = useCartStore((s: CartState) => s.updateQty);
-  const clearCart   = useCartStore((s: CartState) => s.clearCart);
-  const totalPrice  = useCartStore((s: CartState) => s.totalPrice());
-  const router      = useRouter();
+  const removeItem = useCartStore((s: CartState) => s.removeItem);
+  const updateQty = useCartStore((s: CartState) => s.updateQty);
+  const clearCart = useCartStore((s: CartState) => s.clearCart);
+  const totalPrice = useCartStore((s: CartState) => s.totalPrice());
+  const router = useRouter();
 
   // Close on Escape key
   useEffect(() => {
@@ -33,7 +33,7 @@ export function CartDrawer() {
 
   // Swipe-to-close (touch) support
   const touchStartX = useRef<number | null>(null);
-  const panelRef    = useRef<HTMLElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0]?.clientX ?? null;
@@ -54,9 +54,8 @@ export function CartDrawer() {
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          }`}
         onClick={closeDrawer}
         aria-hidden="true"
       />
@@ -66,9 +65,8 @@ export function CartDrawer() {
         ref={panelRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-white shadow-2xl transition-transform duration-300 ease-out dark:bg-dark-surface sm:w-[420px] sm:max-w-full ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-white shadow-2xl transition-transform duration-300 ease-out dark:bg-dark-surface sm:w-[420px] sm:max-w-full ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         aria-label="Shopping cart"
         aria-hidden={!isOpen}
         role="dialog"
@@ -79,7 +77,7 @@ export function CartDrawer() {
           {/* Back / close — large touch target on mobile */}
           <button
             onClick={closeDrawer}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-surface-raised text-ink transition-colors hover:bg-border hover:text-ink dark:bg-dark-surface-2 dark:text-white sm:hidden"
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-surface-raised text-ink transition-colors hover:bg-border hover:text-ink dark:bg-white/10 dark:text-white dark:hover:bg-white/20 sm:hidden"
             aria-label="Close cart"
           >
             <ArrowLeft size={18} strokeWidth={2} />
