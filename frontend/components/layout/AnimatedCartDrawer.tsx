@@ -8,13 +8,13 @@ import { useCartStore, type CartState } from "@/stores/cartStore";
 const spring = { type: "spring", damping: 28, stiffness: 300 };
 
 export function AnimatedCartDrawer() {
-  const isOpen     = useCartStore((s: CartState) => s.isOpen);
-  const items      = useCartStore((s: CartState) => s.items);
-  const closeDrawer= useCartStore((s: CartState) => s.closeDrawer);
+  const isOpen = useCartStore((s: CartState) => s.isOpen);
+  const items = useCartStore((s: CartState) => s.items);
+  const closeDrawer = useCartStore((s: CartState) => s.closeDrawer);
   const removeItem = useCartStore((s: CartState) => s.removeItem);
-  const updateQty  = useCartStore((s: CartState) => s.updateQty);
-  const clearCart  = useCartStore((s: CartState) => s.clearCart);
-  const total      = useCartStore((s: CartState) => s.totalPrice());
+  const updateQty = useCartStore((s: CartState) => s.updateQty);
+  const clearCart = useCartStore((s: CartState) => s.clearCart);
+  const total = useCartStore((s: CartState) => s.totalPrice());
 
   return (
     <AnimatePresence>
@@ -34,7 +34,7 @@ export function AnimatedCartDrawer() {
             key="drawer"
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={spring}
-            className="fixed right-0 top-0 z-50 flex h-full w-[400px] max-w-full flex-col bg-white shadow-xl dark:bg-dark-surface"
+            className="fixed right-0 top-16 z-50 flex h-[calc(100vh-4rem)] w-[400px] max-w-full flex-col bg-white shadow-xl dark:bg-dark-surface"
             aria-label="Shopping cart"
           >
             {/* Header */}
