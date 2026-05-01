@@ -113,7 +113,7 @@ router.get("/:id/reviews", reviewCtrl.getProductReviews);
  *         description: Already reviewed
  */
 router.post("/:id/reviews", protect, reviewCtrl.createReview);
-router.delete("/:id/reviews/:reviewId", protect, authorize("admin", "moderator"), reviewCtrl.deleteReview);
+router.delete("/:id/reviews/:reviewId", protect, authorize("admin"), reviewCtrl.deleteReview);
 
 /**
  * @swagger
@@ -150,7 +150,7 @@ router.post("/", protect, authorize("admin"), validate(CreateProductSchema), ctr
  *     security:
  *       - bearerAuth: []
  */
-router.put("/:id", protect, authorize("admin", "moderator"), validate(UpdateProductSchema), ctrl.updateProduct);
+router.put("/:id", protect, authorize("admin"), validate(UpdateProductSchema), ctrl.updateProduct);
 
 /**
  * @swagger

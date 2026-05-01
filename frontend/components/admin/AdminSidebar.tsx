@@ -10,7 +10,7 @@ import {
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useAuthStore } from "@/stores/authStore";
 
-type Role = "admin" | "moderator" | "customer";
+type Role = "admin" | "customer";
 
 interface NavItem {
   href:    string;
@@ -18,29 +18,29 @@ interface NavItem {
   icon:    React.ElementType;
   exact:   boolean;
   badge:   string | null;
-  roles:   Role[];  // which roles can see this item
-  tooltip: string;  // shown when hover-locked for moderator
+  roles:   Role[];
+  tooltip: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
   {
     href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true, badge: null,
-    roles: ["admin", "moderator"],
+    roles: ["admin"],
     tooltip: "",
   },
   {
     href: "/admin/products", label: "Products", icon: Package, exact: false, badge: null,
-    roles: ["admin", "moderator"],
+    roles: ["admin"],
     tooltip: "",
   },
   {
     href: "/admin/orders", label: "Live Orders", icon: Zap, exact: false, badge: "Live",
-    roles: ["admin", "moderator"],
+    roles: ["admin"],
     tooltip: "",
   },
   {
     href: "/admin/users", label: "Users", icon: Users, exact: false, badge: null,
-    roles: ["admin", "moderator"],  // moderators can view; the page hides edit/delete actions
+    roles: ["admin"],  // moderators can view; the page hides edit/delete actions
     tooltip: "",
   },
 ];
@@ -71,7 +71,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const user     = useAuthStore((s) => s.user);
   const role     = (user?.role ?? "admin") as Role;
-  const isMod    = role === "moderator";
+  const isMod    = false; // moderator role removed
 
   return (
     <aside className="flex h-full w-[220px] flex-shrink-0 flex-col border-r border-border bg-white dark:border-dark-border dark:bg-dark-surface">

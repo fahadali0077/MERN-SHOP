@@ -58,7 +58,7 @@ export function LoginForm() {
     const searchParams = new URLSearchParams(window.location.search);
     const from = searchParams.get("from");
 
-    if (role === "admin" || role === "moderator") {
+    if (role === "admin") {
       router.push("/admin");
     } else if (from && from.startsWith("/") && !from.startsWith("//")) {
       router.push(from);

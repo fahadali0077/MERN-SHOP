@@ -114,8 +114,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           )}
         </div>
 
-        {/* Add to Cart — reveals on group (card) hover, not just image hover */}
-        <div className="mt-3 translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+        {/* Add to Cart — always visible */}
+        <div className="mt-3">
           <AddToCartButton product={product} size="default" />
         </div>
       </div>
