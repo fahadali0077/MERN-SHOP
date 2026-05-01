@@ -75,9 +75,9 @@ export function Footer() {
             {/* Contact info */}
             <ul className="mt-5 space-y-2">
               {[
-                { icon: Mail, text: "fahadj698@gmail.com" href: "mailto:fahadj698@gmail.com" },
-                { icon: Phone, text: "+92 309-9639354" href: "tel:+923099639354" },
-                { icon: MapPin, text: "Lahore, Pakistan" href: "https://google.com" },
+                { icon: Mail, text: "fahadj698@gmail.com", href: "mailto:fahadj698@gmail.com" },
+                { icon: Phone, text: "+92 309-9639354", href: "tel:+923099639354" },
+                { icon: MapPin, text: "Lahore, Pakistan", href: "https://google.com" },
               ].map(({ icon: Icon, text, href }) => (
                 <li key={text} className="flex items-center gap-2 text-xs text-ink-muted">
                   <Icon size={12} className="flex-shrink-0 text-primary" strokeWidth={2} />
