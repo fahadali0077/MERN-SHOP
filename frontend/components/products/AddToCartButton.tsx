@@ -8,6 +8,7 @@ import { useCartStore, type CartState } from "@/stores/cartStore";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/types";
 import { toast } from "@/stores/toastStore";
+import { useAuthStore } from "@/stores/authStore";
 
 interface AddToCartButtonProps {
   product: Product;
@@ -15,6 +16,7 @@ interface AddToCartButtonProps {
   size?: "default" | "lg";
 }
 
+// Admins should not be able to add to cart
 export function AddToCartButton({ product, isInCartSession = false, size = "lg" }: AddToCartButtonProps) {
   const [isPending, startTransition] = useTransition();
   const addItemToStore    = useCartStore((s: CartState) => s.addItem);
@@ -25,6 +27,10 @@ export function AddToCartButton({ product, isInCartSession = false, size = "lg" 
   );
 
   const isInCart = isInCartSession || isInStore;
+  const role = useAuthStore((s) => s.user?.role);
+
+  // Admins cannot shop — return nothing so the button simply doesn't appear
+  if (role === "admin") return null;
 
   const handleClick = () => {
     startTransition(async () => {

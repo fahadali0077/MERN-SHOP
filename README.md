@@ -191,14 +191,14 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ## Deployment
 
-### Backend → Railway
+### Backend → render
 
-1. Create account at [railway.app](https://railway.app)
+1. Create account at [render.app](https://render.app)
 2. New Project → Deploy from GitHub → select repo
 3. Set **Root Directory**: `backend`
-4. Add **MongoDB** database from Railway's plugin marketplace
-5. Set environment variables in Railway dashboard
-6. After deploy, open Railway Shell and run:
+4. Add **MongoDB** database from render's plugin marketplace
+5. Set environment variables in render dashboard
+6. After deploy, open render Shell and run:
    ```bash
    npm run db:seed
    npm run db:admin
@@ -211,13 +211,13 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 3. Set **Root Directory**: `frontend`
 4. Add environment variable:
    ```
-   NEXT_PUBLIC_API_URL=https://your-backend.up.railway.app
+   NEXT_PUBLIC_API_URL=https://your-backend.up.render.app
    ```
 5. Deploy
 
 ### Update CORS after deployment
 
-In Railway, update `FRONTEND_URL` to your Vercel URL:
+In render, update `FRONTEND_URL` to your Vercel URL:
 ```
 FRONTEND_URL=https://your-app.vercel.app
 ```
@@ -240,4 +240,4 @@ FRONTEND_URL=https://your-app.vercel.app
 - 🔒 Security: Helmet, CORS, rate limiting, mongo-sanitize, HPP
 - 📖 Swagger API documentation
 - 🐳 Docker + Docker Compose support
-- 🚂 Railway deployment ready
+- 🚂 render deployment ready

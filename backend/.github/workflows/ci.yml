@@ -66,9 +66,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # ── Job 3: Deploy to Railway ─────────────────────────────────────────────────
+  # ── Job 3: Deploy to render ─────────────────────────────────────────────────
   deploy:
-    name: Deploy to Railway
+    name: Deploy to render
     runs-on: ubuntu-latest
     needs: [test, build]
     if: github.ref == 'refs/heads/main'
@@ -77,10 +77,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
+      - name: Install render CLI
+        run: npm install -g @render/cli
 
-      - name: Deploy to Railway
-        run: railway up --detach
+      - name: Deploy to render
+        run: render up --detach
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          render_TOKEN: ${{ secrets.render_TOKEN }}

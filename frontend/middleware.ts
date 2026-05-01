@@ -6,9 +6,9 @@ import type { NextRequest } from "next/server";
  *
  * PROTECTED ROUTES:
  *   /admin/**      → requires mernshop_admin cookie (set on /admin/login)
- *   /checkout      → requires session cookie (set on login)
+ *   /checkout      → requires session cookie; admin blocked → redirected to /admin
+ *   /cart          → admin blocked → redirected to /admin
  *   /account       → requires session cookie
- *   /cart          → requires session cookie
  *
  * ALWAYS PUBLIC:
  *   /admin/login   → never redirected (would cause infinite loop)
@@ -38,13 +38,24 @@ export function middleware(request: NextRequest) {
 
   if (isPublic(pathname)) return NextResponse.next();
 
+  const isAdminSession    = !!request.cookies.get(ADMIN_COOKIE);
+  const isCustomerSession = !!request.cookies.get(SESSION_COOKIE);
+
   // ── Admin protection ──────────────────────────────────────────────────────
   if (pathname.startsWith("/admin")) {
-    if (!request.cookies.get(ADMIN_COOKIE)) {
+    if (!isAdminSession) {
       const url = new URL("/admin/login", request.url);
       url.searchParams.set("from", pathname);
       return NextResponse.redirect(url);
     }
+    return NextResponse.next();
+  }
+
+  // ── Block admin from customer-only pages ──────────────────────────────────
+  // Admin should never be shopping — redirect them back to their dashboard
+  const CUSTOMER_ONLY = ["/cart", "/checkout", "/wishlist"];
+  if (isAdminSession && CUSTOMER_ONLY.some((p) => pathname.startsWith(p))) {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
   // ── Customer session protection ───────────────────────────────────────────
@@ -52,7 +63,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/checkout") ||
     pathname.startsWith("/account")
   ) {
-    if (!request.cookies.get(SESSION_COOKIE)) {
+    if (!isCustomerSession) {
       const url = new URL("/auth/login", request.url);
       url.searchParams.set("from", pathname);
       return NextResponse.redirect(url);
