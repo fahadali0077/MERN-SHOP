@@ -3,32 +3,32 @@ import { ShoppingBag, Github, Linkedin, Mail, Phone, MapPin, CreditCard, Shield,
 
 const LINKS = {
   Shop: [
-    { href: "/products",           label: "All Products"    },
-    { href: "/products?category=Electronics", label: "Electronics"    },
-    { href: "/products?category=Fashion",     label: "Fashion"        },
-    { href: "/products?category=Books",       label: "Books"          },
-    { href: "/products?category=Sports",      label: "Sports"         },
+    { href: "/products", label: "All Products" },
+    { href: "/products?category=Electronics", label: "Electronics" },
+    { href: "/products?category=Fashion", label: "Fashion" },
+    { href: "/products?category=Books", label: "Books" },
+    { href: "/products?category=Sports", label: "Sports" },
   ],
   Account: [
-    { href: "/auth/login",         label: "Sign In"         },
-    { href: "/auth/register",      label: "Create Account"  },
-    { href: "/account",            label: "My Account"      },
-    { href: "/account/orders",     label: "Track My Order"  },
-    { href: "/cart",               label: "Shopping Cart"   },
+    { href: "/auth/login", label: "Sign In" },
+    { href: "/auth/register", label: "Create Account" },
+    { href: "/account", label: "My Account" },
+    { href: "/account/orders", label: "Track My Order" },
+    { href: "/cart", label: "Shopping Cart" },
   ],
   Support: [
-    { href: "#",                   label: "Help Center"     },
-    { href: "#",                   label: "Returns & Refunds" },
-    { href: "#",                   label: "Shipping Info"   },
-    { href: "#",                   label: "Size Guide"      },
-    { href: "#",                   label: "Contact Us"      },
+    { href: "#", label: "Help Center" },
+    { href: "#", label: "Returns & Refunds" },
+    { href: "#", label: "Shipping Info" },
+    { href: "#", label: "Size Guide" },
+    { href: "#", label: "Contact Us" },
   ],
 };
 
 const TRUST_BADGES = [
-  { icon: Truck,      label: "Free Shipping",    sub: "On orders over $50"  },
-  { icon: RotateCcw,  label: "Easy Returns",     sub: "30-day return policy" },
-  { icon: Shield,     label: "Secure Payments",  sub: "256-bit SSL encrypted" },
+  { icon: Truck, label: "Free Shipping", sub: "On orders over $50" },
+  { icon: RotateCcw, label: "Easy Returns", sub: "30-day return policy" },
+  { icon: Shield, label: "Secure Payments", sub: "256-bit SSL encrypted" },
   { icon: CreditCard, label: "Flexible Payment", sub: "All major cards accepted" },
 ];
 
@@ -75,10 +75,10 @@ export function Footer() {
             {/* Contact info */}
             <ul className="mt-5 space-y-2">
               {[
-                { icon: Mail,    text: "support@mernshop.com"  },
-                { icon: Phone,   text: "+1 (800) 000-0000"      },
-                { icon: MapPin,  text: "Lahore, Pakistan"       },
-              ].map(({ icon: Icon, text }) => (
+                { icon: Mail, text: "fahadj698@gmail.com" href: "mailto:fahadj698@gmail.com" },
+                { icon: Phone, text: "+92 309-9639354" href: "tel:+923099639354" },
+                { icon: MapPin, text: "Lahore, Pakistan" href: "https://google.com" },
+              ].map(({ icon: Icon, text, href }) => (
                 <li key={text} className="flex items-center gap-2 text-xs text-ink-muted">
                   <Icon size={12} className="flex-shrink-0 text-primary" strokeWidth={2} />
                   {text}
@@ -89,8 +89,8 @@ export function Footer() {
             {/* Social */}
             <div className="mt-5 flex items-center gap-2">
               {[
-                { href: "https://github.com/fahadali0077",                    Icon: Github,   label: "GitHub"   },
-                { href: "https://www.linkedin.com/in/fahad-ali-840a093a8/",   Icon: Linkedin, label: "LinkedIn" },
+                { href: "https://github.com/fahadali0077", Icon: Github, label: "GitHub" },
+                { href: "https://www.linkedin.com/in/fahad-ali-840a093a8/", Icon: Linkedin, label: "LinkedIn" },
               ].map(({ href, Icon, label }) => (
                 <a
                   key={label}
