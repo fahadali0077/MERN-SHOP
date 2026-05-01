@@ -140,7 +140,7 @@ export async function logoutAction(): Promise<ActionResult> {
 export async function adminLoginAction(
   email: string,
   password: string
-): Promise<ActionResult> {
+): Promise<ActionResult<{ accessToken: string; user: { id: string; name: string; email: string; role: string; createdAt: string } }>> {
   try {
     const res = await fetch(`${API}/api/v1/auth/login`, {
       method: "POST",
@@ -150,7 +150,7 @@ export async function adminLoginAction(
 
     const data = await res.json() as {
       success: boolean;
-      data?: { accessToken: string; user: { role: string } };
+      data?: { accessToken: string; user: { id: string; name: string; email: string; role: string; createdAt: string } };
       error?: string;
     };
 
@@ -178,7 +178,7 @@ export async function adminLoginAction(
       maxAge: 60 * 15,
     });
 
-    return { success: true, message: "Welcome, Admin!" };
+    return { success: true, message: "Welcome, Admin!", data: { accessToken: data.data.accessToken, user: data.data.user } };
   } catch (err) {
     console.error("[adminLoginAction]", err);
     return { success: false, message: "Login failed." };
