@@ -81,7 +81,9 @@ export function Footer() {
               ].map(({ icon: Icon, text, href }) => (
                 <li key={text} className="flex items-center gap-2 text-xs text-ink-muted">
                   <Icon size={12} className="flex-shrink-0 text-primary" strokeWidth={2} />
-                  {text}
+                  <a href={href} className="hover:text-primary transition-colors">
+                    {text}
+                  </a>
                 </li>
               ))}
             </ul>
