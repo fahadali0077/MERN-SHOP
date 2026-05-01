@@ -1,29 +1,34 @@
 import Link from "next/link";
 import { ShoppingBag, Github, Linkedin, Mail, Phone, MapPin, CreditCard, Shield, RotateCcw, Truck } from "lucide-react";
+import { getSessionUser } from "@/lib/session";
 
-const LINKS = {
-  Shop: [
-    { href: "/products", label: "All Products" },
-    { href: "/products?category=Electronics", label: "Electronics" },
-    { href: "/products?category=Fashion", label: "Fashion" },
-    { href: "/products?category=Books", label: "Books" },
-    { href: "/products?category=Sports", label: "Sports" },
-  ],
-  Account: [
-    { href: "/auth/login", label: "Sign In" },
-    { href: "/auth/register", label: "Create Account" },
-    { href: "/account", label: "My Account" },
-    { href: "/account/orders", label: "Track My Order" },
-    { href: "/cart", label: "Shopping Cart" },
-  ],
-  Support: [
-    { href: "#", label: "Help Center" },
-    { href: "#", label: "Returns & Refunds" },
-    { href: "#", label: "Shipping Info" },
-    { href: "#", label: "Size Guide" },
-    { href: "#", label: "Contact Us" },
-  ],
-};
+const SHOP_LINKS = [
+  { href: "/products", label: "All Products" },
+  { href: "/products?category=Electronics", label: "Electronics" },
+  { href: "/products?category=Fashion", label: "Fashion" },
+  { href: "/products?category=Books", label: "Books" },
+  { href: "/products?category=Sports", label: "Sports" },
+];
+
+const ACCOUNT_GUEST = [
+  { href: "/auth/login", label: "Sign In" },
+  { href: "/auth/register", label: "Create Account" },
+  { href: "/cart", label: "Shopping Cart" },
+];
+
+const ACCOUNT_USER = [
+  { href: "/account", label: "My Account" },
+  { href: "/account/orders", label: "Track My Order" },
+  { href: "/cart", label: "Shopping Cart" },
+];
+
+const SUPPORT_LINKS = [
+  { href: "#", label: "Help Center" },
+  { href: "#", label: "Returns & Refunds" },
+  { href: "#", label: "Shipping Info" },
+  { href: "#", label: "Size Guide" },
+  { href: "#", label: "Contact Us" },
+];
 
 const TRUST_BADGES = [
   { icon: Truck, label: "Free Shipping", sub: "On orders over $50" },
@@ -32,7 +37,15 @@ const TRUST_BADGES = [
   { icon: CreditCard, label: "Flexible Payment", sub: "All major cards accepted" },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const user = await getSessionUser();
+
+  const linkGroups = [
+    { group: "Shop", items: SHOP_LINKS },
+    { group: "Account", items: user ? ACCOUNT_USER : ACCOUNT_GUEST },
+    { group: "Support", items: SUPPORT_LINKS },
+  ];
+
   return (
     <footer className="mt-auto border-t border-border bg-white dark:border-dark-border dark:bg-dark-surface">
 
@@ -109,7 +122,7 @@ export function Footer() {
           </div>
 
           {/* Link columns */}
-          {Object.entries(LINKS).map(([group, items]) => (
+          {linkGroups.map(({ group, items }) => (
             <div key={group}>
               <p className="mb-4 text-[11px] font-bold uppercase tracking-widest text-ink dark:text-white">
                 {group}
