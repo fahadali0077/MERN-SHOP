@@ -1,11 +1,5 @@
 "use client";
 
-/**
- * MERN-III Module 4 — stores/authStore.ts
- * Stores real user data returned from the backend JWT response.
- * Replaces the mock user object built from email string.
- */
-
 import { create } from "zustand";
 import { persist, devtools } from "zustand/middleware";
 import type { User } from "@/types";
