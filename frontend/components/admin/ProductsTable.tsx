@@ -51,13 +51,13 @@ function ProductModal({
   const isNew = product === null;
   const [form, setForm] = useState<typeof EMPTY_PRODUCT>(
     isNew ? { ...EMPTY_PRODUCT } : {
-      name:          product.name,
-      category:      product.category,
-      price:         product.price,
-      stock:         product.stock,
-      badge:         product.badge ?? null,
-      image:         product.image,
-      description:   product.description ?? "",
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      stock: product.stock,
+      badge: product.badge ?? null,
+      image: product.image,
+      description: product.description ?? "",
       originalPrice: product.originalPrice ?? null,
     }
   );
@@ -68,25 +68,34 @@ function ProductModal({
 
   const handleSubmit = async () => {
     if (!form.name.trim()) { toast.error("Name is required"); return; }
-    if (form.price <= 0)   { toast.error("Price must be greater than 0"); return; }
+    if (form.price <= 0) { toast.error("Price must be greater than 0"); return; }
     setSaving(true);
     try {
-      const url    = isNew
+      const url = isNew
         ? `${API_URL}/api/v1/products`
         : `${API_URL}/api/v1/products/${product!._id ?? product!.id}`;
       const method = isNew ? "POST" : "PUT";
-      const res    = await fetch(url, {
+      // Build body cleanly — omit null/empty optional fields entirely.
+      // The backend uses Zod .optional() which accepts undefined but NOT null,
+      // so sending null for badge or originalPrice causes a 422.
+      const body: Record<string, unknown> = {
+        name: form.name,
+        category: form.category,
+        price: Number(form.price),
+        stock: Number(form.stock),
+        image: form.image,
+        description: form.description ?? "",
+      };
+      if (form.badge) body["badge"] = form.badge;
+      if (form.originalPrice) body["originalPrice"] = Number(form.originalPrice);
+
+      const res = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({
-          ...form,
-          price:         Number(form.price),
-          stock:         Number(form.stock),
-          originalPrice: form.originalPrice ? Number(form.originalPrice) : null,
-        }),
+        body: JSON.stringify(body),
       });
       const json = await res.json() as { success: boolean; data: AdminProduct; error?: string };
       if (!json.success) throw new Error(json.error ?? "Save failed");
@@ -194,19 +203,19 @@ export function ProductsTable() {
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
 
-  const [products, setProducts]   = useState<AdminProduct[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
-  const [sorting, setSorting]     = useState<SortingState>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [editProduct, setEditProduct]   = useState<AdminProduct | null | undefined>(undefined); // undefined=closed, null=new
-  const [deletingId, setDeletingId]     = useState<string | null>(null);
+  const [editProduct, setEditProduct] = useState<AdminProduct | null | undefined>(undefined); // undefined=closed, null=new
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res  = await fetch(`${API_URL}/api/v1/products?limit=100`);
+      const res = await fetch(`${API_URL}/api/v1/products?limit=100`);
       if (!res.ok) throw new Error(`Server ${res.status}`);
       const json = await res.json() as { success: boolean; data: AdminProduct[] };
       if (!json.success) throw new Error("API error");
@@ -287,7 +296,7 @@ export function ProductsTable() {
       id: "actions",
       header: "Actions",
       cell: (info) => {
-        const p   = info.row.original;
+        const p = info.row.original;
         const pid = p._id ?? p.id;
         const isDeleting = deletingId === pid;
         return (
@@ -416,8 +425,8 @@ export function ProductsTable() {
                               {flexRender(header.column.columnDef.header, header.getContext())}
                               {header.column.getCanSort() && (
                                 header.column.getIsSorted() === "asc" ? <ChevronUp size={13} /> :
-                                header.column.getIsSorted() === "desc" ? <ChevronDown size={13} /> :
-                                <ChevronsUpDown size={13} className="opacity-40" />
+                                  header.column.getIsSorted() === "desc" ? <ChevronDown size={13} /> :
+                                    <ChevronsUpDown size={13} className="opacity-40" />
                               )}
                             </button>
                           )}
