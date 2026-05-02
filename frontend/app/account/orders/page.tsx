@@ -77,8 +77,8 @@ export default function OrdersPage() {
             <p className="text-sm text-ink-muted">Track & manage your orders</p>
           </div>
         </div>
-        <button onClick={() => { void fetchOrders(page); }} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
-          <RefreshCw size={14} className="text-ink dark:text-white" /> Refresh
+        <button onClick={() => { void fetchOrders(page); }} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-ink hover:bg-surface-raised dark:border-dark-border dark:text-white dark:hover:bg-dark-surface-2">
+          <RefreshCw size={14} /> Refresh
         </button>
       </div>
 
