@@ -143,6 +143,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {/* Reviews */}
+      <div className="mt-8 border-t border-border dark:border-dark-border" />
       <ReviewsSection
         productId={id}
         initialReviews={reviews}

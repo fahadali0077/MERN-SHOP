@@ -152,9 +152,9 @@ function ReviewForm({
   productId: string;
   onSubmitted: (review: Review) => void;
 }) {
-  const [rating, setRating]   = useState(0);
+  const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [error, setError]     = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -258,7 +258,7 @@ export function ReviewsSection({
       : 0;
 
   return (
-    <section className="mt-16">
+    <section className="mt-6">
       {/* Section header */}
       <div className="mb-6 flex items-end justify-between">
         <div>
