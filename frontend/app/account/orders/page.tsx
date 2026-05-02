@@ -42,12 +42,22 @@ export default function OrdersPage() {
       const res = await fetch(`${API_URL}/api/v1/orders/my?page=${p}&limit=8`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
+      if (res.status === 401) {
+        setError("Your session has expired. Please sign in again.");
+        setLoading(false);
+        return;
+      }
       const data = await res.json() as { success: boolean; data: Order[]; pagination: { pages: number } };
       if (!data.success) throw new Error("Failed to fetch orders");
       setOrders(data.data);
       setTotalPages(data.pagination.pages);
     } catch {
-      setError("Failed to load orders. Please try again.");
+      const status = err instanceof Response ? err.status : 0;
+      if (status === 401) {
+        setError("Your session has expired. Please sign in again.");
+      } else {
+        setError("Failed to load orders. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -68,7 +78,7 @@ export default function OrdersPage() {
           </div>
         </div>
         <button onClick={() => { void fetchOrders(page); }} className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
-          <RefreshCw size={14} /> Refresh
+          <RefreshCw size={14} className="text-ink dark:text-white" /> Refresh
         </button>
       </div>
 
@@ -83,7 +93,13 @@ export default function OrdersPage() {
       {error && !loading && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-900/30 dark:bg-red-900/10">
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          <button onClick={() => { void fetchOrders(page); }} className="mt-3 text-sm font-medium text-primary hover:underline">Retry</button>
+          {error.includes("session") ? (
+            <Link href="/auth/login" className="mt-3 inline-block text-sm font-medium text-primary hover:underline">
+              Sign in again →
+            </Link>
+          ) : (
+            <button onClick={() => { void fetchOrders(page); }} className="mt-3 text-sm font-medium text-primary hover:underline">Retry</button>
+          )}
         </div>
       )}
 
