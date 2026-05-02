@@ -84,7 +84,7 @@ export default function PaymentsPage() {
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
-            <ArrowLeft size={16} />
+            <ArrowLeft size={16} className="text-ink dark:text-white" />
           </Link>
           <div>
             <h1 className="text-xl font-bold text-ink dark:text-white">Payment Methods</h1>

@@ -10,11 +10,11 @@ const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
 const STATUS_STEPS = ["pending", "processing", "shipped", "delivered"];
 const STATUS_STYLES: Record<string, string> = {
-  pending:    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
   processing: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  shipped:    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  delivered:  "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  cancelled:  "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  shipped: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+  delivered: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 };
 
 interface OrderItem { product: string; name: string; image?: string; price: number; qty: number; }
@@ -75,7 +75,7 @@ export default function OrderDetailPage() {
     <div className="mx-auto max-w-3xl space-y-5">
       <div className="flex items-center gap-3">
         <Link href="/account/orders" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
-          <ArrowLeft size={16} />
+          <ArrowLeft size={16} className="text-ink dark:text-white" />
         </Link>
         <div>
           <h1 className="text-xl font-bold text-ink dark:text-white">
@@ -103,9 +103,8 @@ export default function OrderDetailPage() {
             />
             {STATUS_STEPS.map((step, i) => (
               <div key={step} className="relative flex flex-col items-center gap-2">
-                <div className={`z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-all ${
-                  i <= stepIndex ? "border-primary bg-primary text-white" : "border-border bg-white dark:border-dark-border dark:bg-dark-surface"
-                }`}>
+                <div className={`z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-all ${i <= stepIndex ? "border-primary bg-primary text-white" : "border-border bg-white dark:border-dark-border dark:bg-dark-surface"
+                  }`}>
                   {i < stepIndex ? "✓" : i + 1}
                 </div>
                 <span className={`text-[11px] capitalize ${i <= stepIndex ? "text-primary font-medium" : "text-ink-muted"}`}>{step}</span>

@@ -9,11 +9,11 @@ import { useAuthStore } from "@/stores/authStore";
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
 const STATUS_STYLES: Record<string, string> = {
-  pending:    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+  pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
   processing: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  shipped:    "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  delivered:  "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  cancelled:  "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  shipped: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+  delivered: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 };
 
 interface OrderItem { product: string; name: string; image?: string; price: number; qty: number; }
@@ -60,7 +60,7 @@ export default function OrdersPage() {
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
-            <ArrowLeft size={16} />
+            <ArrowLeft size={16} className="text-ink dark:text-white" />
           </Link>
           <div>
             <h1 className="text-xl font-bold text-ink dark:text-white">My Orders</h1>
