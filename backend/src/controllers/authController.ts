@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import crypto from "crypto";
 import { User } from "../models/User.js";
+import { Order } from "../models/Order.js";
+import { Review } from "../models/Review.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { AppError } from "../middleware/errorHandler.js";
@@ -105,11 +107,24 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
 
 // ── DELETE /api/v1/auth/me ────────────────────────────────────────────────────
 export const deleteMe = asyncHandler(async (req: Request, res: Response) => {
-  const user = await User.findByIdAndDelete(req.user!.userId);
+  const userId = req.user!.userId;
+
+  const user = await User.findById(userId);
   if (!user) throw new AppError("User not found", 404);
 
-  // Clear the refresh-token cookie too
+  // Cascade delete all data belonging to this user
+  await Promise.all([
+    Order.deleteMany({ user: userId }),
+    Review.deleteMany({ user: userId }),
+    User.findByIdAndDelete(userId),
+  ]);
+
+  // Clear all auth & session cookies
   res.clearCookie("refreshToken");
+  res.clearCookie("accessToken");
+  res.clearCookie("session");
+  res.clearCookie("mern_cart");
+
   res.json({ success: true, message: "Account deleted successfully" });
 });
 

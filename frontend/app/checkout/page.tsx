@@ -106,7 +106,7 @@ export default function CheckoutPage() {
           {orderId && <p className="mt-1 text-xs text-ink-muted">Order ID: {orderId}</p>}
         </div>
         <div className="flex gap-3">
-          <Button asChild variant="outline"><Link href="/account">View Orders</Link></Button>
+          <Button asChild variant="outline"><Link href="/account/orders">View Orders</Link></Button>
           <Button asChild><Link href="/products">Continue shopping</Link></Button>
         </div>
       </div>
@@ -120,7 +120,7 @@ export default function CheckoutPage() {
           <ArrowLeft size={14} strokeWidth={2} /> Back to cart
         </Link>
         <h1 className="font-serif text-4xl font-normal tracking-tight text-ink dark:text-white md:text-5xl">Checkout</h1>
-        <p className="mt-2 text-sm text-ink-muted">Protected route · Requires session</p>
+        <p className="mt-2 text-sm text-ink-muted">Complete your purchase securely</p>
       </div>
 
       {orderError && (
@@ -163,7 +163,7 @@ export default function CheckoutPage() {
                 )} />
               </div>
               <p className="mt-3 flex items-center gap-1.5 text-xs text-ink-muted">
-                <Lock size={11} strokeWidth={2} /> Secured by MERNShop — real order created in MongoDB
+                <Lock size={11} strokeWidth={2} /> Your payment information is encrypted and secure
               </p>
             </div>
 

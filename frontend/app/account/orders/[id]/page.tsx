@@ -34,8 +34,12 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => { setHydrated(true); }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!accessToken) { router.push("/auth/login"); return; }
     const fetch_ = async () => {
       try {
@@ -52,7 +56,7 @@ export default function OrderDetailPage() {
       }
     };
     void fetch_();
-  }, [id, accessToken, router]);
+  }, [id, accessToken, router, hydrated]);
 
   const stepIndex = order ? STATUS_STEPS.indexOf(order.status) : -1;
 

@@ -4,9 +4,10 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "@/stores/toastStore";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import {
   Search, Loader2, RefreshCw, ChevronLeft, ChevronRight,
-  User, ShieldCheck, Shield, Trash2, MoreHorizontal, Mail
+  User, ShieldCheck, Shield, Trash2, MoreHorizontal, Mail, LayoutDashboard
 } from "lucide-react";
 
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
@@ -135,13 +136,22 @@ export default function AdminUsersPage() {
 
       {/* Header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-ink dark:text-white">Users</h1>
-          <p className="mt-0.5 text-sm text-ink-muted">
-            {!isLoading && pagination.total > 0
-              ? `${pagination.total} registered customer${pagination.total !== 1 ? "s" : ""}`
-              : "Manage customer accounts"}
-          </p>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin"
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-border text-ink-muted hover:border-amber hover:text-amber dark:border-dark-border"
+            aria-label="Back to dashboard"
+          >
+            <LayoutDashboard size={14} />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-ink dark:text-white">Users</h1>
+            <p className="mt-0.5 text-sm text-ink-muted">
+              {!isLoading && pagination.total > 0
+                ? `${pagination.total} registered customer${pagination.total !== 1 ? "s" : ""}`
+                : "Manage customer accounts"}
+            </p>
+          </div>
         </div>
         <button
           onClick={() => { void fetchUsers(pagination.page); }}

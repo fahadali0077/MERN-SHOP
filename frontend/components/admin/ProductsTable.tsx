@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
+import Link from "next/link";
 import {
   useReactTable, getCoreRowModel, getSortedRowModel,
   getFilteredRowModel, getPaginationRowModel, createColumnHelper,
@@ -8,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import {
   ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight,
-  Loader2, RefreshCw, Plus, Pencil, Trash2, X, Save,
+  Loader2, RefreshCw, Plus, Pencil, Trash2, X, Save, LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
@@ -355,6 +356,9 @@ export function ProductsTable() {
       <div className="rounded-xl overflow-hidden border border-gray-200 bg-white dark:border-dark-border dark:bg-dark-surface">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3 border-b border-border p-4 dark:border-dark-border">
+          <Link href="/admin" className="flex h-7 w-7 items-center justify-center rounded-lg border border-border text-ink-muted hover:border-amber hover:text-amber dark:border-dark-border" aria-label="Back to dashboard">
+            <LayoutDashboard size={13} />
+          </Link>
           <h2 className="font-serif text-lg font-normal dark:text-white">Products</h2>
 
           <button

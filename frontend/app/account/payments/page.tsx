@@ -24,7 +24,6 @@ const BRAND_COLORS: Record<string, string> = {
 };
 const BRAND_LABEL: Record<string, string> = { visa: "VISA", mastercard: "MC", amex: "AMEX", other: "CARD" };
 
-function detect(last4: string, type: Card["type"]) { return BRAND_LABEL[type] ?? "CARD"; }
 
 function load(): Card[] {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as Card[]; } catch { return []; }
@@ -159,7 +158,7 @@ export default function PaymentsPage() {
             )}
             <p className="text-lg font-bold tracking-widest">•••• •••• •••• {card.last4}</p>
             <p className="mt-3 text-sm opacity-80">{card.holderName}</p>
-            <p className="text-xs opacity-60">{card.nickname || detect(card.last4, card.type)} · Exp {card.expMonth}/{card.expYear}</p>
+            <p className="text-xs opacity-60">{card.nickname || BRAND_LABEL[card.type] || "CARD"} · Exp {card.expMonth}/{card.expYear}</p>
             <div className="mt-4 flex items-center gap-2">
               {!card.isDefault && (
                 <button onClick={() => handleSetDefault(card.id)} className="rounded-lg bg-white/15 px-3 py-1.5 text-xs font-medium hover:bg-white/25">

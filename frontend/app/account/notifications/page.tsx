@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, Bell, Mail, Smartphone, ShoppingBag, Package, Tag, Star, Megaphone } from "lucide-react";
+import { useAuthStore } from "@/stores/authStore";
 
 const STORAGE_KEY = "mernshop_notifications";
+const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
 interface NotifPrefs {
   email_orders: boolean;
@@ -55,6 +57,8 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
 export default function NotificationsPage() {
   const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULTS);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   useEffect(() => { setPrefs(load()); }, []);
 
@@ -63,8 +67,21 @@ export default function NotificationsPage() {
     setSaved(false);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaving(true);
+    // Always save locally
     localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    // Sync to backend if logged in
+    if (accessToken) {
+      try {
+        await fetch(`${API_URL}/api/v1/auth/me/notifications`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+          body: JSON.stringify(prefs),
+        });
+      } catch { /* silently fall back to local-only storage */ }
+    }
+    setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -108,9 +125,10 @@ export default function NotificationsPage() {
       </div>
 
       <div className="mt-6 flex items-center gap-3">
-        <button onClick={handleSave}
-          className={`rounded-xl px-6 py-2.5 text-sm font-semibold text-white transition-all ${saved ? "bg-green-500" : "bg-primary hover:bg-primary-600"}`}>
-          {saved ? "✓ Saved!" : "Save Preferences"}
+        <button onClick={() => { void handleSave(); }}
+          disabled={saving}
+          className={`rounded-xl px-6 py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-60 ${saved ? "bg-green-500" : "bg-primary hover:bg-primary-600"}`}>
+          {saving ? "Saving…" : saved ? "✓ Saved!" : "Save Preferences"}
         </button>
         <button onClick={() => { setPrefs(DEFAULTS); setSaved(false); }}
           className="rounded-xl border border-border px-6 py-2.5 text-sm font-medium hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">

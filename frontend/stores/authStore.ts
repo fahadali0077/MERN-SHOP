@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>()(
 
         logout: () => {
           set({ user: null, accessToken: null, isAuthenticated: false }, false, "auth/logout");
-          // Clear server cookies
+          // Clear server-side session & cart cookies
           fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
         },
       }),

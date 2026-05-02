@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
 import { useSocket } from "@/hooks/useSocket";
 import { toast } from "@/stores/toastStore";
 import { cn } from "@/lib/utils";
-import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Package, Zap } from "lucide-react";
+import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Package, Zap, LayoutDashboard } from "lucide-react";
 
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
@@ -164,6 +165,13 @@ export default function AdminOrdersPage() {
       <div className="flex items-end justify-between">
         <div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-ink-muted hover:border-amber hover:text-amber dark:border-dark-border"
+              aria-label="Back to dashboard"
+            >
+              <LayoutDashboard size={14} />
+            </Link>
             <h1 className="text-2xl font-bold text-ink dark:text-white">Orders</h1>
             <span className={cn(
               "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold",

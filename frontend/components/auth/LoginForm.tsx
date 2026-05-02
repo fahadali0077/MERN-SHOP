@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,9 +32,11 @@ export function LoginForm() {
   });
 
   // Clear fields on mount to defeat browser autofill
-  useState(() => {
-    setTimeout(() => form.reset({ email: "", password: "" }), 50);
-  });
+  useEffect(() => {
+    const t = setTimeout(() => form.reset({ email: "", password: "" }), 50);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onSubmit = async (values: LoginValues) => {
     setError(null);

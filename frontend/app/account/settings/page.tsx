@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, User, Save, Trash2, AlertTriangle, Check } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
+import { useCartStore } from "@/stores/cartStore";
+import { useWishlistStore } from "@/stores/wishlistStore";
 import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/stores/toastStore";
@@ -15,6 +17,8 @@ export default function SettingsPage() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const setAuth = useAuthStore((s) => s.setAuth);
   const logout = useAuthStore((s) => s.logout);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const clearWishlist = useWishlistStore((s) => s.clear);
   const router = useRouter();
 
   const [form, setForm] = useState({ name: "", email: "" });
@@ -61,12 +65,27 @@ export default function SettingsPage() {
   const handleDeleteAccount = async () => {
     setShowDeleteDialog(false);
     try {
-      await fetch(`${API_URL}/api/v1/auth/me`, {
+      const res = await fetch(`${API_URL}/api/v1/auth/me`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-    } catch { /* ignore — clear local state regardless */ }
-    logout();
+      // If the backend returns an error (e.g. 404 already deleted), still clean up locally
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as { message?: string };
+        if (res.status !== 404) {
+          toast.error("Delete failed", data.message ?? "Could not delete account. Please try again.");
+          return;
+        }
+      }
+    } catch {
+      // Network error — still clean up locally so the user isn't stuck
+    }
+
+    // Clear all client-side state
+    clearCart();
+    clearWishlist();
+    logout(); // clears auth store + fires /api/auth/logout to clear HttpOnly cookies
+
     toast.success("Account deleted", "Sorry to see you go.");
     router.push("/");
   };

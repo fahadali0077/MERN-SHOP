@@ -34,6 +34,9 @@ export default function OrdersPage() {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => { setHydrated(true); }, []);
 
   const fetchOrders = useCallback(async (p = 1) => {
     if (!accessToken) { router.push("/auth/login"); return; }
@@ -51,9 +54,8 @@ export default function OrdersPage() {
       if (!data.success) throw new Error("Failed to fetch orders");
       setOrders(data.data);
       setTotalPages(data.pagination.pages);
-    } catch {
-      const status = err instanceof Response ? err.status : 0;
-      if (status === 401) {
+    } catch (err) {
+      if (err instanceof Response && err.status === 401) {
         setError("Your session has expired. Please sign in again.");
       } else {
         setError("Failed to load orders. Please try again.");
@@ -63,7 +65,7 @@ export default function OrdersPage() {
     }
   }, [accessToken, router]);
 
-  useEffect(() => { void fetchOrders(page); }, [fetchOrders, page]);
+  useEffect(() => { if (hydrated) { void fetchOrders(page); } }, [fetchOrders, page, hydrated]);
 
   return (
     <div className="mx-auto max-w-3xl">

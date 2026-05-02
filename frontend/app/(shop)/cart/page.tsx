@@ -33,7 +33,7 @@ export default async function CartPage() {
           My Cart
         </h1>
         <p className="mt-2 text-sm text-ink-muted">
-          {cart.length} item{cart.length !== 1 ? "s" : ""} · Session stored in HttpOnly cookie
+          {cart.length} item{cart.length !== 1 ? "s" : ""} in your cart
         </p>
       </div>
 
