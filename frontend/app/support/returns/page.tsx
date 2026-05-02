@@ -21,7 +21,7 @@ const NOT_ELIGIBLE = [
 ];
 
 const STEPS = [
-  { icon: Package, step: "1", title: "Initiate Return", desc: "Go to Account → Orders, find your order and click 'Request Return'. Select the item(s) and reason." },
+  { icon: Package, step: "1", title: "Initiate Return", desc: 'Go to Account → Orders, find your order and click "Request Return". Select the item(s) and reason.' },
   { icon: RotateCcw, step: "2", title: "Pack & Ship", desc: "Use the prepaid return label we email you. Pack the item securely in its original packaging if possible." },
   { icon: Clock, step: "3", title: "Processing", desc: "Once we receive your return it is inspected within 2 business days. We'll email you the result." },
   { icon: CheckCircle, step: "4", title: "Refund Issued", desc: "Approved refunds are processed within 5–7 business days back to your original payment method." },
