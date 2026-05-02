@@ -18,7 +18,8 @@ import type { NextRequest } from "next/server";
  */
 
 const SESSION_COOKIE = "session";
-const ADMIN_COOKIE   = "mernshop_admin";
+const ACCESS_COOKIE = "accessToken";
+const ADMIN_COOKIE = "mernshop_admin";
 
 const PUBLIC_PATHS = [
   "/admin/login",
@@ -38,8 +39,8 @@ export function middleware(request: NextRequest) {
 
   if (isPublic(pathname)) return NextResponse.next();
 
-  const isAdminSession    = !!request.cookies.get(ADMIN_COOKIE);
-  const isCustomerSession = !!request.cookies.get(SESSION_COOKIE);
+  const isAdminSession = !!request.cookies.get(ADMIN_COOKIE);
+  const isCustomerSession = !!request.cookies.get(SESSION_COOKIE) || !!request.cookies.get(ACCESS_COOKIE);
 
   // ── Admin protection ──────────────────────────────────────────────────────
   if (pathname.startsWith("/admin")) {
