@@ -55,6 +55,15 @@ export async function loginAction(
       secure: process.env["NODE_ENV"] === "production",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
+    if (data.data.user.role === "admin") {
+      cookieStore.set("mernshop_admin", "true", {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env["NODE_ENV"] === "production",
+        maxAge: 60 * 60 * 8, // 8 hours — matches adminLoginAction
+      });
+    }
 
     return { success: true, message: "Welcome back!", data: data.data };
   } catch (err) {
