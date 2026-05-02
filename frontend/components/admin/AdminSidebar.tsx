@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   ShoppingBag, LayoutDashboard, Package, Zap,
-  Users, Store, Home, ChevronRight, Shield
+  Users, Store, Home, ChevronRight, X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { useAuthStore } from "@/stores/authStore";
@@ -13,94 +13,63 @@ import { useAuthStore } from "@/stores/authStore";
 type Role = "admin" | "customer";
 
 interface NavItem {
-  href:    string;
-  label:   string;
-  icon:    React.ElementType;
-  exact:   boolean;
-  badge:   string | null;
-  roles:   Role[];
-  tooltip: string;
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  exact: boolean;
+  badge: string | null;
+  roles: Role[];
 }
 
 const NAV_ITEMS: NavItem[] = [
-  {
-    href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true, badge: null,
-    roles: ["admin"],
-    tooltip: "",
-  },
-  {
-    href: "/admin/products", label: "Products", icon: Package, exact: false, badge: null,
-    roles: ["admin"],
-    tooltip: "",
-  },
-  {
-    href: "/admin/orders", label: "Live Orders", icon: Zap, exact: false, badge: "Live",
-    roles: ["admin"],
-    tooltip: "",
-  },
-  {
-    href: "/admin/users", label: "Users", icon: Users, exact: false, badge: null,
-    roles: ["admin"],  // moderators can view; the page hides edit/delete actions
-    tooltip: "",
-  },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true, badge: null, roles: ["admin"] },
+  { href: "/admin/products", label: "Products", icon: Package, exact: false, badge: null, roles: ["admin"] },
+  { href: "/admin/orders", label: "Live Orders", icon: Zap, exact: false, badge: "Live", roles: ["admin"] },
+  { href: "/admin/users", label: "Users", icon: Users, exact: false, badge: null, roles: ["admin"] },
 ];
 
 const STORE_ITEMS = [
-  { href: "/",         label: "Home",       icon: Home  },
+  { href: "/", label: "Home", icon: Home },
   { href: "/products", label: "Storefront", icon: Store },
 ];
 
-// What moderators can and cannot do — shown in the sidebar info block
-const MODERATOR_PERMISSIONS = {
-  can: [
-    "View all orders",
-    "Update order status",
-    "Edit product details",
-    "Delete reviews",
-    "View users list",
-  ],
-  cannot: [
-    "Create or delete products",
-    "Change user roles",
-    "Delete users",
-    "View financial stats",
-  ],
-};
+interface AdminSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
-export function AdminSidebar() {
+export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
-  const user     = useAuthStore((s) => s.user);
-  const role     = (user?.role ?? "admin") as Role;
-  const isMod    = false; // moderator role removed
+  const user = useAuthStore((s) => s.user);
+  const role = (user?.role ?? "admin") as Role;
 
-  return (
+  const SidebarContent = () => (
     <aside className="flex h-full w-[220px] flex-shrink-0 flex-col border-r border-border bg-white dark:border-dark-border dark:bg-dark-surface">
 
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink dark:bg-amber shadow-sm">
-          <ShoppingBag size={15} className="text-white" strokeWidth={2.5} />
-        </div>
-        <div>
-          <p className="font-serif text-sm tracking-tight text-ink dark:text-white">
-            MERN<span className="text-amber">Shop</span>
-          </p>
-          <p className="text-[9px] font-semibold uppercase tracking-widest text-ink-muted">
-            {isMod ? "Moderator" : "Admin Panel"}
-          </p>
-        </div>
-      </div>
-
-      {/* Moderator role badge */}
-      {isMod && (
-        <div className="mx-3 mb-1 flex items-center gap-2 rounded-lg border border-purple-200 bg-purple-50 px-3 py-2 dark:border-purple-500/20 dark:bg-purple-900/10">
-          <Shield size={13} className="flex-shrink-0 text-purple-500" strokeWidth={2} />
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold text-purple-700 dark:text-purple-400">Moderator Access</p>
-            <p className="truncate text-[9px] text-purple-500/70">Limited permissions</p>
+      {/* Logo + mobile close button */}
+      <div className="flex items-center justify-between px-5 py-5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink dark:bg-amber shadow-sm">
+            <ShoppingBag size={15} className="text-white" strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="font-serif text-sm tracking-tight text-ink dark:text-white">
+              MERN<span className="text-amber">Shop</span>
+            </p>
+            <p className="text-[9px] font-semibold uppercase tracking-widest text-ink-muted">
+              Admin Panel
+            </p>
           </div>
         </div>
-      )}
+        {/* Close button — only visible on mobile */}
+        <button
+          onClick={onClose}
+          className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-muted hover:bg-surface-raised hover:text-ink dark:hover:bg-dark-surface-2 dark:hover:text-white md:hidden"
+          aria-label="Close sidebar"
+        >
+          <X size={15} />
+        </button>
+      </div>
 
       <div className="mx-4 h-px bg-border dark:bg-dark-border" />
 
@@ -161,28 +130,6 @@ export function AdminSidebar() {
             </li>
           ))}
         </ul>
-
-        {/* Moderator permissions info box */}
-        {isMod && (
-          <div className="mt-4 rounded-lg border border-border bg-surface-raised/60 p-3 dark:border-dark-border dark:bg-dark-surface-2/40">
-            <p className="mb-2 text-[9px] font-bold uppercase tracking-widest text-ink-muted">Your Access</p>
-            <div className="space-y-1">
-              {MODERATOR_PERMISSIONS.can.map((item) => (
-                <p key={item} className="flex items-center gap-1.5 text-[10px] text-green-600 dark:text-green-400">
-                  <span className="text-[8px]">✓</span> {item}
-                </p>
-              ))}
-            </div>
-            <div className="my-2 h-px bg-border dark:bg-dark-border" />
-            <div className="space-y-1">
-              {MODERATOR_PERMISSIONS.cannot.map((item) => (
-                <p key={item} className="flex items-center gap-1.5 text-[10px] text-ink-muted/60 line-through">
-                  <span className="text-[8px] no-underline">✗</span> {item}
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
       </nav>
 
       {/* Footer */}
@@ -192,5 +139,34 @@ export function AdminSidebar() {
         <ThemeToggle />
       </div>
     </aside>
+  );
+
+  return (
+    <>
+      {/* ── Desktop: always-visible sidebar ─────────────────────────────────── */}
+      <div className="hidden md:flex">
+        <SidebarContent />
+      </div>
+
+      {/* ── Mobile: slide-in drawer with backdrop ────────────────────────────── */}
+      {/* Backdrop */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 md:hidden",
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      {/* Drawer */}
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 transition-transform duration-300 ease-in-out md:hidden",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <SidebarContent />
+      </div>
+    </>
   );
 }
