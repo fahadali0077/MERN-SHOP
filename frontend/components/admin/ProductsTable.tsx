@@ -87,7 +87,9 @@ function ProductModal({
         description: form.description ?? "",
       };
       if (form.badge) body["badge"] = form.badge;
-      if (form.originalPrice) body["originalPrice"] = Number(form.originalPrice);
+      if (form.originalPrice != null && !isNaN(form.originalPrice) && form.originalPrice > 0) {
+        body["originalPrice"] = form.originalPrice;
+      }
 
       const res = await fetch(url, {
         method,
@@ -153,13 +155,13 @@ function ProductModal({
 
             <div className="grid grid-cols-3 gap-4">
               <Field label="Price ($)">
-                <input type="number" min="0" step="0.01" className={inputCls} value={form.price} onChange={(e) => set("price", e.target.value)} />
+                <input type="number" min="0" step="0.01" className={inputCls} value={form.price} onChange={(e) => set("price", e.target.value === "" ? 0 : parseFloat(e.target.value))} />
               </Field>
               <Field label="Original Price ($)">
-                <input type="number" min="0" step="0.01" className={inputCls} value={form.originalPrice ?? ""} onChange={(e) => set("originalPrice", e.target.value || null)} placeholder="Optional" />
+                <input type="number" min="0" step="0.01" className={inputCls} value={form.originalPrice ?? ""} onChange={(e) => set("originalPrice", e.target.value === "" ? null : parseFloat(e.target.value))} placeholder="Optional" />
               </Field>
               <Field label="Stock">
-                <input type="number" min="0" step="1" className={inputCls} value={form.stock} onChange={(e) => set("stock", e.target.value)} />
+                <input type="number" min="0" step="1" className={inputCls} value={form.stock} onChange={(e) => set("stock", e.target.value === "" ? 0 : parseInt(e.target.value, 10))} />
               </Field>
             </div>
 
