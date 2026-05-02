@@ -77,9 +77,9 @@ function CustomerMenu({
             {/* Menu items */}
             <div className="p-1.5">
               {[
-                { href: "/account",         icon: User,    label: "My Account"  },
-                { href: "/account/orders",  icon: Package, label: "My Orders"   },
-                { href: "/wishlist",        icon: Heart,   label: "Wishlist"    },
+                { href: "/account", icon: User, label: "My Account" },
+                { href: "/account/orders", icon: Package, label: "My Orders" },
+                { href: "/wishlist", icon: Heart, label: "Wishlist" },
               ].map(({ href, icon: Icon, label }) => (
                 <Link
                   key={href}
@@ -176,10 +176,10 @@ function AdminMenu({
 
             <div className="p-1.5">
               {[
-                { href: "/admin",          icon: LayoutDashboard, label: "Dashboard"    },
-                { href: "/admin/products", icon: Package,          label: "Products"    },
-                { href: "/admin/orders",   icon: ShoppingBag,      label: "Orders"      },
-                { href: "/admin/users",    icon: User,             label: "Users"       },
+                { href: "/admin", icon: LayoutDashboard, label: "Dashboard" },
+                { href: "/admin/products", icon: Package, label: "Products" },
+                { href: "/admin/orders", icon: ShoppingBag, label: "Orders" },
+                { href: "/admin/users", icon: User, label: "Users" },
               ].map(({ href, icon: Icon, label }) => (
                 <Link
                   key={href}
@@ -211,13 +211,13 @@ function AdminMenu({
 
 // ── Main Navbar ────────────────────────────────────────────────────────────
 export function Navbar() {
-  const user    = useAuthStore((s) => s.user);
-  const logout  = useAuthStore((s) => s.logout);
-  const isAuth  = useAuthStore((s) => s.isAuthenticated);
-  const router  = useRouter();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const isAuth = useAuthStore((s) => s.isAuthenticated);
+  const router = useRouter();
 
-  const [mounted,          setMounted]          = useState(false);
-  const [elevated,         setElevated]         = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [elevated, setElevated] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
@@ -229,7 +229,7 @@ export function Navbar() {
 
   const wishlistCount = useWishlistStore((s) => s.count());
 
-  const isAdmin    = isAuth && user?.role === "admin";
+  const isAdmin = isAuth && user?.role === "admin";
   const isCustomer = isAuth && user?.role !== "admin";
 
   const confirmSignOut = () => {
@@ -345,7 +345,7 @@ export function Navbar() {
             {/* Cart — customers + guests only */}
             {(!mounted || !isAdmin) && <CartButton />}
 
-            <MobileMenu />
+            <MobileMenu isLoggedIn={isAuth} />
           </div>
         </div>
       </header>

@@ -7,18 +7,31 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const LINKS = [
-  { href: "/",              label: "Home"     },
-  { href: "/products",      label: "Shop"     },
-  { href: "/cart",          label: "Cart"     },
-  { href: "/account",       label: "Account"  },
-  { href: "/auth/login",    label: "Sign In"  },
+const BASE_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/products", label: "Shop" },
+  { href: "/cart", label: "Cart" },
+];
+
+const AUTH_LINKS = [
+  { href: "/account", label: "Account" },
+  { href: "/account/orders", label: "My Orders" },
+];
+
+const GUEST_LINKS = [
+  { href: "/auth/login", label: "Sign In" },
   { href: "/auth/register", label: "Register" },
 ];
 
-export function MobileMenu() {
+interface MobileMenuProps {
+  isLoggedIn: boolean;
+}
+
+export function MobileMenu({ isLoggedIn }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+
+  const links = [...BASE_LINKS, ...(isLoggedIn ? AUTH_LINKS : GUEST_LINKS)];
 
   return (
     <div className="md:hidden">
@@ -51,7 +64,7 @@ export function MobileMenu() {
               aria-label="Mobile navigation"
             >
               <div className="p-2">
-                {LINKS.map(({ href, label }) => {
+                {links.map(({ href, label }) => {
                   const active = pathname === href;
                   return (
                     <Link
