@@ -6,12 +6,14 @@ import * as ctrl from "../controllers/authController.js";
 
 const router = Router();
 
-router.post("/register",        validate(RegisterSchema), ctrl.register);
-router.post("/login",           validate(LoginSchema),    ctrl.login);
-router.post("/refresh",         ctrl.refresh);
-router.post("/logout",          ctrl.logout);
-router.get("/me",               protect, ctrl.getMe);
+router.post("/register", validate(RegisterSchema), ctrl.register);
+router.post("/login", validate(LoginSchema), ctrl.login);
+router.post("/refresh", ctrl.refresh);
+router.post("/logout", ctrl.logout);
+router.get("/me", protect, ctrl.getMe);
+router.patch("/me", protect, ctrl.updateMe);
+router.post("/change-password", protect, ctrl.changePassword);
 router.post("/forgot-password", ctrl.forgotPassword);
-router.post("/reset-password",  ctrl.resetPassword);
+router.post("/reset-password", ctrl.resetPassword);
 
 export default router;
