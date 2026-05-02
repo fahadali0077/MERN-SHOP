@@ -30,8 +30,23 @@ const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: { su
 app.use("/api/", limiter);
 app.use("/api/v1/auth/", authLimiter);
 
-const allowedOrigins = [process.env["FRONTEND_URL"] ?? "http://localhost:3000", "http://localhost:3000", "http://localhost:3001"];
-app.use(cors({ origin: (o, cb) => { if (!o || allowedOrigins.includes(o)) return cb(null, true); cb(new Error("CORS")); }, credentials: true, methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type", "Authorization"] }));
+const allowedOrigins = [
+  process.env["FRONTEND_URL"] ?? "http://localhost:3000",
+  "http://localhost:3000",
+  "http://localhost:3001",
+  ...(process.env["FRONTEND_URL_ADDITIONAL"] ? [process.env["FRONTEND_URL_ADDITIONAL"]] : []),
+].filter(Boolean) as string[];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (o, cb) => { if (!o || allowedOrigins.includes(o)) return cb(null, true); cb(new Error("CORS")); },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+// Handle preflight (OPTIONS) for ALL routes — must come before any route definitions
+app.options("*", cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
