@@ -23,11 +23,11 @@ const ACCOUNT_USER = [
 ];
 
 const SUPPORT_LINKS = [
-  { href: "#", label: "Help Center" },
-  { href: "#", label: "Returns & Refunds" },
-  { href: "#", label: "Shipping Info" },
-  { href: "#", label: "Size Guide" },
-  { href: "#", label: "Contact Us" },
+  { href: "/support/help-center", label: "Help Center" },
+  { href: "/support/returns", label: "Returns & Refunds" },
+  { href: "/support/shipping", label: "Shipping Info" },
+  { href: "/support/size-guide", label: "Size Guide" },
+  { href: "/support/contact", label: "Contact Us" },
 ];
 
 const TRUST_BADGES = [
@@ -162,10 +162,14 @@ export async function Footer() {
           </div>
 
           <div className="flex items-center gap-4">
-            {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((label) => (
+            {[
+              { label: "Privacy Policy", href: "/legal/privacy" },
+              { label: "Terms of Service", href: "/legal/terms" },
+              { label: "Cookie Policy", href: "/legal/cookies" },
+            ].map(({ label, href }) => (
               <Link
                 key={label}
-                href="#"
+                href={href}
                 className="text-xs text-ink-muted transition-colors hover:text-ink dark:hover:text-white"
               >
                 {label}
