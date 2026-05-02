@@ -101,7 +101,7 @@ export default function AddressesPage() {
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border">
+          <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
             <ArrowLeft size={16} />
           </Link>
           <div>
@@ -111,7 +111,7 @@ export default function AddressesPage() {
         </div>
         {!showForm && (
           <button onClick={() => { setShowForm(true); setEditId(null); setForm(emptyForm()); setErrors({}); }}
-            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+            className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-600">
             <Plus size={15} /> Add Address
           </button>
         )}
@@ -150,11 +150,11 @@ export default function AddressesPage() {
           </div>
 
           <div className="mt-5 flex gap-3">
-            <button onClick={handleSave} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
+            <button onClick={handleSave} className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-600">
               <Check size={15} /> {editId ? "Update" : "Save"} Address
             </button>
             <button onClick={() => { setShowForm(false); setEditId(null); setErrors({}); }}
-              className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium hover:bg-surface-raised dark:border-dark-border">
+              className="rounded-xl border border-border px-5 py-2.5 text-sm font-medium hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
               Cancel
             </button>
           </div>

@@ -94,7 +94,7 @@ export default function OrdersPage() {
           </div>
           <h3 className="font-semibold text-ink dark:text-white">No orders yet</h3>
           <p className="mt-1 text-sm text-ink-muted">Your placed orders will appear here</p>
-          <Link href="/products" className="mt-5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90">
+          <Link href="/products" className="mt-5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-600">
             Browse Products
           </Link>
         </div>

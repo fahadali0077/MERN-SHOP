@@ -103,6 +103,16 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
   res.json({ success: true, message: "Password changed successfully" });
 });
 
+// ── DELETE /api/v1/auth/me ────────────────────────────────────────────────────
+export const deleteMe = asyncHandler(async (req: Request, res: Response) => {
+  const user = await User.findByIdAndDelete(req.user!.userId);
+  if (!user) throw new AppError("User not found", 404);
+
+  // Clear the refresh-token cookie too
+  res.clearCookie("refreshToken");
+  res.json({ success: true, message: "Account deleted successfully" });
+});
+
 // ── POST /api/v1/auth/forgot-password ────────────────────────────────────────
 export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body as { email: string };

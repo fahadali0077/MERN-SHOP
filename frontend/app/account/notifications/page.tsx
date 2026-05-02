@@ -93,7 +93,7 @@ export default function NotificationsPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-center gap-3">
-        <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border">
+        <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
           <ArrowLeft size={16} />
         </Link>
         <div>
@@ -109,11 +109,11 @@ export default function NotificationsPage() {
 
       <div className="mt-6 flex items-center gap-3">
         <button onClick={handleSave}
-          className={`rounded-xl px-6 py-2.5 text-sm font-semibold text-white transition-all ${saved ? "bg-green-500" : "bg-primary hover:bg-primary/90"}`}>
+          className={`rounded-xl px-6 py-2.5 text-sm font-semibold text-white transition-all ${saved ? "bg-green-500" : "bg-primary hover:bg-primary-600"}`}>
           {saved ? "✓ Saved!" : "Save Preferences"}
         </button>
         <button onClick={() => { setPrefs(DEFAULTS); setSaved(false); }}
-          className="rounded-xl border border-border px-6 py-2.5 text-sm font-medium hover:bg-surface-raised dark:border-dark-border">
+          className="rounded-xl border border-border px-6 py-2.5 text-sm font-medium hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
           Reset to defaults
         </button>
       </div>

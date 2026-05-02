@@ -81,7 +81,7 @@ export default function SecurityPage() {
   return (
     <div className="mx-auto max-w-lg">
       <div className="mb-6 flex items-center gap-3">
-        <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border">
+        <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
           <ArrowLeft size={16} />
         </Link>
         <div>
@@ -124,7 +124,7 @@ export default function SecurityPage() {
           )}
 
           <button onClick={() => { void handleSubmit(); }} disabled={status === "loading"}
-            className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60">
+            className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-60">
             {status === "loading" ? "Updating..." : "Update Password"}
           </button>
         </div>

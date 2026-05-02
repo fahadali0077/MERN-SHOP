@@ -58,6 +58,19 @@ export default function SettingsPage() {
 
   const isDirty = form.name !== (user?.name ?? "") || form.email !== (user?.email ?? "");
 
+  const handleDeleteAccount = async () => {
+    setShowDeleteDialog(false);
+    try {
+      await fetch(`${API_URL}/api/v1/auth/me`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+    } catch { /* ignore — clear local state regardless */ }
+    logout();
+    toast.success("Account deleted", "Sorry to see you go.");
+    router.push("/");
+  };
+
   return (
     <div className="mx-auto max-w-lg">
       <ConfirmDialog
@@ -67,17 +80,12 @@ export default function SettingsPage() {
         confirmLabel="Yes, delete account"
         cancelLabel="Keep my account"
         variant="danger"
-        onConfirm={() => {
-          setShowDeleteDialog(false);
-          logout();
-          toast.success("Account deleted", "Sorry to see you go.");
-          router.push("/");
-        }}
+        onConfirm={() => { void handleDeleteAccount(); }}
         onCancel={() => setShowDeleteDialog(false)}
       />
 
       <div className="mb-6 flex items-center gap-3">
-        <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border">
+        <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
           <ArrowLeft size={16} />
         </Link>
         <div>
@@ -132,7 +140,7 @@ export default function SettingsPage() {
           )}
 
           <button onClick={() => { void handleSave(); }} disabled={!isDirty || status === "loading"}
-            className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50">
+            className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-50">
             <Save size={14} /> {status === "loading" ? "Saving..." : "Save Changes"}
           </button>
         </div>
