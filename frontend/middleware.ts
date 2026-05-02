@@ -2,29 +2,24 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * middleware.ts — Edge middleware running before every request.
+ * middleware.ts
+ *
+ * Single login page at /auth/login handles everyone.
+ * Role is read from the "session" HttpOnly cookie set by loginAction.
  *
  * PROTECTED ROUTES:
- *   /admin/**      → requires mernshop_admin cookie (set on /admin/login)
- *   /checkout      → requires session cookie; admin blocked → redirected to /admin
- *   /cart          → admin blocked → redirected to /admin
- *   /account       → requires session cookie
+ *   /admin/**   → requires session with role === "admin"
+ *   /account    → requires any session
+ *   /checkout   → requires non-admin session
  *
  * ALWAYS PUBLIC:
- *   /admin/login   → never redirected (would cause infinite loop)
- *   /auth/login    → never redirected
- *   /auth/register → never redirected
- *   /api/**        → never redirected
+ *   /auth/**  /api/**  /_next/**
  */
 
 const SESSION_COOKIE = "session";
-const ACCESS_COOKIE = "accessToken";
-const ADMIN_COOKIE = "mernshop_admin";
 
 const PUBLIC_PATHS = [
-  "/admin/login",
-  "/auth/login",
-  "/auth/register",
+  "/auth/",
   "/api/",
   "/_next/",
   "/favicon",
@@ -34,37 +29,45 @@ function isPublic(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 }
 
+function getSessionRole(request: NextRequest): string | null {
+  const raw = request.cookies.get(SESSION_COOKIE)?.value;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(decodeURIComponent(raw)) as { role?: string };
+    return parsed.role ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isPublic(pathname)) return NextResponse.next();
 
-  const isAdminSession = !!request.cookies.get(ADMIN_COOKIE);
-  const isCustomerSession = !!request.cookies.get(SESSION_COOKIE) || !!request.cookies.get(ACCESS_COOKIE);
+  const role = getSessionRole(request);
+  const isAdmin = role === "admin";
+  const isLoggedIn = role !== null;
 
-  // ── Admin protection ──────────────────────────────────────────────────────
+  // ── Admin routes ───────────────────────────────────────────────────────────
   if (pathname.startsWith("/admin")) {
-    if (!isAdminSession) {
-      const url = new URL("/admin/login", request.url);
+    if (!isAdmin) {
+      const url = new URL("/auth/login", request.url);
       url.searchParams.set("from", pathname);
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
   }
 
-  // ── Block admin from customer-only pages ──────────────────────────────────
-  // Admin should never be shopping — redirect them back to their dashboard
+  // ── Block admin from customer-only pages ───────────────────────────────────
   const CUSTOMER_ONLY = ["/cart", "/checkout", "/wishlist"];
-  if (isAdminSession && CUSTOMER_ONLY.some((p) => pathname.startsWith(p))) {
+  if (isAdmin && CUSTOMER_ONLY.some((p) => pathname.startsWith(p))) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
-  // ── Customer session protection ───────────────────────────────────────────
-  if (
-    pathname.startsWith("/checkout") ||
-    pathname.startsWith("/account")
-  ) {
-    if (!isCustomerSession) {
+  // ── Protected customer pages ───────────────────────────────────────────────
+  if (pathname.startsWith("/checkout") || pathname.startsWith("/account")) {
+    if (!isLoggedIn) {
       const url = new URL("/auth/login", request.url);
       url.searchParams.set("from", pathname);
       return NextResponse.redirect(url);

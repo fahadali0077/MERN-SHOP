@@ -1,16 +1,11 @@
 "use server";
 
-/**
- * MERN-III Module 4 — app/actions/auth.ts
- * Replaces mock cookie auth with real JWT calls to the Express backend.
- */
-
 import { cookies } from "next/headers";
 import type { ActionResult } from "@/types";
 
 const API = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
-// ── Customer login — calls POST /api/v1/auth/login ────────────────────────────
+// ── Customer / Admin login — single endpoint, role-based cookie ───────────────
 export async function loginAction(
   email: string,
   password: string
@@ -34,16 +29,16 @@ export async function loginAction(
 
     const cookieStore = await cookies();
 
-    // Store access token in HttpOnly cookie for middleware to read
+    // Access token (short-lived, 15 min)
     cookieStore.set("accessToken", data.data.accessToken, {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
       secure: process.env["NODE_ENV"] === "production",
-      maxAge: 60 * 15, // 15 minutes (matches JWT expiry)
+      maxAge: 60 * 15,
     });
 
-    // Keep session cookie so middleware can protect routes
+    // Session cookie — role is read here by middleware to protect /admin
     cookieStore.set("session", JSON.stringify({
       name: data.data.user.name,
       email: data.data.user.email,
@@ -55,15 +50,6 @@ export async function loginAction(
       secure: process.env["NODE_ENV"] === "production",
       maxAge: 60 * 60 * 24 * 7, // 7 days
     });
-    if (data.data.user.role === "admin") {
-      cookieStore.set("mernshop_admin", "true", {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env["NODE_ENV"] === "production",
-        maxAge: 60 * 60 * 8, // 8 hours — matches adminLoginAction
-      });
-    }
 
     return { success: true, message: "Welcome back!", data: data.data };
   } catch (err) {
@@ -72,7 +58,7 @@ export async function loginAction(
   }
 }
 
-// ── Customer register — calls POST /api/v1/auth/register ─────────────────────
+// ── Register ──────────────────────────────────────────────────────────────────
 export async function registerAction(
   name: string,
   email: string,
@@ -109,6 +95,7 @@ export async function registerAction(
       maxAge: 60 * 15,
     });
     cookieStore.set("session", JSON.stringify({
+      name: data.data.user.name,
       email: data.data.user.email,
       role: data.data.user.role,
     }), {
@@ -126,12 +113,10 @@ export async function registerAction(
   }
 }
 
-// ── Customer logout — calls POST /api/v1/auth/logout ─────────────────────────
+// ── Logout ────────────────────────────────────────────────────────────────────
 export async function logoutAction(): Promise<ActionResult> {
   try {
-    await fetch(`${API}/api/v1/auth/logout`, {
-      method: "POST",
-    });
+    await fetch(`${API}/api/v1/auth/logout`, { method: "POST" });
 
     const cookieStore = await cookies();
     cookieStore.delete("session");
@@ -145,64 +130,36 @@ export async function logoutAction(): Promise<ActionResult> {
   }
 }
 
-// ── Admin login — calls POST /api/v1/auth/login with admin role check ─────────
+// ── Kept for backwards compatibility — now just calls loginAction ─────────────
 export async function adminLoginAction(
   email: string,
   password: string
 ): Promise<ActionResult<{ accessToken: string; user: { id: string; name: string; email: string; role: string; createdAt: string } }>> {
-  try {
-    const res = await fetch(`${API}/api/v1/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+  const result = await loginAction(email, password);
 
-    const data = await res.json() as {
-      success: boolean;
-      data?: { accessToken: string; user: { id: string; name: string; email: string; role: string; createdAt: string } };
-      error?: string;
-    };
-
-    if (!data.success || !data.data) {
-      return { success: false, message: data.error ?? "Login failed" };
-    }
-
-    if (data.data.user.role !== "admin") {
-      return { success: false, message: "Access denied. Admin role required." };
-    }
-
-    const cookieStore = await cookies();
-    cookieStore.set("mernshop_admin", "true", {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      secure: process.env["NODE_ENV"] === "production",
-      maxAge: 60 * 60 * 8, // 8 hours
-    });
-    cookieStore.set("accessToken", data.data.accessToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      secure: process.env["NODE_ENV"] === "production",
-      maxAge: 60 * 15,
-    });
-
-    return { success: true, message: "Welcome, Admin!", data: { accessToken: data.data.accessToken, user: data.data.user } };
-  } catch (err) {
-    console.error("[adminLoginAction]", err);
-    return { success: false, message: "Login failed." };
+  if (!result.success || !result.data) {
+    return { success: false, message: result.message ?? "Login failed" };
   }
+
+  if (result.data.user.role !== "admin") {
+    return { success: false, message: "Access denied. Admin role required." };
+  }
+
+  return {
+    success: true,
+    message: "Welcome, Admin!",
+    data: {
+      accessToken: result.data.accessToken,
+      user: {
+        id: "",
+        createdAt: "",
+        ...result.data.user,
+      },
+    },
+  };
 }
 
 // ── Admin logout ──────────────────────────────────────────────────────────────
 export async function adminLogoutAction(): Promise<ActionResult> {
-  try {
-    const cookieStore = await cookies();
-    cookieStore.delete("mernshop_admin");
-    cookieStore.delete("accessToken");
-    return { success: true, message: "Logged out." };
-  } catch (err) {
-    console.error("[adminLogoutAction]", err);
-    return { success: false, message: "Logout failed." };
-  }
+  return logoutAction();
 }
