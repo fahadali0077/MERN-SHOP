@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,16 +16,16 @@ import type { User } from "@/types";
 import { toast } from "@/stores/toastStore";
 
 const LoginSchema = z.object({
-  email:    z.string().email("Valid email required"),
+  email: z.string().email("Valid email required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 type LoginValues = z.infer<typeof LoginSchema>;
 
 export function LoginForm() {
-  const [error, setError]               = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const setAuth = useAuthStore((s) => s.setAuth);
-  const router  = useRouter();
+  const router = useRouter();
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
@@ -35,7 +36,7 @@ export function LoginForm() {
   useEffect(() => {
     const t = setTimeout(() => form.reset({ email: "", password: "" }), 50);
     return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onSubmit = async (values: LoginValues) => {
@@ -91,7 +92,16 @@ export function LoginForm() {
 
         <FormField control={form.control} name="password" render={({ field }) => (
           <FormItem>
-            <FormLabel>Password</FormLabel>
+            <div className="flex items-center justify-between">
+              <FormLabel>Password</FormLabel>
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs font-medium text-amber hover:underline"
+                tabIndex={-1}
+              >
+                Forgot password?
+              </Link>
+            </div>
             <FormControl>
               <div className="relative">
                 <Input

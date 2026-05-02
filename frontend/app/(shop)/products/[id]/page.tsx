@@ -9,6 +9,9 @@ import { StarRating } from "@/components/products/StarRating";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { ImageGallery } from "@/components/products/ImageGallery";
 import { WishlistButton } from "@/components/wishlist/WishlistButton";
+import { ReviewsSection } from "@/components/products/ReviewsSection";
+import { fetchReviews } from "@/app/actions/reviews";
+import { getSessionUser } from "@/lib/session";
 
 export async function generateStaticParams() {
   const ids = await fetchProductIds();
@@ -24,13 +27,17 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 const BADGE_STYLES: Record<string, string> = {
   Sale: "bg-amber text-white",
-  New:  "bg-ink text-white",
-  Hot:  "bg-red-500 text-white",
+  New: "bg-ink text-white",
+  Hot: "bg-red-500 text-white",
 };
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = await fetchProductById(id);
+  const [product, reviews, sessionUser] = await Promise.all([
+    fetchProductById(id),
+    fetchReviews(id),
+    getSessionUser(),
+  ]);
   if (!product) notFound();
 
   const discount = product.originalPrice != null
@@ -134,6 +141,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           />
         </div>
       </div>
+
+      {/* Reviews */}
+      <ReviewsSection
+        productId={id}
+        initialReviews={reviews}
+        isAuthenticated={!!sessionUser}
+        isAdmin={sessionUser?.role === "admin"}
+      />
     </div>
   );
 }
