@@ -1,1 +1,16 @@
-{"name":"Anker PowerCore 26800 Portable Charger","price":55.99,"image":"https://picsum.photos/seed/prod007/600/600","rating":4.6,"reviewCount":6723,"category":"Electronics","description":"26800mAh capacity. Charges iPhone 15 up to 6.5 times. Dual USB-C and USB-A ports.","stock":120}
+{
+    "name": "Nike Air Max 270 Sneakers",
+    "price": 129.99,
+    "originalPrice": 150.0,
+    "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
+    "images": [
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500",
+        "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?w=500"
+    ],
+    "rating": 4.6,
+    "reviewCount": 4521,
+    "category": "Fashion",
+    "badge": "Sale",
+    "description": "Inspired by Air Max icons of the past, the Nike Air Max 270 delivers a fresh, modern look with a large Air unit underfoot.",
+    "stock": 80
+}

@@ -1,1 +1,13 @@
-{"name":"Garmin Forerunner 965 GPS Running Watch","price":599.99,"originalPrice":699.99,"image":"https://picsum.photos/seed/prod022/600/600","rating":4.8,"reviewCount":1432,"category":"Sports","badge":"Sale","description":"AMOLED display. Up to 31 days battery in smartwatch mode. Daily Suggested Workouts. Training Readiness score. Music storage.","stock":30}
+{
+    "name": "Yoga Mat Premium Non-Slip",
+    "price": 49.99,
+    "image": "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=500",
+    "images": [
+        "https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=500"
+    ],
+    "rating": 4.6,
+    "reviewCount": 7890,
+    "category": "Sports",
+    "description": "Extra thick 6mm yoga mat with alignment lines. Non-slip surface, eco-friendly TPE material, includes carrying strap.",
+    "stock": 100
+}

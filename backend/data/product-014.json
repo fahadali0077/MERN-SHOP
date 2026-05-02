@@ -1,1 +1,15 @@
-{"name":"Vitamix 5200 Professional Blender","price":449.99,"originalPrice":599.99,"image":"https://picsum.photos/seed/prod014/600/600","rating":4.8,"reviewCount":2897,"category":"Home & Kitchen","badge":"Sale","description":"Variable speed control. Hot soups and cold smoothies in the same container. Aircraft-grade stainless steel blades. 10-year warranty.","stock":35}
+{
+    "name": "Nespresso Vertuo Coffee Machine",
+    "price": 159.99,
+    "originalPrice": 199.99,
+    "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500",
+    "images": [
+        "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500"
+    ],
+    "rating": 4.6,
+    "reviewCount": 5432,
+    "category": "Home & Kitchen",
+    "badge": "Sale",
+    "description": "Brew single-serve coffee and espresso drinks at the touch of a button. Centrifusion technology for perfect crema every time.",
+    "stock": 40
+}

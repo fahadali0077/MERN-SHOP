@@ -1,1 +1,14 @@
-{"name":"Atomic Habits — James Clear","price":14.99,"image":"https://picsum.photos/seed/prod018/600/600","rating":4.9,"reviewCount":18900,"category":"Books","badge":"Hot","description":"A groundbreaking book about building good habits and breaking bad ones. Over 15 million copies sold worldwide.","stock":500}
+{
+    "name": "Deep Work by Cal Newport",
+    "price": 15.99,
+    "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500",
+    "images": [
+        "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500"
+    ],
+    "rating": 4.6,
+    "reviewCount": 8901,
+    "category": "Books",
+    "badge": "New",
+    "description": "Rules for focused success in a distracted world. A must-read for anyone seeking a competitive advantage in the modern economy.",
+    "stock": 160
+}
