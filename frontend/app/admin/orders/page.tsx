@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/authStore";
 import { useSocket } from "@/hooks/useSocket";
@@ -41,13 +42,34 @@ function StatusBadge({ status, orderId, token, onUpdated }: {
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const btnRef = useRef<HTMLButtonElement>(null);
 
+  // Close on outside click
   useEffect(() => {
-    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    if (!open) return;
+    const h = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (btnRef.current && !btnRef.current.contains(target)) setOpen(false);
+    };
     document.addEventListener("mousedown", h);
     return () => document.removeEventListener("mousedown", h);
-  }, []);
+  }, [open]);
+
+  // Close on scroll so dropdown doesn't float away
+  useEffect(() => {
+    if (!open) return;
+    const h = () => setOpen(false);
+    window.addEventListener("scroll", h, true);
+    return () => window.removeEventListener("scroll", h, true);
+  }, [open]);
+
+  const handleOpen = () => {
+    if (!btnRef.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    setCoords({ top: rect.bottom + 6, left: rect.left });
+    setOpen((v) => !v);
+  };
 
   const update = async (newStatus: OrderStatus) => {
     setLoading(true); setOpen(false);
@@ -66,10 +88,19 @@ function StatusBadge({ status, orderId, token, onUpdated }: {
     } finally { setLoading(false); }
   };
 
+  const DOT: Record<OrderStatus, string> = {
+    pending: "bg-amber-400",
+    processing: "bg-blue-500",
+    shipped: "bg-purple-500",
+    delivered: "bg-green-500",
+    cancelled: "bg-red-500",
+  };
+
   return (
-    <div ref={ref} className="relative">
+    <>
       <button
-        onClick={() => setOpen((v) => !v)}
+        ref={btnRef}
+        onClick={handleOpen}
         disabled={loading}
         className={cn(
           "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold capitalize transition-all hover:opacity-80 disabled:opacity-50",
@@ -81,27 +112,30 @@ function StatusBadge({ status, orderId, token, onUpdated }: {
         <span className="text-[9px] opacity-60">▾</span>
       </button>
 
-      {open && (
+      {open && typeof document !== "undefined" && createPortal(
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 z-20 mt-1 w-36 overflow-hidden rounded-xl border border-border bg-white shadow-lg dark:border-dark-border dark:bg-dark-surface">
+          {/* Full-screen backdrop — catches clicks, does NOT block scroll */}
+          <div className="fixed inset-0 z-[9998]" style={{ pointerEvents: "none" }} />
+          <div
+            className="fixed z-[9999] w-44 overflow-hidden rounded-xl border border-border bg-white shadow-2xl dark:border-dark-border dark:bg-dark-surface"
+            style={{ top: coords.top, left: coords.left }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             {STATUS_FLOW.filter((s) => s !== status).map((s) => (
               <button
                 key={s}
                 onClick={() => { void update(s); }}
-                className={cn(
-                  "flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold capitalize transition-colors hover:bg-surface-raised dark:hover:bg-dark-surface-2",
-                  STATUS_STYLES[s],
-                  "bg-transparent border-0",
-                )}
+                className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-xs font-semibold capitalize text-ink transition-colors hover:bg-surface-raised dark:text-white dark:hover:bg-dark-surface-2"
               >
+                <span className={cn("h-2 w-2 flex-shrink-0 rounded-full", DOT[s])} />
                 {s}
               </button>
             ))}
           </div>
-        </>
+        </>,
+        document.body,
       )}
-    </div>
+    </>
   );
 }
 
