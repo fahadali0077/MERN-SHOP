@@ -301,7 +301,7 @@ CI/CD via GitHub Actions automatically:
 Deploy the `frontend/` directory to Vercel or any platform that supports Next.js. Set `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_SOCKET_URL` to your deployed backend URL.
 
 ---
-
-## 📝 License
-
-MIT
+## 👨‍💻 Author
+**Fahad Ali** — MERN Stack Developer  
+[![GitHub](https://img.shields.io/badge/GitHub-Profile-black?logo=github)](https://github.com/fahadali0077)  
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://www.linkedin.com/in/fahadali-fullstack-dev)
