@@ -50,8 +50,10 @@ export default function SecurityPage() {
     const e: Partial<typeof form> = {};
     if (!form.currentPassword) e.currentPassword = "Required";
     if (form.newPassword.length < 8) e.newPassword = "At least 8 characters";
+    else if (!/[A-Z]/.test(form.newPassword)) e.newPassword = "Must contain an uppercase letter";
+    else if (!/[0-9]/.test(form.newPassword)) e.newPassword = "Must contain a number";
+    else if (form.newPassword === form.currentPassword) e.newPassword = "New password must be different";
     if (form.newPassword !== form.confirmPassword) e.confirmPassword = "Passwords don't match";
-    if (form.newPassword === form.currentPassword) e.newPassword = "New password must be different";
     setErrors(e);
     return Object.keys(e).length === 0;
   };

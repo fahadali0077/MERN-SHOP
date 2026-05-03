@@ -44,6 +44,20 @@ function ResetPasswordForm() {
         defaultValues: { password: "", confirmPassword: "" },
     });
 
+    const password = form.watch("password");
+    const getStrength = (p: string) => {
+        if (!p) return 0;
+        let s = 0;
+        if (p.length >= 8) s++;
+        if (/[A-Z]/.test(p)) s++;
+        if (/[0-9]/.test(p)) s++;
+        if (/[^A-Za-z0-9]/.test(p)) s++;
+        return s;
+    };
+    const strength = getStrength(password);
+    const strengthColors = ["", "bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-green-500"];
+    const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
+
     // No token — invalid link
     if (!token) {
         return (
@@ -154,6 +168,21 @@ function ResetPasswordForm() {
                             </FormItem>
                         )}
                     />
+
+                    {/* Strength meter */}
+                    {password.length > 0 && (
+                        <div className="-mt-2">
+                            <div className="flex gap-1 mb-1">
+                                {[1, 2, 3, 4].map((i) => (
+                                    <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColors[strength] : "bg-border dark:bg-dark-border"}`} />
+                                ))}
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <p className="text-[11px] text-ink-muted">{strengthLabels[strength]}</p>
+                                <p className="text-[11px] text-ink-muted">Min 8 · uppercase · number</p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Confirm password */}
                     <FormField
