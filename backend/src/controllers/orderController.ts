@@ -183,7 +183,12 @@ export const getAllOrders = asyncHandler(async (req: Request, res: Response) => 
   });
 });
 
-// ── PUT /api/v1/orders/:id/status ─────────────────────────────────────────────
+// ── DELETE /api/v1/orders/:id  (admin only) ───────────────────────────────────
+export const deleteOrder = asyncHandler(async (req: Request, res: Response) => {
+  const order = await Order.findByIdAndDelete(req.params["id"]);
+  if (!order) throw new AppError("Order not found", 404);
+  res.json({ success: true, message: "Order deleted successfully" });
+});
 export const updateOrderStatus = asyncHandler(async (req: Request, res: Response) => {
   const { status } = req.body as { status: string };
   const validStatuses = ["pending", "processing", "shipped", "delivered", "cancelled"];

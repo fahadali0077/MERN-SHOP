@@ -7,7 +7,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useSocket } from "@/hooks/useSocket";
 import { toast } from "@/stores/toastStore";
 import { cn } from "@/lib/utils";
-import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Package, Zap, LayoutDashboard } from "lucide-react";
+import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Package, Zap, LayoutDashboard, Trash2 } from "lucide-react";
 
 const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
@@ -186,157 +186,187 @@ export default function AdminOrdersPage() {
     void fetchOrders(1);
   }, [hydrated, fetchOrders]);
 
-  const handleStatusUpdate = (id: string, status: OrderStatus) => {
-    setOrders((prev) => prev.map((o) => o._id === id ? { ...o, status } : o));
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!window.confirm("Delete this order? This cannot be undone.")) return;
+    setDeletingOrderId(orderId);
+    try {
+      const res = await fetch(`${API_URL}/api/v1/orders/${orderId}`, {
+        method: "DELETE",
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
+      const json = await res.json() as { success: boolean; error?: string };
+      if (!json.success) throw new Error(json.error ?? "Delete failed");
+      setOrders((prev) => prev.filter((o) => o._id !== orderId));
+      setTotal((t) => t - 1);
+      toast.success("Order deleted");
+    } catch (err) {
+      toast.error("Failed to delete order", err instanceof Error ? err.message : "Unknown");
+    } finally { setDeletingOrderId(null); }
   };
+  setOrders((prev) => prev.map((o) => o._id === id ? { ...o, status } : o));
+};
 
-  const getCustomer = (user: Order["user"]): string => {
-    if (!user) return "Guest";
-    if (typeof user === "object") return user.name ?? user.email ?? "Customer";
-    return "Customer";
-  };
+const getCustomer = (user: Order["user"]): string => {
+  if (!user) return "Guest";
+  if (typeof user === "object") return user.name ?? user.email ?? "Customer";
+  return "Customer";
+};
 
-  const newOrderIds = new Set(socketOrders.map((o) => o.id));
+const newOrderIds = new Set(socketOrders.map((o) => o.id));
 
-  return (
-    <div className="flex flex-col gap-6 p-6 lg:p-8">
-      {/* Header */}
-      <div className="flex items-end justify-between">
-        <div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/admin"
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-ink-muted hover:border-amber hover:text-amber dark:border-dark-border"
-              aria-label="Back to dashboard"
-            >
-              <LayoutDashboard size={14} />
-            </Link>
-            <h1 className="text-2xl font-bold text-ink dark:text-white">Orders</h1>
-            <span className={cn(
-              "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold",
-              connected ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                : "bg-surface-raised text-ink-muted",
-            )}>
-              <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "animate-pulse bg-green-500" : "bg-ink-muted/40")} />
-              {connected ? "Live" : "Offline"}
+return (
+  <div className="flex flex-col gap-6 p-6 lg:p-8">
+    {/* Header */}
+    <div className="flex items-end justify-between">
+      <div>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-ink-muted hover:border-amber hover:text-amber dark:border-dark-border"
+            aria-label="Back to dashboard"
+          >
+            <LayoutDashboard size={14} />
+          </Link>
+          <h1 className="text-2xl font-bold text-ink dark:text-white">Orders</h1>
+          <span className={cn(
+            "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+            connected ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              : "bg-surface-raised text-ink-muted",
+          )}>
+            <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "animate-pulse bg-green-500" : "bg-ink-muted/40")} />
+            {connected ? "Live" : "Offline"}
+          </span>
+          {socketOrders.length > 0 && (
+            <span className="rounded-full bg-amber-dim px-2 py-0.5 text-[10px] font-bold text-amber">
+              <Zap size={9} className="inline" /> {socketOrders.length} new
             </span>
-            {socketOrders.length > 0 && (
-              <span className="rounded-full bg-amber-dim px-2 py-0.5 text-[10px] font-bold text-amber">
-                <Zap size={9} className="inline" /> {socketOrders.length} new
-              </span>
-            )}
-          </div>
-          <p className="mt-0.5 text-sm text-ink-muted">{total} total orders</p>
+          )}
         </div>
-        <button
-          onClick={() => { void fetchOrders(page); }}
-          disabled={loading}
-          className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-ink-muted hover:border-amber hover:text-amber disabled:opacity-40 dark:border-dark-border"
-        >
-          <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
-        </button>
+        <p className="mt-0.5 text-sm text-ink-muted">{total} total orders</p>
       </div>
-
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-border bg-white dark:border-dark-border dark:bg-dark-surface">
-        {(loading || !hydrated) && (
-          <div className="flex items-center justify-center gap-2 py-20 text-ink-muted">
-            <Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading orders…</span>
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="flex flex-col items-center gap-3 py-20 text-center px-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
-              <span className="text-xl">⚠️</span>
-            </div>
-            <p className="text-sm font-medium text-red-500">{error}</p>
-            {error?.includes("sign in") ? (
-              <a href="/admin/login" className="text-xs font-semibold text-amber underline">Go to Login →</a>
-            ) : (
-              <button onClick={() => { void fetchOrders(1); }} className="text-xs font-semibold text-amber underline">Retry</button>
-            )}
-          </div>
-        )}
-
-        {!loading && !error && orders.length === 0 && (
-          <div className="flex flex-col items-center gap-2 py-20 text-center">
-            <Package size={28} className="text-ink-muted/30" />
-            <p className="text-sm text-ink-muted">No orders yet</p>
-          </div>
-        )}
-
-        {!loading && !error && orders.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-surface-raised/60 dark:border-dark-border dark:bg-dark-surface-2/40">
-                  {["Order ID", "Customer", "Items", "Total", "Status", "Date"].map((h) => (
-                    <th key={h} className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-ink-muted">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map((order, i) => {
-                  const isNew = newOrderIds.has(order._id);
-                  return (
-                    <tr key={order._id} className={cn(
-                      "border-b border-border/50 transition-colors dark:border-dark-border/50",
-                      isNew ? "bg-amber-50/60 dark:bg-amber/5" : i % 2 === 1 ? "bg-surface-raised/20 dark:bg-dark-surface-2/10" : "",
-                      "hover:bg-surface-raised/40 dark:hover:bg-dark-surface-2/30",
-                    )}>
-                      <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-2">
-                          {isNew && <span className="h-1.5 w-1.5 rounded-full bg-amber animate-pulse" />}
-                          <span className="font-mono text-xs font-bold text-ink dark:text-white">
-                            #{order._id.slice(-6).toUpperCase()}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-3.5">
-                        <p className="font-medium text-ink dark:text-white">{getCustomer(order.user)}</p>
-                        {order.shippingAddress?.city && (
-                          <p className="text-xs text-ink-muted">{order.shippingAddress.city}</p>
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5 text-ink-muted">{order.items.length} item{order.items.length !== 1 ? "s" : ""}</td>
-                      <td className="px-5 py-3.5 font-bold tabular-nums text-ink dark:text-white">${order.totalAmount.toFixed(2)}</td>
-                      <td className="px-5 py-3.5">
-                        <StatusBadge
-                          status={order.status}
-                          orderId={order._id}
-                          token={accessToken}
-                          onUpdated={handleStatusUpdate}
-                        />
-                      </td>
-                      <td className="px-5 py-3.5 text-xs text-ink-muted">
-                        {new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {!loading && !error && totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-border px-5 py-3 dark:border-dark-border">
-            <p className="text-xs text-ink-muted">Page {page} of {totalPages} · {total} orders</p>
-            <div className="flex items-center gap-2">
-              <button onClick={() => { void fetchOrders(page - 1); }} disabled={page <= 1}
-                className="flex h-7 w-7 items-center justify-center rounded border border-border text-ink-muted hover:border-amber hover:text-amber disabled:opacity-30 dark:border-dark-border">
-                <ChevronLeft size={13} />
-              </button>
-              <button onClick={() => { void fetchOrders(page + 1); }} disabled={page >= totalPages}
-                className="flex h-7 w-7 items-center justify-center rounded border border-border text-ink-muted hover:border-amber hover:text-amber disabled:opacity-30 dark:border-dark-border">
-                <ChevronRight size={13} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <button
+        onClick={() => { void fetchOrders(page); }}
+        disabled={loading}
+        className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm font-medium text-ink-muted hover:border-amber hover:text-amber disabled:opacity-40 dark:border-dark-border"
+      >
+        <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
+      </button>
     </div>
-  );
+
+    {/* Table */}
+    <div className="overflow-hidden rounded-xl border border-border bg-white dark:border-dark-border dark:bg-dark-surface">
+      {(loading || !hydrated) && (
+        <div className="flex items-center justify-center gap-2 py-20 text-ink-muted">
+          <Loader2 size={18} className="animate-spin" /><span className="text-sm">Loading orders…</span>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="flex flex-col items-center gap-3 py-20 text-center px-6">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+            <span className="text-xl">⚠️</span>
+          </div>
+          <p className="text-sm font-medium text-red-500">{error}</p>
+          {error?.includes("sign in") ? (
+            <a href="/admin/login" className="text-xs font-semibold text-amber underline">Go to Login →</a>
+          ) : (
+            <button onClick={() => { void fetchOrders(1); }} className="text-xs font-semibold text-amber underline">Retry</button>
+          )}
+        </div>
+      )}
+
+      {!loading && !error && orders.length === 0 && (
+        <div className="flex flex-col items-center gap-2 py-20 text-center">
+          <Package size={28} className="text-ink-muted/30" />
+          <p className="text-sm text-ink-muted">No orders yet</p>
+        </div>
+      )}
+
+      {!loading && !error && orders.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-surface-raised/60 dark:border-dark-border dark:bg-dark-surface-2/40">
+                {["Order ID", "Customer", "Items", "Total", "Status", "Date", ""].map((h) => (
+                  <th key={h} className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-ink-muted">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order, i) => {
+                const isNew = newOrderIds.has(order._id);
+                return (
+                  <tr key={order._id} className={cn(
+                    "border-b border-border/50 transition-colors dark:border-dark-border/50",
+                    isNew ? "bg-amber-50/60 dark:bg-amber/5" : i % 2 === 1 ? "bg-surface-raised/20 dark:bg-dark-surface-2/10" : "",
+                    "hover:bg-surface-raised/40 dark:hover:bg-dark-surface-2/30",
+                  )}>
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        {isNew && <span className="h-1.5 w-1.5 rounded-full bg-amber animate-pulse" />}
+                        <span className="font-mono text-xs font-bold text-ink dark:text-white">
+                          #{order._id.slice(-6).toUpperCase()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <p className="font-medium text-ink dark:text-white">{getCustomer(order.user)}</p>
+                      {order.shippingAddress?.city && (
+                        <p className="text-xs text-ink-muted">{order.shippingAddress.city}</p>
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 text-ink-muted">{order.items.length} item{order.items.length !== 1 ? "s" : ""}</td>
+                    <td className="px-5 py-3.5 font-bold tabular-nums text-ink dark:text-white">${order.totalAmount.toFixed(2)}</td>
+                    <td className="px-5 py-3.5">
+                      <StatusBadge
+                        status={order.status}
+                        orderId={order._id}
+                        token={accessToken}
+                        onUpdated={handleStatusUpdate}
+                      />
+                    </td>
+                    <td className="px-5 py-3.5 text-xs text-ink-muted">
+                      {new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </td>
+                    <td className="px-3 py-3.5">
+                      <button
+                        onClick={() => { void handleDeleteOrder(order._id); }}
+                        disabled={deletingOrderId === order._id}
+                        className="flex items-center justify-center rounded-lg border border-red-200 p-1.5 text-red-500 transition-colors hover:bg-red-50 disabled:opacity-40 dark:border-red-900/30 dark:hover:bg-red-900/20"
+                        title="Delete order"
+                      >
+                        {deletingOrderId === order._id
+                          ? <Loader2 size={13} className="animate-spin" />
+                          : <Trash2 size={13} />}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !error && totalPages > 1 && (
+        <div className="flex items-center justify-between border-t border-border px-5 py-3 dark:border-dark-border">
+          <p className="text-xs text-ink-muted">Page {page} of {totalPages} · {total} orders</p>
+          <div className="flex items-center gap-2">
+            <button onClick={() => { void fetchOrders(page - 1); }} disabled={page <= 1}
+              className="flex h-7 w-7 items-center justify-center rounded border border-border text-ink-muted hover:border-amber hover:text-amber disabled:opacity-30 dark:border-dark-border">
+              <ChevronLeft size={13} />
+            </button>
+            <button onClick={() => { void fetchOrders(page + 1); }} disabled={page >= totalPages}
+              className="flex h-7 w-7 items-center justify-center rounded border border-border text-ink-muted hover:border-amber hover:text-amber disabled:opacity-30 dark:border-dark-border">
+              <ChevronRight size={13} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+);
 }

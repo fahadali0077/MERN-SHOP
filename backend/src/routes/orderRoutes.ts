@@ -16,5 +16,6 @@ router.get("/stats", authorize("admin"), ctrl.getOrderStats); // aggregate stats
 router.get("/", authorize("admin"), ctrl.getAllOrders);
 router.get("/:id", ctrl.getOrderById);              // get single order (owner or admin)
 router.put("/:id/status", authorize("admin"), ctrl.updateOrderStatus);
+router.delete("/:id", authorize("admin"), ctrl.deleteOrder);
 
 export default router;
