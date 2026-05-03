@@ -171,7 +171,12 @@ export default function AdminOrdersPage() {
       setTotal(json.pagination?.total ?? json.data.length);
       setPage(p);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load orders");
+      const msg = err instanceof Error ? err.message : "Failed to load orders";
+      if (msg === "Failed to fetch") {
+        setError("Cannot reach the server. The backend may be starting up — please wait a moment and retry.");
+      } else {
+        setError(msg);
+      }
     } finally { setLoading(false); }
   }, [accessToken]);
 
@@ -241,9 +246,16 @@ export default function AdminOrdersPage() {
         )}
 
         {!loading && error && (
-          <div className="flex flex-col items-center gap-3 py-20 text-center">
-            <p className="text-sm text-red-500">{error}</p>
-            <button onClick={() => { void fetchOrders(1); }} className="text-xs font-semibold text-amber underline">Retry</button>
+          <div className="flex flex-col items-center gap-3 py-20 text-center px-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+              <span className="text-xl">⚠️</span>
+            </div>
+            <p className="text-sm font-medium text-red-500">{error}</p>
+            {error?.includes("sign in") ? (
+              <a href="/admin/login" className="text-xs font-semibold text-amber underline">Go to Login →</a>
+            ) : (
+              <button onClick={() => { void fetchOrders(1); }} className="text-xs font-semibold text-amber underline">Retry</button>
+            )}
           </div>
         )}
 

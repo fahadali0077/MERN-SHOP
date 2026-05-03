@@ -23,33 +23,33 @@ interface AdminUser {
 interface Pagination { page: number; limit: number; total: number; pages: number; }
 
 const ROLE_STYLES = {
-  admin:     "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber/10 dark:text-amber-300 dark:border-amber/20",
+  admin: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber/10 dark:text-amber-300 dark:border-amber/20",
   moderator: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-500/20",
-  customer:  "bg-surface-raised text-ink-muted border-border dark:bg-dark-surface-2 dark:text-white/50 dark:border-dark-border",
+  customer: "bg-surface-raised text-ink-muted border-border dark:bg-dark-surface-2 dark:text-white/50 dark:border-dark-border",
 };
 const ROLE_ICONS = { admin: ShieldCheck, moderator: Shield, customer: User } as const;
 
-const AVATAR_COLORS = ["bg-violet-500","bg-blue-500","bg-emerald-500","bg-amber-500","bg-pink-500","bg-red-500"];
-const getInitials = (n: string) => n.split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2);
-const getColor    = (n: string) => AVATAR_COLORS[n.charCodeAt(0) % AVATAR_COLORS.length] ?? "bg-violet-500";
+const AVATAR_COLORS = ["bg-violet-500", "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-pink-500", "bg-red-500"];
+const getInitials = (n: string) => n.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+const getColor = (n: string) => AVATAR_COLORS[n.charCodeAt(0) % AVATAR_COLORS.length] ?? "bg-violet-500";
 
 export default function AdminUsersPage() {
   // ── Wait for Zustand hydration before using token ────────────────────────
-  const accessToken   = useAuthStore((s) => s.accessToken);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const currentUserId = useAuthStore((s) => s.user?.id);
-  const currentRole   = useAuthStore((s) => s.user?.role ?? "customer");
+  const currentRole = useAuthStore((s) => s.user?.role ?? "customer");
   const isAdmin = currentRole === "admin";
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
 
-  const [users, setUsers]         = useState<AdminUser[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({ page:1, limit:20, total:0, pages:1 });
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
-  const [search, setSearch]       = useState("");
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, pages: 1 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [openMenu, setOpenMenu]   = useState<string | null>(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const hasFetched = useRef(false);
 
   useEffect(() => {
@@ -77,7 +77,12 @@ export default function AdminUsersPage() {
       setUsers(json.data);
       setPagination(json.pagination);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load users");
+      const msg = err instanceof Error ? err.message : "Failed to load users";
+      if (msg === "Failed to fetch") {
+        setError("Cannot reach the server. The backend may be starting up — please wait a moment and retry.");
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -183,9 +188,16 @@ export default function AdminUsersPage() {
         )}
 
         {!isLoading && error && (
-          <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
-            <p className="text-sm text-red-500">{error}</p>
-            <button onClick={() => { void fetchUsers(); }} className="text-xs font-semibold text-amber underline">Retry</button>
+          <div className="flex flex-col items-center justify-center gap-3 py-20 text-center px-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+              <span className="text-xl">⚠️</span>
+            </div>
+            <p className="text-sm font-medium text-red-500">{error}</p>
+            {error?.includes("sign in") ? (
+              <a href="/admin/login" className="text-xs font-semibold text-amber underline">Go to Login →</a>
+            ) : (
+              <button onClick={() => { void fetchUsers(); }} className="text-xs font-semibold text-amber underline">Retry</button>
+            )}
           </div>
         )}
 
@@ -201,7 +213,7 @@ export default function AdminUsersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-surface-raised/60 dark:border-dark-border dark:bg-dark-surface-2/40">
-                  {["User","Role","Joined","Actions"].map(h => (
+                  {["User", "Role", "Joined", "Actions"].map(h => (
                     <th key={h} className={cn(
                       "px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-ink-muted",
                       h === "Actions" && "text-right"
@@ -248,7 +260,7 @@ export default function AdminUsersPage() {
 
                       {/* Joined */}
                       <td className="px-5 py-3.5 text-xs text-ink-muted">
-                        {new Date(user.createdAt).toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" })}
+                        {new Date(user.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                       </td>
 
                       {/* Actions */}
@@ -256,47 +268,47 @@ export default function AdminUsersPage() {
                         {isActioning
                           ? <Loader2 size={14} className="ml-auto animate-spin text-ink-muted" />
                           : !isAdmin
-                          ? <span className="text-[10px] text-ink-muted/50">View only</span>
-                          : (
-                            <div className="relative inline-block">
-                              <button
-                                onClick={() => setOpenMenu(openMenu === uid ? null : uid)}
-                                disabled={isMe}
-                                className="flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs text-ink-muted transition-colors hover:border-ink/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 dark:border-dark-border dark:hover:text-white"
-                              >
-                                <MoreHorizontal size={13} />
-                              </button>
+                            ? <span className="text-[10px] text-ink-muted/50">View only</span>
+                            : (
+                              <div className="relative inline-block">
+                                <button
+                                  onClick={() => setOpenMenu(openMenu === uid ? null : uid)}
+                                  disabled={isMe}
+                                  className="flex items-center gap-1 rounded-lg border border-border px-2 py-1.5 text-xs text-ink-muted transition-colors hover:border-ink/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 dark:border-dark-border dark:hover:text-white"
+                                >
+                                  <MoreHorizontal size={13} />
+                                </button>
 
-                              {openMenu === uid && (
-                                <>
-                                  <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
-                                  <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-white shadow-lg dark:border-dark-border dark:bg-dark-surface">
-                                    <p className="border-b border-border px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-ink-muted dark:border-dark-border">
-                                      Change Role
-                                    </p>
-                                    {(["customer","moderator","admin"] as const).filter(r => r !== user.role).map(role => (
-                                      <button key={role}
-                                        onClick={() => { void handleRoleChange(uid, user.name, role); }}
-                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm capitalize text-ink-soft transition-colors hover:bg-surface-raised dark:text-white/70 dark:hover:bg-dark-surface-2"
+                                {openMenu === uid && (
+                                  <>
+                                    <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
+                                    <div className="absolute right-0 z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-white shadow-lg dark:border-dark-border dark:bg-dark-surface">
+                                      <p className="border-b border-border px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-ink-muted dark:border-dark-border">
+                                        Change Role
+                                      </p>
+                                      {(["customer", "moderator", "admin"] as const).filter(r => r !== user.role).map(role => (
+                                        <button key={role}
+                                          onClick={() => { void handleRoleChange(uid, user.name, role); }}
+                                          className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm capitalize text-ink-soft transition-colors hover:bg-surface-raised dark:text-white/70 dark:hover:bg-dark-surface-2"
+                                        >
+                                          {role === "admin" ? <ShieldCheck size={13} className="text-amber" /> :
+                                            role === "moderator" ? <Shield size={13} className="text-purple-500" /> :
+                                              <User size={13} className="text-ink-muted" />}
+                                          Make {role}
+                                        </button>
+                                      ))}
+                                      <div className="border-t border-border dark:border-dark-border" />
+                                      <button
+                                        onClick={() => { void handleDelete(uid, user.name); }}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                                       >
-                                        {role === "admin" ? <ShieldCheck size={13} className="text-amber" /> :
-                                         role === "moderator" ? <Shield size={13} className="text-purple-500" /> :
-                                         <User size={13} className="text-ink-muted" />}
-                                        Make {role}
+                                        <Trash2 size={13} />Delete user
                                       </button>
-                                    ))}
-                                    <div className="border-t border-border dark:border-dark-border" />
-                                    <button
-                                      onClick={() => { void handleDelete(uid, user.name); }}
-                                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-                                    >
-                                      <Trash2 size={13} />Delete user
-                                    </button>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          )
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            )
                         }
                       </td>
                     </tr>

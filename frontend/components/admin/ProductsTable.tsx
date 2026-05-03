@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useState, useMemo, useEffect, useCallback, usRef } from "react";
 import Link from "next/link";
 import {
   useReactTable, getCoreRowModel, getSortedRowModel,
@@ -222,12 +222,19 @@ export function ProductsTable() {
     setLoading(true); setError(null);
     try {
       const res = await fetch(`${API_URL}/api/v1/products?limit=100`);
-      if (!res.ok) throw new Error(`Server ${res.status}`);
+      if (res.status === 401) { setError("Session expired — please sign in again."); return; }
+      if (res.status === 403) { setError("Access denied — admin privileges required."); return; }
+      if (!res.ok) throw new Error(`Server error (${res.status})`);
       const json = await res.json() as { success: boolean; data: AdminProduct[] };
       if (!json.success) throw new Error("API error");
       setProducts(json.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      if (msg === "Failed to fetch") {
+        setError("Cannot reach the server. Check your internet connection or the backend may be starting up — please wait a moment and retry.");
+      } else {
+        setError(msg);
+      }
     } finally { setLoading(false); }
   }, []);
 
@@ -416,9 +423,16 @@ export function ProductsTable() {
 
         {/* Error */}
         {!loading && error && (
-          <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <p className="text-sm text-red-500">{error}</p>
-            <button onClick={() => { void fetchProducts(); }} className="text-xs font-semibold text-amber underline">Retry</button>
+          <div className="flex flex-col items-center gap-3 py-16 text-center px-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+              <span className="text-xl">⚠️</span>
+            </div>
+            <p className="text-sm font-medium text-red-500">{error}</p>
+            {error.includes("sign in") ? (
+              <a href="/admin/login" className="text-xs font-semibold text-amber underline">Go to Login →</a>
+            ) : (
+              <button onClick={() => { void fetchProducts(); }} className="text-xs font-semibold text-amber underline">Retry</button>
+            )}
           </div>
         )}
 
