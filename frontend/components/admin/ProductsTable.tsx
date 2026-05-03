@@ -37,6 +37,16 @@ const EMPTY_PRODUCT: Omit<AdminProduct, "id" | "_id" | "rating"> = {
   stock: 0, badge: null, image: "", description: "", originalPrice: null,
 };
 
+// ── Field wrapper — must be outside ProductModal to keep stable identity ──────
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-semibold text-ink-muted uppercase tracking-wide">{label}</label>
+      {children}
+    </div>
+  );
+}
+
 // ── Edit / Create Modal ───────────────────────────────────────────────────────
 function ProductModal({
   product,
@@ -111,13 +121,6 @@ function ProductModal({
       setSaving(false);
     }
   };
-
-  const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-    <div>
-      <label className="mb-1 block text-xs font-semibold text-ink-muted uppercase tracking-wide">{label}</label>
-      {children}
-    </div>
-  );
 
   const inputCls = "w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface dark:text-white";
 
