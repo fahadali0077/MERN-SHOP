@@ -19,7 +19,8 @@ const RegisterSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Must contain an uppercase letter")
-    .regex(/[0-9]/, "Must contain a number"),
+    .regex(/[0-9]/, "Must contain a number")
+    .regex(/[^A-Za-z0-9]/, "Must contain a special character"),
 });
 type RegisterValues = z.infer<typeof RegisterSchema>;
 
@@ -98,7 +99,7 @@ export function RegisterForm() {
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Min 8 chars, 1 uppercase, 1 number"
+                  placeholder="Min 8 chars, uppercase, number, symbol"
                   autoComplete="new-password"
                   className="pr-11"
                   {...field}
@@ -128,7 +129,7 @@ export function RegisterForm() {
             </div>
             <div className="flex items-center justify-between">
               <p className="text-[11px] text-ink-muted">{strengthLabels[strength]}</p>
-              <p className="text-[11px] text-ink-muted">Min 8 chars · 1 uppercase · 1 number</p>
+              <p className="text-[11px] text-ink-muted">Min 8 chars · uppercase · number · symbol</p>
             </div>
           </div>
         )}

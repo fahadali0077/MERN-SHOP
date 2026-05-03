@@ -19,7 +19,8 @@ const Schema = z
             .string()
             .min(8, "Password must be at least 8 characters")
             .regex(/[A-Z]/, "Must contain at least one uppercase letter")
-            .regex(/[0-9]/, "Must contain at least one number"),
+            .regex(/[0-9]/, "Must contain at least one number")
+            .regex(/[^A-Za-z0-9]/, "Must contain at least one special character"),
         confirmPassword: z.string(),
     })
     .refine((d) => d.password === d.confirmPassword, {
@@ -120,7 +121,7 @@ function ResetPasswordForm() {
                         Set new password
                     </h1>
                     <p className="mt-1 text-sm text-ink-muted">
-                        Must be at least 8 characters with a number and uppercase letter
+                        Must be at least 8 characters with an uppercase letter, number & symbol
                     </p>
                 </div>
             </div>
@@ -179,7 +180,7 @@ function ResetPasswordForm() {
                             </div>
                             <div className="flex items-center justify-between">
                                 <p className="text-[11px] text-ink-muted">{strengthLabels[strength]}</p>
-                                <p className="text-[11px] text-ink-muted">Min 8 · uppercase · number</p>
+                                <p className="text-[11px] text-ink-muted">Min 8 · uppercase · number · symbol</p>
                             </div>
                         </div>
                     )}
