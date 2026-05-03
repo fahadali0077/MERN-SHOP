@@ -6,7 +6,7 @@ import { Review } from "../models/Review.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt.js";
 import { asyncHandler } from "../middleware/asyncHandler.js";
 import { AppError } from "../middleware/errorHandler.js";
-import { sendEmail, passwordResetHtml } from "../utils/email.js";
+import { sendEmail, passwordResetHtml, verificationEmailHtml } from "../utils/email.js";
 
 const REFRESH_COOKIE = {
   httpOnly: true, sameSite: "lax" as const,
@@ -14,23 +14,108 @@ const REFRESH_COOKIE = {
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
+// ── POST /api/v1/auth/register ─────────────────────────────────────────────────
 export const register = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body as { name: string; email: string; password: string };
   if (await User.findOne({ email })) throw new AppError("Email already registered", 409);
-  const user = await User.create({ name, email, password });
+
+  const user = await User.create({ name, email, password, isEmailVerified: false });
+
+  // Generate email verification token
+  const rawToken = (user as { createEmailVerifyToken(): string }).createEmailVerifyToken();
+  await user.save({ validateBeforeSave: false });
+
+  const verifyUrl = `${process.env["FRONTEND_URL"] ?? "http://localhost:3000"}/auth/verify-email?token=${rawToken}`;
+
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: "MERNShop — Verify Your Email",
+      html: verificationEmailHtml(user.name, verifyUrl),
+    });
+  } catch {
+    // Don't block registration on email failure; user can resend
+    console.error("[register] Failed to send verification email");
+  }
+
+  // Do NOT issue tokens — user must verify email first
+  res.status(201).json({
+    success: true,
+    message: "Check your email to verify your account.",
+    data: { email: user.email, name: user.name },
+  });
+});
+
+// ── GET /api/v1/auth/verify-email?token=RAW ───────────────────────────────────
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const rawToken = req.query["token"] as string | undefined;
+  if (!rawToken) throw new AppError("Verification token is required", 400);
+
+  const hashedToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+  const user = await User.findOne({
+    emailVerifyToken: hashedToken,
+    emailVerifyExpires: { $gt: new Date() },
+  }).select("+emailVerifyToken +emailVerifyExpires +refreshToken");
+
+  if (!user) throw new AppError("Verification link is invalid or has expired (24h limit)", 400);
+
+  user.isEmailVerified = true;
+  user.emailVerifyToken = undefined;
+  user.emailVerifyExpires = undefined;
+
   const accessToken = signAccessToken(user.id as string, user.role);
   const refreshToken = signRefreshToken(user.id as string);
   user.refreshToken = refreshToken;
   await user.save({ validateBeforeSave: false });
+
   res.cookie("refreshToken", refreshToken, REFRESH_COOKIE);
-  res.status(201).json({ success: true, data: { user, accessToken }, message: "Account created!" });
+  res.json({ success: true, data: { user, accessToken }, message: "Email verified! Welcome aboard." });
 });
 
+// ── POST /api/v1/auth/resend-verification ────────────────────────────────────
+export const resendVerification = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body as { email: string };
+  if (!email) throw new AppError("Email is required", 400);
+
+  const user = await User.findOne({ email }).select("+emailVerifyToken +emailVerifyExpires");
+
+  // Always return 200 to not reveal if email exists
+  if (!user || user.isEmailVerified) {
+    res.json({ success: true, message: "If that email is registered and unverified, a new link has been sent." });
+    return;
+  }
+
+  const rawToken = (user as { createEmailVerifyToken(): string }).createEmailVerifyToken();
+  await user.save({ validateBeforeSave: false });
+
+  const verifyUrl = `${process.env["FRONTEND_URL"] ?? "http://localhost:3000"}/auth/verify-email?token=${rawToken}`;
+
+  try {
+    await sendEmail({
+      to: user.email,
+      subject: "MERNShop — Verify Your Email (Resent)",
+      html: verificationEmailHtml(user.name, verifyUrl),
+    });
+  } catch {
+    throw new AppError("Failed to send verification email. Please try again.", 500);
+  }
+
+  res.json({ success: true, message: "If that email is registered and unverified, a new link has been sent." });
+});
+
+// ── POST /api/v1/auth/login ───────────────────────────────────────────────────
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body as { email: string; password: string };
   const user = await User.findOne({ email }).select("+password +refreshToken");
   if (!user || !(await (user as { comparePassword(p: string): Promise<boolean> }).comparePassword(password)))
     throw new AppError("Invalid email or password", 401);
+
+  // Block unverified users
+  if (!user.isEmailVerified) {
+    throw new AppError("Please verify your email before logging in.", 403);
+  }
+
   const accessToken = signAccessToken(user.id as string, user.role);
   const refreshToken = signRefreshToken(user.id as string);
   user.refreshToken = refreshToken;
@@ -66,7 +151,6 @@ export const getMe = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: user });
 });
 
-// ── PATCH /api/v1/auth/me ─────────────────────────────────────────────────────
 export const updateMe = asyncHandler(async (req: Request, res: Response) => {
   const { name, email } = req.body as { name?: string; email?: string };
 
@@ -87,7 +171,6 @@ export const updateMe = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, data: updated, message: "Profile updated" });
 });
 
-// ── POST /api/v1/auth/change-password ─────────────────────────────────────────
 export const changePassword = asyncHandler(async (req: Request, res: Response) => {
   const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
   if (!currentPassword || !newPassword) throw new AppError("Both current and new password are required", 400);
@@ -105,21 +188,18 @@ export const changePassword = asyncHandler(async (req: Request, res: Response) =
   res.json({ success: true, message: "Password changed successfully" });
 });
 
-// ── DELETE /api/v1/auth/me ────────────────────────────────────────────────────
 export const deleteMe = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.user!.userId;
 
   const user = await User.findById(userId);
   if (!user) throw new AppError("User not found", 404);
 
-  // Cascade delete all data belonging to this user
   await Promise.all([
     Order.deleteMany({ user: userId }),
     Review.deleteMany({ user: userId }),
     User.findByIdAndDelete(userId),
   ]);
 
-  // Clear all auth & session cookies
   res.clearCookie("refreshToken");
   res.clearCookie("accessToken");
   res.clearCookie("session");
@@ -128,12 +208,10 @@ export const deleteMe = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, message: "Account deleted successfully" });
 });
 
-// ── POST /api/v1/auth/forgot-password ────────────────────────────────────────
 export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body as { email: string };
   const user = await User.findOne({ email });
 
-  // Always return 200 — don't reveal if email exists
   if (!user) {
     res.json({ success: true, message: "If that email exists, a reset link has been sent." });
     return;
@@ -159,7 +237,6 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
   }
 });
 
-// ── POST /api/v1/auth/reset-password ─────────────────────────────────────────
 export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
   const { token, password } = req.body as { token: string; password: string };
 
@@ -167,7 +244,7 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: new Date() }, // not expired
+    passwordResetExpires: { $gt: new Date() },
   }).select("+password");
 
   if (!user) throw new AppError("Reset token is invalid or has expired (10 min limit)", 400);

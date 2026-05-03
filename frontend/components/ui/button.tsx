@@ -18,8 +18,8 @@ const buttonVariants = cva(
       variant: {
         default: [
           "bg-primary text-white shadow-sm",
-          "hover:bg-primary-600 hover:-translate-y-0.5 hover:shadow-md hover:shadow-primary/25",
-          "active:translate-y-0 active:shadow-sm",
+          "hover:bg-primary-600 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-md hover:shadow-primary/30",
+          "active:translate-y-0 active:scale-[0.97] active:shadow-sm",
         ],
         outline: [
           "border border-border bg-white text-ink-soft shadow-xs",

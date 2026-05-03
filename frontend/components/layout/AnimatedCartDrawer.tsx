@@ -25,16 +25,18 @@ export function AnimatedCartDrawer() {
             key="bd"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[7999] bg-ink/40 backdrop-blur-sm"
             onClick={closeDrawer}
           />
 
           {/* Drawer */}
           <motion.aside
             key="drawer"
-            initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+            initial={{ x: "100%", backdropFilter: "blur(0px)" }}
+            animate={{ x: 0, backdropFilter: "blur(12px)" }}
+            exit={{ x: "100%", backdropFilter: "blur(0px)" }}
             transition={spring}
-            className="fixed right-0 top-16 z-50 flex h-[calc(100vh-4rem)] w-[400px] max-w-full flex-col bg-white shadow-xl dark:bg-dark-surface"
+            className="fixed right-0 top-16 z-[8000] flex h-[calc(100vh-4rem)] w-[400px] max-w-full flex-col bg-white shadow-xl dark:bg-dark-surface"
             aria-label="Shopping cart"
           >
             {/* Header */}

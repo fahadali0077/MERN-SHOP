@@ -11,8 +11,12 @@ export interface IUser extends Document {
   avatarUrl?: string;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  isEmailVerified: boolean;
+  emailVerifyToken?: string;
+  emailVerifyExpires?: Date;
   comparePassword(candidate: string): Promise<boolean>;
   createPasswordResetToken(): string;
+  createEmailVerifyToken(): string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -25,6 +29,9 @@ const userSchema = new Schema<IUser>(
     avatarUrl:           { type: String },
     passwordResetToken:  { type: String, select: false },
     passwordResetExpires:{ type: Date,   select: false },
+    isEmailVerified:     { type: Boolean, default: false },
+    emailVerifyToken:    { type: String, select: false },
+    emailVerifyExpires:  { type: Date,   select: false },
   },
   {
     timestamps: true,
@@ -34,6 +41,7 @@ const userSchema = new Schema<IUser>(
         delete ret["_id"]; delete ret["__v"];
         delete ret["password"]; delete ret["refreshToken"];
         delete ret["passwordResetToken"]; delete ret["passwordResetExpires"];
+        delete ret["emailVerifyToken"]; delete ret["emailVerifyExpires"];
         return ret;
       },
     },
@@ -50,11 +58,17 @@ userSchema.methods["comparePassword"] = function (candidate: string): Promise<bo
   return bcrypt.compare(candidate, this.password);
 };
 
-// Generate a random reset token, hash it for storage, return raw for email
 userSchema.methods["createPasswordResetToken"] = function (): string {
   const rawToken = crypto.randomBytes(32).toString("hex");
   this.passwordResetToken = crypto.createHash("sha256").update(rawToken).digest("hex");
-  this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
+  return rawToken;
+};
+
+userSchema.methods["createEmailVerifyToken"] = function (): string {
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  this.emailVerifyToken = crypto.createHash("sha256").update(rawToken).digest("hex");
+  this.emailVerifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
   return rawToken;
 };
 

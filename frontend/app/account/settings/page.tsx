@@ -48,7 +48,7 @@ export default function SettingsPage() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ name: form.name.trim(), email: form.email.trim() }),
       });
-      const data = await res.json() as { success: boolean; data?: { id: string; name: string; email: string; role: "customer" | "admin" }; message?: string };
+      const data = await res.json() as { success: boolean; data?: { id: string; name: string; email: string; role: "customer" | "admin"; createdAt: string }; message?: string };
       if (!data.success) throw new Error(data.message ?? "Update failed");
       if (data.data && accessToken) setAuth(data.data, accessToken);
       setStatus("success");

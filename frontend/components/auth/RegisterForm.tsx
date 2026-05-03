@@ -59,8 +59,9 @@ export function RegisterForm() {
       return;
     }
 
-    toast.success("Account created!", "Please sign in to continue.");
-    router.push("/auth/login?registered=true");
+    // Redirect to verify-email-sent page with email param
+    const email = result.data?.email ?? values.email;
+    router.push(`/auth/verify-email-sent?email=${encodeURIComponent(email)}`);
   };
 
   return (

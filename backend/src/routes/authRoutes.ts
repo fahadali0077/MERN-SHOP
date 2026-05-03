@@ -8,6 +8,8 @@ const router = Router();
 
 router.post("/register", validate(RegisterSchema), ctrl.register);
 router.post("/login", validate(LoginSchema), ctrl.login);
+router.get("/verify-email", ctrl.verifyEmail);
+router.post("/resend-verification", ctrl.resendVerification);
 router.post("/refresh", ctrl.refresh);
 router.post("/logout", ctrl.logout);
 router.get("/me", protect, ctrl.getMe);

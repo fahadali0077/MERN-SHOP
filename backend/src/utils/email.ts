@@ -97,3 +97,29 @@ export const passwordResetHtml = (resetUrl: string): string => `
     </div>
   </div>
 `;
+
+export const verificationEmailHtml = (name: string, verifyUrl: string): string => `
+  <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#333">
+    <div style="background:#1a1a1a;padding:24px;text-align:center">
+      <h1 style="color:#f59e0b;margin:0;font-size:24px">MERNShop</h1>
+    </div>
+    <div style="padding:32px 24px">
+      <h2 style="margin-top:0">Verify Your Email 📬</h2>
+      <p>Hi <strong>${name}</strong>, thanks for joining MERNShop!</p>
+      <p>Click the button below to verify your email address and activate your account.</p>
+      <p>This link expires in <strong>24 hours</strong>.</p>
+      <div style="text-align:center;margin:32px 0">
+        <a href="${verifyUrl}"
+           style="background:#f59e0b;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block">
+          Verify Email Address
+        </a>
+      </div>
+      <p style="color:#666;font-size:13px">
+        If you didn't create an account, you can safely ignore this email.
+      </p>
+    </div>
+    <div style="background:#f9f9f9;padding:16px;text-align:center;font-size:12px;color:#999">
+      © ${new Date().getFullYear()} MERNShop. All rights reserved.
+    </div>
+  </div>
+`;

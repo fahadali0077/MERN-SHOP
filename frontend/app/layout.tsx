@@ -6,7 +6,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { AnimatedCartDrawer } from "@/components/layout/AnimatedCartDrawer";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
-import { Toaster } from "@/components/ui/Toaster";
+import { Toaster, WelcomeBanner } from "@/components/ui/Toaster";
+import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
 
 export const metadata: Metadata = {
   ...DEFAULT_METADATA,
@@ -25,11 +26,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <AnimatedCartDrawer />
           <Navbar />
+          <WelcomeBanner />
           <main className="mx-auto w-full max-w-screen-xl flex-1 px-5 pt-8 pb-12 sm:px-8 md:px-10 md:pt-12 md:pb-16">
             {children}
           </main>
           <Footer />
           <Toaster />
+          <ConfirmDialogProvider />
         </ThemeProvider>
       </body>
     </html>

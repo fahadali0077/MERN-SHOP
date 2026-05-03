@@ -255,7 +255,7 @@ export function Navbar() {
 
       <header
         className={[
-          "sticky top-0 z-50 will-change-transform border-b backdrop-blur-xl transition-all duration-300",
+          "sticky top-0 z-[7000] will-change-transform border-b backdrop-blur-xl transition-all duration-300",
           elevated
             ? "border-border/90 bg-white/92 shadow-md dark:border-dark-border/90 dark:bg-dark-surface/92"
             : "border-border/50 bg-white/80 dark:border-dark-border/50 dark:bg-dark-surface/80",

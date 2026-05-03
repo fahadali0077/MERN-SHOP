@@ -31,8 +31,9 @@ export interface User {
   name: string;
   email: string;
   role: "customer" | "admin";
-  createdAt: string; // ISO date string
+  createdAt: string;
   avatarUrl?: string;
+  isEmailVerified?: boolean;
 }
 
 // ── API Response wrapper ───────────────────────────────────────────────────────
@@ -46,6 +47,7 @@ export interface ActionResult<T = void> {
   message: string;
   data?: T;
   fieldErrors?: Partial<Record<string, string[]>>;
+  statusCode?: number;
 }
 
 // ── Sort ───────────────────────────────────────────────────────────────────────

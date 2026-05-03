@@ -9,6 +9,7 @@ import { FeaturedProductCard } from "@/components/home/FeaturedProductCard";
 import { ScrollRevealSection } from "@/components/home/ScrollRevealSection";
 import { HeroCTA } from "@/components/home/HeroCTA";
 import { StatsBar } from "@/components/home/StatsBar";
+import { HeroParallax } from "@/components/home/HeroParallax";
 
 export const metadata: Metadata = {
   title: "MERNShop — Modern E-Commerce",
@@ -44,6 +45,7 @@ export default async function HomePage() {
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section className="hero-gradient-overlay relative grid gap-10 pt-8 pb-12 md:grid-cols-[1fr_420px] md:items-start md:gap-12 lg:grid-cols-[1fr_460px]">
+        <HeroParallax />
 
         <div className="self-start">
           {/* Announcement pill */}
@@ -160,12 +162,13 @@ export default async function HomePage() {
             const count = products.filter((p) => p.category === cat).length;
             const cfg   = CATEGORY_CONFIG[cat] ?? { color: "#6366f1", icon: "Package" };
             return (
-              <div key={cat} className="reveal" style={{ transitionDelay: `${i * 0.07}s` }}>
+              <div key={cat}>
                 <CategoryCard
                   cat={cat}
                   count={count}
                   color={cfg.color}
                   iconName={cfg.icon}
+                  index={i}
                 />
               </div>
             );
@@ -187,9 +190,7 @@ export default async function HomePage() {
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:gap-5">
           {products.slice(0, 6).map((p, i) => (
-            <div key={p.id} className="reveal" style={{ transitionDelay: `${i * 0.06}s` }}>
-              <FeaturedProductCard product={p} priority={i < 2} />
-            </div>
+            <FeaturedProductCard key={p.id} product={p} priority={i < 2} index={i} />
           ))}
         </div>
       </ScrollRevealSection>

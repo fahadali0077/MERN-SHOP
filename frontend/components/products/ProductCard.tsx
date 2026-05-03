@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import type { Product } from "@/types";
 import { StarRating } from "./StarRating";
 import { AddToCartButton } from "./AddToCartButton";
@@ -11,6 +12,7 @@ import { SHIMMER_BLUR, CARD_IMAGE_SIZES } from "@/lib/imageUtils";
 interface ProductCardProps {
   product:  Product;
   priority?: boolean;
+  index?: number;
 }
 
 const BADGE_STYLES: Record<string, string> = {
@@ -19,15 +21,21 @@ const BADGE_STYLES: Record<string, string> = {
   Hot:  "bg-red-500 text-white",
 };
 
-export function ProductCard({ product, priority = false }: ProductCardProps) {
+export function ProductCard({ product, priority = false, index = 0 }: ProductCardProps) {
   const discount = product.originalPrice != null
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
   return (
-    // ── group triggers on the whole card, not just the image ─────────────────
-    <article className="product-card group relative flex flex-col overflow-hidden rounded-xl border border-border bg-white ring-1 ring-black/[0.04] dark:border-dark-border dark:bg-dark-surface dark:ring-white/[0.04]">
-
+    <motion.article
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.45, delay: index * 0.06, ease: [0.19, 1, 0.22, 1] }}
+      whileHover={{ scale: 1.03, boxShadow: "0 16px 48px rgba(0,0,0,0.12)" }}
+      style={{ borderRadius: "0.75rem" }}
+      className="product-card group relative flex flex-col overflow-hidden rounded-xl border border-border bg-white ring-1 ring-black/[0.04] dark:border-dark-border dark:bg-dark-surface dark:ring-white/[0.04]"
+    >
       {/* Badge */}
       {product.badge && (
         <div className="absolute left-3 top-3 z-10 badge-entrance">
@@ -37,7 +45,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         </div>
       )}
 
-      {/* Discount badge */}
       {discount && !product.badge && (
         <div className="absolute left-3 top-3 z-10 badge-entrance">
           <span className="rounded-full bg-green-500 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
@@ -46,16 +53,9 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         </div>
       )}
 
-      {/* Wishlist */}
       <WishlistButton product={product} />
 
-      {/* Image */}
-      <Link
-        href={`/products/${product.id}`}
-        className="block"
-        tabIndex={-1}
-        aria-hidden="true"
-      >
+      <Link href={`/products/${product.id}`} className="block" tabIndex={-1} aria-hidden="true">
         <div className="relative aspect-square overflow-hidden bg-surface-raised dark:bg-dark-surface-2">
           <Image
             src={product.image}
@@ -67,14 +67,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             sizes={CARD_IMAGE_SIZES}
             className="object-cover transition-transform duration-600 ease-expo-out group-hover:scale-[1.07]"
           />
-
-          {/* Dark gradient overlay — always present so text is readable */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent opacity-0 transition-opacity duration-400 group-hover:opacity-100" />
-
-          {/* Bottom accent line */}
           <span className="absolute bottom-0 h-[3px] w-full origin-left scale-x-0 bg-primary transition-transform duration-400 ease-expo-out group-hover:scale-x-100" />
-
-          {/* Quick view pill — fixed contrast: dark bg + white text always */}
           <div className="absolute bottom-3 left-0 right-0 flex justify-center translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
             <span className="rounded-full bg-black/70 px-4 py-1.5 text-xs font-semibold text-white shadow-lg backdrop-blur-sm">
               Quick view →
@@ -83,7 +77,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         </div>
       </Link>
 
-      {/* Body */}
       <div className="flex flex-1 flex-col gap-2 p-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
           {product.category}
@@ -97,7 +90,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 
         <StarRating rating={product.rating} reviewCount={product.reviewCount} />
 
-        {/* Pricing */}
         <div className="mt-auto flex flex-wrap items-baseline gap-1.5 pt-1">
           <span className="text-[1.05rem] font-bold tabular-nums text-ink dark:text-white">
             ${product.price.toFixed(2)}
@@ -114,11 +106,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           )}
         </div>
 
-        {/* Add to Cart — always visible */}
         <div className="mt-3">
           <AddToCartButton product={product} size="default" />
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
