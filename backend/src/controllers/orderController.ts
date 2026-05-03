@@ -79,9 +79,9 @@ export const createOrder = asyncHandler(async (req: Request, res: Response) => {
     const user = await User.findById(req.user!.userId).lean();
     if (user) {
       await sendEmail({
-        to:      user.email,
+        to: user.email,
         subject: `Order Confirmed — #${String((order as { _id: unknown })._id).slice(-8).toUpperCase()}`,
-        html:    orderConfirmationHtml(user.name, order as Parameters<typeof orderConfirmationHtml>[1]),
+        html: orderConfirmationHtml(user.name, order as Parameters<typeof orderConfirmationHtml>[1]),
       });
     }
   } catch (emailErr) {
@@ -103,8 +103,12 @@ export const getOrderById = asyncHandler(async (req: Request, res: Response) => 
   if (!order) throw new AppError("Order not found", 404);
 
   // Only allow owner or admin to view the order
-  const userId = String((order as { user: unknown }).user);
-  const isOwner = userId === req.user!.userId;
+  // After populate(), order.user is an object { _id, name, email } — must extract _id
+  const populatedUser = (order as { user: unknown }).user as { _id: unknown } | string;
+  const ownerId = typeof populatedUser === "object" && populatedUser !== null
+    ? String((populatedUser as { _id: unknown })._id)
+    : String(populatedUser);
+  const isOwner = ownerId === req.user!.userId;
   const isAdmin = req.user!.role === "admin";
   if (!isOwner && !isAdmin) throw new AppError("Access denied", 403);
 
@@ -113,7 +117,7 @@ export const getOrderById = asyncHandler(async (req: Request, res: Response) => 
 
 // ── GET /api/v1/orders/my ─────────────────────────────────────────────────────
 export const getMyOrders = asyncHandler(async (req: Request, res: Response) => {
-  const page  = Math.max(1, parseInt((req.query["page"] as string) ?? "1", 10));
+  const page = Math.max(1, parseInt((req.query["page"] as string) ?? "1", 10));
   const limit = Math.min(20, parseInt((req.query["limit"] as string) ?? "10", 10));
 
   const [orders, total] = await Promise.all([
@@ -142,10 +146,10 @@ export const getOrderStats = asyncHandler(async (_req: Request, res: Response) =
   res.json({
     success: true,
     data: {
-      totalRevenue:  row?.total  ?? 0,
-      totalOrders:   row?.count  ?? 0,
-      recentOrders:  recentCount,
-      byStatus:      statusData,
+      totalRevenue: row?.total ?? 0,
+      totalOrders: row?.count ?? 0,
+      recentOrders: recentCount,
+      byStatus: statusData,
     },
   });
 });
