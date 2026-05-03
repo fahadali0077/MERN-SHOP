@@ -230,7 +230,7 @@ export function ProductsTable() {
 
   useEffect(() => { if (hydrated) void fetchProducts(); }, [hydrated, fetchProducts]);
 
-  const handleDelete = async (product: AdminProduct) => {
+  const handleDelete = useCallback(async (product: AdminProduct) => {
     if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
     const id = product._id ?? product.id;
     setDeletingId(id);
@@ -246,16 +246,24 @@ export function ProductsTable() {
     } catch (err) {
       toast.error("Failed to delete", err instanceof Error ? err.message : "Unknown");
     } finally { setDeletingId(null); }
-  };
+  }, [accessToken]);
 
-  const handleSaved = (saved: AdminProduct) => {
+  const handleSaved = useCallback((saved: AdminProduct) => {
     setProducts((prev) => {
       const id = saved._id ?? saved.id;
       const idx = prev.findIndex((p) => (p._id ?? p.id) === id);
       if (idx >= 0) { const next = [...prev]; next[idx] = saved; return next; }
       return [saved, ...prev];
     });
-  };
+  }, []);
+
+  // Keep a ref to deletingId so columns don't need to be re-created on every change
+  const deletingIdRef = useRef<string | null>(null);
+  deletingIdRef.current = deletingId;
+  const handleDeleteRef = useRef(handleDelete);
+  handleDeleteRef.current = handleDelete;
+  const setEditProductRef = useRef(setEditProduct);
+  setEditProductRef.current = setEditProduct;
 
   const columns = useMemo(() => [
     columnHelper.accessor("name", {
@@ -301,17 +309,17 @@ export function ProductsTable() {
       cell: (info) => {
         const p = info.row.original;
         const pid = p._id ?? p.id;
-        const isDeleting = deletingId === pid;
+        const isDeleting = deletingIdRef.current === pid;
         return (
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setEditProduct(p)}
+              onClick={() => setEditProductRef.current(p)}
               className="flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-xs font-medium text-ink-muted transition-colors hover:border-primary hover:text-primary dark:border-dark-border"
             >
               <Pencil size={11} /> Edit
             </button>
             <button
-              onClick={() => { void handleDelete(p); }}
+              onClick={() => { void handleDeleteRef.current(p); }}
               disabled={isDeleting}
               className="flex items-center gap-1 rounded-lg border border-red-200 px-2 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 disabled:opacity-40 dark:border-red-900/30 dark:hover:bg-red-900/20"
             >
@@ -322,7 +330,7 @@ export function ProductsTable() {
         );
       },
     }),
-  ], [deletingId]);
+  ], []);
 
   const filteredData = useMemo(() =>
     selectedCategory === "All" ? products : products.filter((p) => p.category === selectedCategory),
