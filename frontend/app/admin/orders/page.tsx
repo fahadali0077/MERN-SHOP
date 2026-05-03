@@ -24,11 +24,11 @@ interface Order {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  pending:    "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber/10 dark:text-amber-300 dark:border-amber/20",
+  pending: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber/10 dark:text-amber-300 dark:border-amber/20",
   processing: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-500/20",
-  shipped:    "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-500/20",
-  delivered:  "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-500/20",
-  cancelled:  "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-500/20",
+  shipped: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-500/20",
+  delivered: "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-500/20",
+  cancelled: "bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-500/20",
 };
 
 const STATUS_FLOW: OrderStatus[] = ["pending", "processing", "shipped", "delivered", "cancelled"];
@@ -111,12 +111,12 @@ export default function AdminOrdersPage() {
   useEffect(() => { setHydrated(true); }, []);
 
   const { orders: socketOrders, connected } = useSocket({ maxOrders: 20 });
-  const [orders, setOrders]         = useState<Order[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState<string | null>(null);
-  const [page, setPage]             = useState(1);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal]           = useState(0);
+  const [total, setTotal] = useState(0);
   const hasFetched = useRef(false);
 
   const fetchOrders = useCallback(async (p = 1) => {
@@ -133,8 +133,8 @@ export default function AdminOrdersPage() {
         pagination: { pages: number; total: number };
       };
       setOrders(json.data);
-      setTotalPages(json.pagination.pages);
-      setTotal(json.pagination.total);
+      setTotalPages(json.pagination?.pages ?? 1);
+      setTotal(json.pagination?.total ?? json.data.length);
       setPage(p);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load orders");
@@ -176,7 +176,7 @@ export default function AdminOrdersPage() {
             <span className={cn(
               "flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold",
               connected ? "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-surface-raised text-ink-muted",
+                : "bg-surface-raised text-ink-muted",
             )}>
               <span className={cn("h-1.5 w-1.5 rounded-full", connected ? "animate-pulse bg-green-500" : "bg-ink-muted/40")} />
               {connected ? "Live" : "Offline"}

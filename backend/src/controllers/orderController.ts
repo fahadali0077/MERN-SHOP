@@ -155,9 +155,32 @@ export const getOrderStats = asyncHandler(async (_req: Request, res: Response) =
 });
 
 // ── GET /api/v1/orders ────────────────────────────────────────────────────────
-export const getAllOrders = asyncHandler(async (_req: Request, res: Response) => {
-  const orders = await Order.find().populate("user", "name email").populate("items.product", "name price").sort({ createdAt: -1 }).lean();
-  res.json({ success: true, data: orders, message: `${orders.length} orders` });
+export const getAllOrders = asyncHandler(async (req: Request, res: Response) => {
+  const page = Math.max(1, parseInt((req.query["page"] as string) ?? "1", 10));
+  const limit = Math.min(50, parseInt((req.query["limit"] as string) ?? "15", 10));
+  const skip = (page - 1) * limit;
+
+  const [orders, total] = await Promise.all([
+    Order.find()
+      .populate("user", "name email")
+      .populate("items.product", "name price")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Order.countDocuments(),
+  ]);
+
+  res.json({
+    success: true,
+    data: orders,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  });
 });
 
 // ── PUT /api/v1/orders/:id/status ─────────────────────────────────────────────
