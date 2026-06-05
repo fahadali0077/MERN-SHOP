@@ -16,7 +16,7 @@ export const DEFAULT_METADATA: Metadata = {
     type: "website",
     siteName: env.NEXT_PUBLIC_APP_NAME,
     locale: "en_US",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "MERNShop" }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 522, alt: "MERNShop" }],
   },
   twitter: {
     card: "summary_large_image",
