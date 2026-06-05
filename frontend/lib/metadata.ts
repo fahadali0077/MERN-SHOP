@@ -12,8 +12,16 @@ export const DEFAULT_METADATA: Metadata = {
     template: `%s | ${env.NEXT_PUBLIC_APP_NAME}`,
   },
   description: "Production-grade e-commerce frontend built with Next.js 15.",
-  openGraph: { type: "website", siteName: env.NEXT_PUBLIC_APP_NAME, locale: "en_US" },
-  twitter: { card: "summary_large_image" },
+  openGraph: {
+    type: "website",
+    siteName: env.NEXT_PUBLIC_APP_NAME,
+    locale: "en_US",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "MERNShop" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-image.png"],
+  },
 
 };
 
