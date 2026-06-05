@@ -20,7 +20,7 @@ export const DEFAULT_METADATA: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/og-image.png"],
+    images: [{ url: "/og-image.jpg", alt: "MERNShop" }],
   },
 
 };
