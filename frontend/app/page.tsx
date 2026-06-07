@@ -15,8 +15,11 @@ export const metadata: Metadata = {
   title: "MERNShop — Modern E-Commerce",
   description: "Discover curated products across electronics, fashion, books, and more. Built with Next.js 15.",
   openGraph: {
-    title: "MERNShop",
+    title: "MERNShop — Full-Stack E-Commerce Platform",
     description: "Discover curated products across electronics, fashion, books, and more.",
+    url: "https://mern-shop-swart.vercel.app",
+    siteName: "MERNShop",
+    type: "website",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "MERNShop" }],
   },
 };
