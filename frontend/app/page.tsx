@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "MERNShop",
     description: "Discover curated products across electronics, fashion, books, and more.",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 522, alt: "MERNShop" }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "MERNShop" }],
   },
 };
 
