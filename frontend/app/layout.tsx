@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: "Discover premium products across electronics, fashion, books, and lifestyle.",
   openGraph: {
     ...DEFAULT_METADATA.openGraph,
-    title: "MERNShop — Full-Stack E-Commerce Platform",
+    title: "MERNShop — Modern E-Commerce Platform",
     description: "Discover premium products across electronics, fashion, books, and lifestyle.",
     url: "https://mern-shop-swart.vercel.app",
     siteName: "MERNShop",
