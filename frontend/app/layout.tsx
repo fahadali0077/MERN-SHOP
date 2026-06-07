@@ -13,6 +13,22 @@ export const metadata: Metadata = {
   ...DEFAULT_METADATA,
   title: { default: "MERNShop", template: "%s — MERNShop" },
   description: "Discover premium products across electronics, fashion, books, and lifestyle.",
+  openGraph: {
+    ...DEFAULT_METADATA.openGraph,
+    title: "MERNShop — Full-Stack E-Commerce Platform",
+    description: "Discover premium products across electronics, fashion, books, and lifestyle.",
+    url: "https://mern-shop-swart.vercel.app",
+    siteName: "MERNShop",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "MERNShop",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
