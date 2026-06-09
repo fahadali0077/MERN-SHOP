@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AnimatedCartDrawer />
           <Navbar />
           <WelcomeBanner />
-          <main className="mx-auto w-full max-w-screen-xl flex-1 px-5 pt-1 pb-12 sm:px-8 md:px-10 md:pt-2 md:pb-16">
+          <main className="mx-auto w-full max-w-screen-xl flex-1 px-5 pt-3 pb-12 sm:px-8 md:px-10 md:pt-4 md:pb-16">
             {children}
           </main>
           <Footer />
