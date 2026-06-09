@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Lock, Eye, EyeOff, Shield, AlertTriangle } from "lucide-react";
-import { useAuthStore } from "@/stores/authStore";
 
 
 // ── Must be outside SecurityPage to keep a stable identity across renders ─────

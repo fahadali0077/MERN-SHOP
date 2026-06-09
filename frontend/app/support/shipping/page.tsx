@@ -86,7 +86,7 @@ export default function ShippingPage() {
       </h2>
       <div className="mb-8 rounded-xl border border-border bg-white p-5 dark:border-dark-border dark:bg-dark-surface">
         <p className="text-sm text-ink-muted">
-          Once your order ships you will receive a confirmation email with a tracking number. You can use this number on the carrier's website or view your order status under{" "}
+          Once your order ships you will receive a confirmation email with a tracking number. You can use this number on the carrier&apos;s website or view your order status under{" "}
           <Link href="/account/orders" className="font-semibold text-primary hover:underline">Account → Orders</Link>.
           Tracking updates may take up to 24 hours to appear after dispatch.
         </p>

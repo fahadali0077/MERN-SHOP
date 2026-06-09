@@ -12,7 +12,6 @@ import {
   Loader2, RefreshCw, Plus, Pencil, Trash2, X, Save, LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/stores/authStore";
 import { toast } from "@/stores/toastStore";
 
 const CATEGORIES = ["Electronics", "Fashion", "Home & Kitchen", "Books", "Sports"];

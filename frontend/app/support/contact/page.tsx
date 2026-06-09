@@ -40,7 +40,7 @@ export default function ContactPage() {
               <CheckCircle size={48} className="mb-4 text-green-500" />
               <h2 className="text-lg font-semibold text-ink dark:text-white">Message Sent!</h2>
               <p className="mt-2 text-sm text-ink-muted">
-                Thanks {form.name}, we'll get back to you at <strong>{form.email}</strong> within 24 hours.
+                Thanks {form.name}, we&apos;ll get back to you at <strong>{form.email}</strong> within 24 hours.
               </p>
               <button
                 onClick={() => { setSubmitted(false); setForm({ name: "", email: "", reason: "", message: "" }); }}

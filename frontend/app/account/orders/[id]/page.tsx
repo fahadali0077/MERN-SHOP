@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Package, MapPin, Clock } from "lucide-react";
-import { useAuthStore } from "@/stores/authStore";
 
 
 const STATUS_STEPS = ["pending", "processing", "shipped", "delivered"];

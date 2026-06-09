@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  ShoppingBag, LogOut, Sparkles, ChevronDown,
+  ShoppingBag, LogOut, ChevronDown,
   User, Package, Heart, LayoutDashboard,
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";

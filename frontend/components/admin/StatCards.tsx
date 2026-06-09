@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { TrendingUp, DollarSign, ShoppingCart, Users, Package, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/stores/authStore";
 
 
 interface StatData {

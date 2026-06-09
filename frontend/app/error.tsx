@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 interface ErrorPageProps {
   error: Error & { digest?: string };

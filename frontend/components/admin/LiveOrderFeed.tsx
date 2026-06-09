@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSocket, type LiveOrder } from "@/hooks/useSocket";
-import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
 import { Loader2, RefreshCw, Package } from "lucide-react";
 

@@ -59,7 +59,7 @@ export default function ReturnsPage() {
       {/* Steps */}
       <h2 className="mb-4 font-semibold text-ink dark:text-white">How to Return an Item</h2>
       <div className="mb-10 space-y-4">
-        {STEPS.map(({ icon: Icon, step, title, desc }) => (
+        {STEPS.map(({ step, title, desc }) => (
           <div key={step} className="flex gap-4 rounded-xl border border-border bg-white p-5 dark:border-dark-border dark:bg-dark-surface">
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
               {step}

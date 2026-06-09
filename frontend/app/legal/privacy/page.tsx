@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
         <h1 className="font-serif text-3xl text-ink dark:text-white">Privacy Policy</h1>
         <p className="mt-2 text-sm text-ink-muted">Last updated: January 1, 2025</p>
         <p className="mt-3 text-ink-muted">
-          MERNShop ("we", "our", "us") is committed to protecting your personal information. This policy explains what data we collect, how we use it, and your rights.
+          MERNShop (&ldquo;we&rdquo;, &ldquo;our&rdquo;, &ldquo;us&rdquo;) is committed to protecting your personal information. This policy explains what data we collect, how we use it, and your rights.
         </p>
       </div>
 
