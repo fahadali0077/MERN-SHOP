@@ -1,21 +1,19 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, CheckCircle2, Lock, ArrowLeft, CreditCard, ShieldCheck } from "lucide-react";
+import { Loader2, CheckCircle2, ArrowLeft, CreditCard, ShieldCheck } from "lucide-react";
 import { useCartStore, type CartState } from "@/stores/cartStore";
-import { useAuthStore } from "@/stores/authStore";
+import { createOrderAction } from "@/app/actions/cart";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/stores/toastStore";
+import type { CartItem } from "@/types";
 
-const API = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
-
-// ── Detect card brand from first digits ───────────────────────────────────────
 function detectBrand(num: string): "visa" | "mastercard" | "amex" | null {
   const n = num.replace(/\s/g, "");
   if (/^4/.test(n)) return "visa";
@@ -26,32 +24,20 @@ function detectBrand(num: string): "visa" | "mastercard" | "amex" | null {
 
 function CardBrandIcon({ brand }: { brand: "visa" | "mastercard" | "amex" | null }) {
   if (!brand) return <CreditCard size={20} className="text-ink-muted" />;
-  const logos: Record<string, string> = {
-    visa:       "VISA",
-    mastercard: "MC",
-    amex:       "AMEX",
-  };
-  const colors: Record<string, string> = {
-    visa:       "text-blue-600",
-    mastercard: "text-red-500",
-    amex:       "text-green-600",
-  };
-  return (
-    <span className={`text-xs font-black tracking-widest ${colors[brand]}`}>
-      {logos[brand]}
-    </span>
-  );
+  const logos: Record<string, string> = { visa: "VISA", mastercard: "MC", amex: "AMEX" };
+  const colors: Record<string, string> = { visa: "text-blue-600", mastercard: "text-red-500", amex: "text-green-600" };
+  return <span className={`text-xs font-black tracking-widest ${colors[brand]}`}>{logos[brand]}</span>;
 }
 
 const CheckoutSchema = z.object({
-  fullName:   z.string().min(2, "Full name required"),
-  email:      z.string().email("Valid email required"),
-  address:    z.string().min(5, "Address required"),
-  city:       z.string().min(2, "City required"),
+  fullName: z.string().min(2, "Full name required"),
+  email: z.string().email("Valid email required"),
+  address: z.string().min(5, "Address required"),
+  city: z.string().min(2, "City required"),
   postalCode: z.string().min(4, "Postal code required"),
   cardNumber: z.string().regex(/^\d{16}$/, "16-digit card number required"),
-  expiry:     z.string().regex(/^\d{2}\/\d{2}$/, "MM/YY format required"),
-  cvv:        z.string().regex(/^\d{3,4}$/, "3–4 digit CVV required"),
+  expiry: z.string().regex(/^\d{2}\/\d{2}$/, "MM/YY format required"),
+  cvv: z.string().regex(/^\d{3,4}$/, "3–4 digit CVV required"),
 });
 type CheckoutValues = z.infer<typeof CheckoutSchema>;
 
@@ -63,10 +49,14 @@ export default function CheckoutPage() {
   const [confirmedItems, setConfirmedItems] = useState<Array<{ name: string; price: number; qty: number }>>([]);
   const [confirmedTotal, setConfirmedTotal] = useState(0);
 
-  const items     = useCartStore((s: CartState) => s.items);
-  const total     = useCartStore((s: CartState) => s.totalPrice());
-  const clearCart = useCartStore((s: CartState) => s.clearCart);
-  const accessToken = useAuthStore((s) => s.accessToken);
+  // FIX #2: read the cart from the SAME server-seeded mirror the rest of the app
+  // uses (the AuthHydrator seeds it from the cookie cart). The actual order write
+  // happens server-side in createOrderAction, which re-reads the cookie cart, so
+  // even if the mirror were briefly stale the order uses the authoritative source.
+  const items = useCartStore((s: CartState) => s.items);
+  const total = useCartStore((s: CartState) => s.totalPrice());
+  const setItems = useCartStore((s) => s.setItems);
+  const hydrated = useCartStore((s) => s.hydrated);
 
   const form = useForm<CheckoutValues>({
     resolver: zodResolver(CheckoutSchema),
@@ -74,13 +64,25 @@ export default function CheckoutPage() {
     defaultValues: { fullName: "", email: "", address: "", city: "", postalCode: "", cardNumber: "", expiry: "", cvv: "" },
   });
 
-  // ── Card number auto-format ──────────────────────────────────────────────
+  // Belt-and-suspenders: refresh the mirror from the server cart on mount.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/cart", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { success: boolean; data?: CartItem[] } | null) => {
+        if (!cancelled && j?.success && Array.isArray(j.data)) setItems(j.data);
+      })
+      .catch(() => null);
+    return () => {
+      cancelled = true;
+    };
+  }, [setItems]);
+
   const formatCardNumber = useCallback((raw: string) => {
     const digits = raw.replace(/\D/g, "").slice(0, 16);
     return digits.replace(/(.{4})/g, "$1 ").trim();
   }, []);
 
-  // ── Expiry auto-format MM/YY ─────────────────────────────────────────────
   const formatExpiry = useCallback((raw: string) => {
     const digits = raw.replace(/\D/g, "").slice(0, 4);
     if (digits.length >= 3) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
@@ -94,54 +96,36 @@ export default function CheckoutPage() {
     setOrderError(null);
     setProcessing(true);
 
-    // Fake 1.5s payment processing step
-    await new Promise((r) => setTimeout(r, 1500));
+    // Simulated payment latency.
+    await new Promise((r) => setTimeout(r, 1200));
 
-    try {
-      const res = await fetch(`${API}/api/v1/orders`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-        },
-        body: JSON.stringify({
-          items: items.map((i) => ({ productId: i.product.id, qty: i.qty })),
-          shippingAddress: {
-            street:  values.address,
-            city:    values.city,
-            country: "PK",
-          },
-        }),
-      });
+    const result = await createOrderAction({
+      street: values.address,
+      city: values.city,
+      country: "PK",
+    });
 
-      const data = await res.json() as { success: boolean; data?: { id?: string; _id?: string }; error?: string };
-
-      if (!data.success) {
-        const msg = data.error ?? "Order failed. Please try again.";
-        setOrderError(msg);
-        toast.error("Order failed", msg);
-        setProcessing(false);
-        return;
-      }
-
-      const id = data.data?.id ?? data.data?._id ?? null;
-      setOrderId(id ? String(id) : null);
-      // Snapshot items for confirmation screen
-      setConfirmedItems(items.map((i) => ({ name: i.product.name, price: i.product.price, qty: i.qty })));
-      setConfirmedTotal(total);
-      clearCart();
-      setPlaced(true);
-      toast.success("Order confirmed!", "Check your email for confirmation details.");
-    } catch {
-      const msg = "Network error. Please check your connection and try again.";
+    if (!result.success || !result.data) {
+      const msg =
+        result.statusCode === 401
+          ? "Your session has expired. Please sign in again."
+          : result.message;
       setOrderError(msg);
       toast.error("Order failed", msg);
-    } finally {
       setProcessing(false);
+      return;
     }
+
+    // Snapshot from the server's authoritative item list.
+    setConfirmedItems(result.data.items.map((i) => ({ name: i.product.name, price: i.product.price, qty: i.qty })));
+    setConfirmedTotal(result.data.totalAmount);
+    setOrderId(result.data.id || null);
+    setItems([]); // server already cleared the cookie cart
+    setPlaced(true);
+    setProcessing(false);
+    toast.success("Order confirmed!", "Check your email for confirmation details.");
   };
 
-  // ── Order Confirmed Screen ───────────────────────────────────────────────
   if (placed) {
     return (
       <div className="mx-auto max-w-lg py-16">
@@ -156,8 +140,6 @@ export default function CheckoutPage() {
               Order ID: <span className="font-mono font-medium">{orderId}</span>
             </p>
           )}
-
-          {/* Order summary table */}
           <div className="mt-6 rounded-xl border border-border dark:border-dark-border overflow-hidden text-left">
             <div className="bg-surface-raised dark:bg-dark-surface-2 px-4 py-2.5">
               <p className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Order Summary</p>
@@ -175,7 +157,6 @@ export default function CheckoutPage() {
               </div>
             </div>
           </div>
-
           <div className="mt-6 flex gap-3">
             <Button asChild variant="outline" className="flex-1"><Link href="/account/orders">View Orders</Link></Button>
             <Button asChild className="flex-1"><Link href="/products">Continue Shopping</Link></Button>
@@ -184,6 +165,8 @@ export default function CheckoutPage() {
       </div>
     );
   }
+
+  const cartEmpty = hydrated && items.length === 0;
 
   return (
     <div className="pb-16">
@@ -201,10 +184,15 @@ export default function CheckoutPage() {
         </div>
       )}
 
+      {cartEmpty && (
+        <div className="mb-6 rounded-xl border border-border bg-surface-raised px-4 py-3 text-sm text-ink-muted dark:border-dark-border dark:bg-dark-surface-2">
+          Your cart is empty. <Link href="/products" className="font-semibold text-primary hover:underline">Browse products</Link>.
+        </div>
+      )}
+
       <div className="grid gap-10 lg:grid-cols-[1fr_360px] lg:items-start">
         <Form {...form}>
           <form onSubmit={(e) => { void form.handleSubmit(onSubmit)(e); }} className="space-y-6" noValidate>
-            {/* Shipping */}
             <div className="rounded-xl border border-border bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
               <h2 className="mb-5 font-serif text-lg font-normal dark:text-white">Shipping Information</h2>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -212,9 +200,7 @@ export default function CheckoutPage() {
                   <FormField key={name} control={form.control} name={name} render={({ field }) => (
                     <FormItem className={name === "address" ? "sm:col-span-2" : ""}>
                       <FormLabel>
-                        {name === "fullName" ? "Full Name" :
-                         name === "postalCode" ? "Postal Code" :
-                         name.charAt(0).toUpperCase() + name.slice(1)}
+                        {name === "fullName" ? "Full Name" : name === "postalCode" ? "Postal Code" : name.charAt(0).toUpperCase() + name.slice(1)}
                       </FormLabel>
                       <FormControl><Input {...field} /></FormControl>
                       <FormMessage />
@@ -224,11 +210,9 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Payment */}
             <div className="rounded-xl border border-border bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
               <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-serif text-lg font-normal dark:text-white">Payment Details</h2>
-                {/* Card brand logos */}
                 <div className="flex items-center gap-2 text-[10px] font-black tracking-widest">
                   <span className={brand === "visa" ? "text-blue-600" : "text-ink-muted/40 dark:text-white/20"}>VISA</span>
                   <span className={brand === "mastercard" ? "text-red-500" : "text-ink-muted/40 dark:text-white/20"}>MC</span>
@@ -237,97 +221,56 @@ export default function CheckoutPage() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                {/* Card Number */}
                 <FormField control={form.control} name="cardNumber" render={({ field }) => (
                   <FormItem className="sm:col-span-2">
                     <FormLabel>Card Number</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Input
-                          placeholder="4242 4242 4242 4242"
-                          inputMode="numeric"
-                          maxLength={19}
-                          className="pr-10"
+                        <Input placeholder="4242 4242 4242 4242" inputMode="numeric" maxLength={19} className="pr-10"
                           value={formatCardNumber(field.value)}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/\D/g, "").slice(0, 16);
-                            field.onChange(raw);
-                          }}
-                        />
-                        <div className="absolute inset-y-0 right-3 flex items-center">
-                          <CardBrandIcon brand={brand} />
-                        </div>
+                          onChange={(e) => field.onChange(e.target.value.replace(/\D/g, "").slice(0, 16))} />
+                        <div className="absolute inset-y-0 right-3 flex items-center"><CardBrandIcon brand={brand} /></div>
                       </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
 
-                {/* Expiry */}
                 <FormField control={form.control} name="expiry" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Expiry</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="MM/YY"
-                        inputMode="numeric"
-                        maxLength={5}
+                      <Input placeholder="MM/YY" inputMode="numeric" maxLength={5}
                         value={formatExpiry(field.value)}
-                        onChange={(e) => {
-                          const formatted = formatExpiry(e.target.value);
-                          field.onChange(formatted);
-                        }}
-                      />
+                        onChange={(e) => field.onChange(formatExpiry(e.target.value))} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
 
-                {/* CVV */}
                 <FormField control={form.control} name="cvv" render={({ field }) => (
                   <FormItem>
                     <FormLabel>CVV</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="•••"
-                        inputMode="numeric"
-                        maxLength={4}
-                        {...field}
-                      />
-                    </FormControl>
+                    <FormControl><Input type="password" placeholder="•••" inputMode="numeric" maxLength={4} {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
               </div>
 
-              {/* SSL badge */}
               <div className="mt-4 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 dark:bg-green-900/10">
                 <ShieldCheck size={14} className="text-green-600 dark:text-green-400" strokeWidth={2} />
                 <p className="text-xs font-medium text-green-700 dark:text-green-400">
-                  🔒 Secured by SSL — Your payment info is encrypted and never stored.
+                  Secured by SSL — Your payment info is encrypted and never stored.
                 </p>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full"
-              disabled={form.formState.isSubmitting || processing || items.length === 0}
-            >
-              {processing ? (
-                <><Loader2 size={16} className="animate-spin" /> Processing payment…</>
-              ) : form.formState.isSubmitting ? (
-                <><Loader2 size={16} className="animate-spin" /> Submitting…</>
-              ) : (
-                `Pay $${total.toFixed(2)}`
-              )}
+            <Button type="submit" size="lg" className="w-full" disabled={processing || items.length === 0}>
+              {processing ? (<><Loader2 size={16} className="animate-spin" /> Processing payment…</>) : `Pay $${total.toFixed(2)}`}
             </Button>
           </form>
         </Form>
 
-        {/* Order Summary */}
         <aside className="sticky top-24 rounded-xl border border-border bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
           <h2 className="mb-5 font-serif text-lg font-normal dark:text-white">Order Summary</h2>
           <div className="space-y-3">
@@ -338,9 +281,7 @@ export default function CheckoutPage() {
               </div>
             ))}
           </div>
-          {items.length === 0 && (
-            <p className="text-sm text-ink-muted">Your cart is empty.</p>
-          )}
+          {items.length === 0 && <p className="text-sm text-ink-muted">Your cart is empty.</p>}
           <div className="mt-5 border-t border-border pt-5 dark:border-dark-border">
             <div className="flex items-center justify-between">
               <span className="font-semibold dark:text-white">Total</span>

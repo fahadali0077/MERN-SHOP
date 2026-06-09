@@ -2,22 +2,34 @@
  * seedAdmin.ts — Creates an admin user in MongoDB
  * Usage: npm run db:admin
  *
- * Creates: admin@mernshop.com / Admin@1234
- * Change credentials below before running in production.
+ * FIX A9: credentials are read from env. The previous hardcoded
+ * admin@mernshop.com / Admin@1234 was committed to the repo (and duplicated in a
+ * now-deleted /api/auth/admin route), effectively publishing admin access.
+ *
+ * Set SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD / SEED_ADMIN_NAME in .env.
  */
 
 import "dotenv/config";
 import mongoose from "mongoose";
 import { User } from "../models/User.js";
 
-const ADMIN_EMAIL    = "admin@mernshop.com";
-const ADMIN_PASSWORD = "Admin@1234";
-const ADMIN_NAME     = "MERNShop Admin";
+const ADMIN_EMAIL = process.env["SEED_ADMIN_EMAIL"] ?? "admin@mernshop.com";
+const ADMIN_PASSWORD = process.env["SEED_ADMIN_PASSWORD"] ?? "Admin@1234";
+const ADMIN_NAME = process.env["SEED_ADMIN_NAME"] ?? "MERNShop Admin";
 
 async function seedAdmin(): Promise<void> {
   const uri = process.env["MONGODB_URI"];
   if (!uri) {
     console.error("❌  MONGODB_URI not set in .env");
+    process.exit(1);
+  }
+
+  // Refuse to seed the well-known default password in production.
+  if (process.env["NODE_ENV"] === "production" && ADMIN_PASSWORD === "Admin@1234") {
+    console.error(
+      "❌  Refusing to seed the default admin password in production. " +
+        "Set SEED_ADMIN_PASSWORD to a strong value."
+    );
     process.exit(1);
   }
 
@@ -36,15 +48,16 @@ async function seedAdmin(): Promise<void> {
     }
   } else {
     await User.create({
-      name:     ADMIN_NAME,
-      email:    ADMIN_EMAIL,
+      name: ADMIN_NAME,
+      email: ADMIN_EMAIL,
       password: ADMIN_PASSWORD,
-      role:     "admin",
+      role: "admin",
+      isEmailVerified: true, // seeded admin can log in immediately
     });
-    console.log(`✅  Admin user created:`);
-    console.log(`     Email:    ${ADMIN_EMAIL}`);
-    console.log(`     Password: ${ADMIN_PASSWORD}`);
-    console.log(`\n⚠️   Change this password immediately in production!`);
+    console.log(`✅  Admin user created: ${ADMIN_EMAIL}`);
+    if (ADMIN_PASSWORD === "Admin@1234") {
+      console.log(`\n⚠️   Using the default password. Change it immediately.`);
+    }
   }
 
   await mongoose.disconnect();

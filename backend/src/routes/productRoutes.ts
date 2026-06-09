@@ -113,7 +113,7 @@ router.get("/:id/reviews", reviewCtrl.getProductReviews);
  *         description: Already reviewed
  */
 router.post("/:id/reviews", protect, reviewCtrl.createReview);
-router.delete("/:id/reviews/:reviewId", protect, authorize("admin"), reviewCtrl.deleteReview);
+router.delete("/:id/reviews/:reviewId", protect, reviewCtrl.deleteReview); // FIX #4: owner OR admin (controller decides)
 
 /**
  * @swagger

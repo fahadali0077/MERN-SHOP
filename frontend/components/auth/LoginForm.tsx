@@ -12,7 +12,6 @@ import { useAuthStore } from "@/stores/authStore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import type { User } from "@/types";
 import { toast } from "@/stores/toastStore";
 
 const LoginSchema = z.object({
@@ -25,6 +24,9 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  // FIX #1/#8: store the USER for instant client UI; the token lives only in the
+  // HttpOnly cookie set by loginAction. We pass the in-memory token too (optional),
+  // but never persist it (authStore.partialize keeps only `user`).
   const setAuth = useAuthStore((s) => s.setAuth);
   const router = useRouter();
 
@@ -45,7 +47,6 @@ export function LoginForm() {
     const result = await loginAction(values.email, values.password);
 
     if (!result.success) {
-      // Detect email-not-verified (403)
       if (result.statusCode === 403 || result.message?.toLowerCase().includes("verify your email")) {
         setUnverifiedEmail(values.email);
         return;
@@ -56,22 +57,19 @@ export function LoginForm() {
     }
 
     if (result.data) {
-      setAuth(result.data.user as unknown as User, result.data.accessToken);
+      // Full user object now (FIX #14) incl. id/createdAt; token kept in-memory only.
+      setAuth(result.data.user, result.data.accessToken);
     }
 
     const userName = result.data?.user?.name ?? "there";
-    // Set welcome flag for the banner
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("mernshop_welcome", userName);
-    }
+    if (typeof window !== "undefined") sessionStorage.setItem("mernshop_welcome", userName);
     toast.success(`Welcome back, ${userName}!`, "You are now signed in.");
 
     const role = result.data?.user?.role;
-    if (role === "admin") {
-      router.push("/admin");
-    } else {
-      router.push("/");
-    }
+    // refresh() re-runs server components so middleware-protected/SSR views see the
+    // new session cookie immediately.
+    router.refresh();
+    router.push(role === "admin" ? "/admin" : "/");
   };
 
   if (unverifiedEmail) {
@@ -84,16 +82,11 @@ export function LoginForm() {
         <p className="mb-4 text-sm text-amber-700 dark:text-amber-400">
           Please check your inbox and click the verification link before signing in.
         </p>
-        <Link
-          href={`/auth/verify-email-sent?email=${encodeURIComponent(unverifiedEmail)}`}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600"
-        >
+        <Link href={`/auth/verify-email-sent?email=${encodeURIComponent(unverifiedEmail)}`}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600">
           Resend verification email →
         </Link>
-        <button
-          onClick={() => setUnverifiedEmail(null)}
-          className="mt-3 block text-xs text-amber-600 hover:underline dark:text-amber-400"
-        >
+        <button onClick={() => setUnverifiedEmail(null)} className="mt-3 block text-xs text-amber-600 hover:underline dark:text-amber-400">
           ← Back to sign in
         </button>
       </div>
@@ -112,9 +105,7 @@ export function LoginForm() {
         <FormField control={form.control} name="email" render={({ field }) => (
           <FormItem>
             <FormLabel>Email</FormLabel>
-            <FormControl>
-              <Input type="email" placeholder="you@example.com" autoComplete="email" {...field} />
-            </FormControl>
+            <FormControl><Input type="email" placeholder="you@example.com" autoComplete="email" {...field} /></FormControl>
             <FormMessage />
           </FormItem>
         )} />
@@ -123,26 +114,14 @@ export function LoginForm() {
           <FormItem>
             <div className="flex items-center justify-between">
               <FormLabel>Password</FormLabel>
-              <Link href="/auth/forgot-password" className="text-xs text-amber hover:underline">
-                Forgot password?
-              </Link>
+              <Link href="/auth/forgot-password" className="text-xs text-amber hover:underline">Forgot password?</Link>
             </div>
             <FormControl>
               <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Your password"
-                  autoComplete="current-password"
-                  className="pr-11"
-                  {...field}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
+                <Input type={showPassword ? "text" : "password"} placeholder="Your password" autoComplete="current-password" className="pr-11" {...field} />
+                <button type="button" onClick={() => setShowPassword((v) => !v)}
                   className="absolute inset-y-0 right-0 flex items-center px-3 text-ink-muted hover:text-ink dark:hover:text-white"
-                  tabIndex={-1}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
+                  tabIndex={-1} aria-label={showPassword ? "Hide password" : "Show password"}>
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
@@ -152,9 +131,7 @@ export function LoginForm() {
         )} />
 
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting
-            ? <><Loader2 size={16} className="animate-spin" /> Signing in…</>
-            : "Sign in"}
+          {form.formState.isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Signing in…</> : "Sign in"}
         </Button>
       </form>
     </Form>

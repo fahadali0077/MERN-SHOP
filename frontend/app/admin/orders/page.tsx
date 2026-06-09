@@ -9,7 +9,6 @@ import { toast } from "@/stores/toastStore";
 import { cn } from "@/lib/utils";
 import { Loader2, RefreshCw, ChevronLeft, ChevronRight, Package, Zap, LayoutDashboard, Trash2 } from "lucide-react";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
 type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
 
@@ -34,10 +33,9 @@ const STATUS_STYLES: Record<string, string> = {
 
 const STATUS_FLOW: OrderStatus[] = ["pending", "processing", "shipped", "delivered", "cancelled"];
 
-function StatusBadge({ status, orderId, token, onUpdated }: {
+function StatusBadge({ status, orderId, onUpdated }: {
   status: OrderStatus;
   orderId: string;
-  token: string | null;
   onUpdated: (id: string, status: OrderStatus) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -74,9 +72,9 @@ function StatusBadge({ status, orderId, token, onUpdated }: {
   const update = async (newStatus: OrderStatus) => {
     setLoading(true); setOpen(false);
     try {
-      const res = await fetch(`${API_URL}/api/v1/orders/${orderId}/status`, {
+      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
       const json = await res.json() as { success: boolean; error?: string };
@@ -140,7 +138,6 @@ function StatusBadge({ status, orderId, token, onUpdated }: {
 }
 
 export default function AdminOrdersPage() {
-  const accessToken = useAuthStore((s) => s.accessToken);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
 
@@ -156,8 +153,8 @@ export default function AdminOrdersPage() {
   const fetchOrders = useCallback(async (p = 1) => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/v1/orders?page=${p}&limit=15`, {
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      const res = await fetch(`/api/admin/orders?page=${p}&limit=15`, {
+        headers: {},
       });
       if (res.status === 401) { setError("Session expired — please sign in again."); return; }
       if (!res.ok) throw new Error(`Server ${res.status}`);
@@ -178,7 +175,7 @@ export default function AdminOrdersPage() {
         setError(msg);
       }
     } finally { setLoading(false); }
-  }, [accessToken]);
+  }, []);
 
   useEffect(() => {
     if (!hydrated || hasFetched.current) return;
@@ -192,9 +189,9 @@ export default function AdminOrdersPage() {
     if (!window.confirm("Delete this order? This cannot be undone.")) return;
     setDeletingOrderId(orderId);
     try {
-      const res = await fetch(`${API_URL}/api/v1/orders/${orderId}`, {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: "DELETE",
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        headers: {},
       });
       const json = await res.json() as { success: boolean; error?: string };
       if (!json.success) throw new Error(json.error ?? "Delete failed");
@@ -325,7 +322,6 @@ export default function AdminOrdersPage() {
                         <StatusBadge
                           status={order.status}
                           orderId={order._id}
-                          token={accessToken}
                           onUpdated={handleStatusUpdate}
                         />
                       </td>

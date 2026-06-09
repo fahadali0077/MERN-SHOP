@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { toast } from "@/stores/toastStore";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 const CATEGORIES = ["Electronics", "Fashion", "Home & Kitchen", "Books", "Sports"];
 
 interface AdminProduct {
@@ -52,12 +51,10 @@ function ProductModal({
   product,
   onClose,
   onSaved,
-  token,
 }: {
   product: AdminProduct | null; // null = create new
   onClose: () => void;
   onSaved: (p: AdminProduct) => void;
-  token: string | null;
 }) {
   const isNew = product === null;
   const [form, setForm] = useState<typeof EMPTY_PRODUCT>(
@@ -83,8 +80,8 @@ function ProductModal({
     setSaving(true);
     try {
       const url = isNew
-        ? `${API_URL}/api/v1/products`
-        : `${API_URL}/api/v1/products/${product!._id ?? product!.id}`;
+        ? `/api/admin/products`
+        : `/api/admin/products/${product!._id ?? product!.id}`;
       const method = isNew ? "POST" : "PUT";
       // Build body cleanly — omit null/empty optional fields entirely.
       // The backend uses Zod .optional() which accepts undefined but NOT null,
@@ -106,7 +103,7 @@ function ProductModal({
         method,
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          
         },
         body: JSON.stringify(body),
       });
@@ -205,7 +202,6 @@ function ProductModal({
 const columnHelper = createColumnHelper<AdminProduct>();
 
 export function ProductsTable() {
-  const accessToken = useAuthStore((s) => s.accessToken);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
 
@@ -221,7 +217,7 @@ export function ProductsTable() {
   const fetchProducts = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/v1/products?limit=100`);
+      const res = await fetch("/api/admin/products?limit=100");
       if (res.status === 401) { setError("Session expired — please sign in again."); return; }
       if (res.status === 403) { setError("Access denied — admin privileges required."); return; }
       if (!res.ok) throw new Error(`Server error (${res.status})`);
@@ -245,9 +241,9 @@ export function ProductsTable() {
     const id = product._id ?? product.id;
     setDeletingId(id);
     try {
-      const res = await fetch(`${API_URL}/api/v1/products/${id}`, {
+      const res = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        headers: {},
       });
       const json = await res.json() as { success: boolean; error?: string };
       if (!json.success) throw new Error(json.error ?? "Delete failed");
@@ -256,7 +252,7 @@ export function ProductsTable() {
     } catch (err) {
       toast.error("Failed to delete", err instanceof Error ? err.message : "Unknown");
     } finally { setDeletingId(null); }
-  }, [accessToken]);
+  }, []);
 
   const handleSaved = useCallback((saved: AdminProduct) => {
     setProducts((prev) => {
@@ -365,7 +361,6 @@ export function ProductsTable() {
       {editProduct !== undefined && (
         <ProductModal
           product={editProduct}
-          token={accessToken}
           onClose={() => setEditProduct(undefined)}
           onSaved={handleSaved}
         />

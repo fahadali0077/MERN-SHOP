@@ -10,6 +10,8 @@ export const CATEGORIES = [
 ] as const satisfies readonly Category[];
 
 // ── ProductSchema ─────────────────────────────────────────────────────────────
+// FIX C24/C22: include optional `stock` so that cart items validated by
+// /api/cart against CartItemSchema retain stock info instead of having it stripped.
 export const ProductSchema = z.object({
   id: z.string().min(1, "Product ID is required"),
   name: z.string().min(1, "Name is required").max(200),
@@ -21,6 +23,7 @@ export const ProductSchema = z.object({
   badge: z.enum(["New", "Sale", "Hot"]).optional(),
   originalPrice: z.number().positive().optional(),
   description: z.string().max(1000).optional(),
+  stock: z.number().int().nonnegative().optional(),
 });
 
 export type ProductSchemaType = z.infer<typeof ProductSchema>;
@@ -33,8 +36,7 @@ export const CartItemSchema = z.object({
 
 export type CartItemSchemaType = z.infer<typeof CartItemSchema>;
 
-// ── AddToCartInputSchema — accepts MongoDB ObjectIds (24 hex chars) ────────────
-// MERN-III CHANGE: removed p-NNN regex, now accepts any non-empty string (MongoDB ObjectId)
+// ── AddToCartInputSchema — accepts MongoDB ObjectIds ──────────────────────────
 export const AddToCartInputSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
   qty: z.number().int().min(1, "Quantity must be at least 1").max(99, "Maximum quantity is 99").default(1),

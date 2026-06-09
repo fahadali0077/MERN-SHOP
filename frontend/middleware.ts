@@ -1,23 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-/**
- * middleware.ts
- *
- * Single login page at /auth/login handles everyone.
- * Role is read from the "session" HttpOnly cookie set by loginAction.
- *
- * PROTECTED ROUTES:
- *   /admin/**   → requires session with role === "admin"
- *   /account    → requires any session
- *   /checkout   → requires non-admin session
- *
- * ALWAYS PUBLIC:
- *   /auth/**  /api/**  /_next/**
- */
-
 const SESSION_COOKIE = "session";
 
+// FIX #9: make the storefront pages EXPLICITLY public so guards can never
+// accidentally gate them. Previously /products relied on the absence of a block.
 const PUBLIC_PATHS = [
   "/auth/",
   "/api/",
@@ -25,10 +12,13 @@ const PUBLIC_PATHS = [
   "/favicon",
   "/support/",
   "/legal/",
+  "/products", // storefront listing + detail — always public
+  "/", // home
 ];
 
 function isPublic(pathname: string): boolean {
-  return PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  if (pathname === "/") return true;
+  return PUBLIC_PATHS.some((p) => (p === "/" ? false : pathname.startsWith(p)));
 }
 
 function getSessionRole(request: NextRequest): string | null {
@@ -67,7 +57,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
-  // ── Protected customer pages ───────────────────────────────────────────────
+  // ── Protected customer pages (require any session) ─────────────────────────
   if (pathname.startsWith("/checkout") || pathname.startsWith("/account")) {
     if (!isLoggedIn) {
       const url = new URL("/auth/login", request.url);
@@ -80,7 +70,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|json)$).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|json)$).*)"],
 };

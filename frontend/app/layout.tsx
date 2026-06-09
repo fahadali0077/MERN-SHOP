@@ -8,6 +8,7 @@ import { AnimatedCartDrawer } from "@/components/layout/AnimatedCartDrawer";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { Toaster, WelcomeBanner } from "@/components/ui/Toaster";
 import { ConfirmDialogProvider } from "@/components/ui/ConfirmDialog";
+import { AuthHydrator } from "@/components/layout/AuthHydrator";
 
 export const metadata: Metadata = {
   ...DEFAULT_METADATA,
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="flex min-h-screen flex-col bg-parchment antialiased dark:bg-dark-bg">
         <ThemeProvider>
+      <AuthHydrator />
           <AnimatedCartDrawer />
           <Navbar />
           <WelcomeBanner />

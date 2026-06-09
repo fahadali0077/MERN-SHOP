@@ -10,7 +10,6 @@ import {
   User, ShieldCheck, Shield, Trash2, MoreHorizontal, Mail, LayoutDashboard
 } from "lucide-react";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
 interface AdminUser {
   _id: string;
@@ -35,7 +34,6 @@ const getColor = (n: string) => AVATAR_COLORS[n.charCodeAt(0) % AVATAR_COLORS.le
 
 export default function AdminUsersPage() {
   // ── Wait for Zustand hydration before using token ────────────────────────
-  const accessToken = useAuthStore((s) => s.accessToken);
   const currentUserId = useAuthStore((s) => s.user?.id);
   const currentRole = useAuthStore((s) => s.user?.role ?? "customer");
   const isAdmin = currentRole === "admin";
@@ -65,9 +63,7 @@ export default function AdminUsersPage() {
       if (debouncedSearch) params.set("search", debouncedSearch);
 
       const headers: Record<string, string> = {};
-      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
-
-      const res = await fetch(`${API_URL}/api/v1/users?${params.toString()}`, { headers });
+      const res = await fetch(`/api/admin/users?${params.toString()}`, { headers });
 
       if (res.status === 401) { setError("Session expired — please sign in again."); return; }
       if (!res.ok) throw new Error(`Server error ${res.status}`);
@@ -86,7 +82,7 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken, debouncedSearch]);
+  }, [debouncedSearch]);
 
   // Only fetch after Zustand hydrates
   useEffect(() => {
@@ -102,9 +98,9 @@ export default function AdminUsersPage() {
   const handleRoleChange = async (userId: string, userName: string, newRole: string) => {
     setActionLoading(userId); setOpenMenu(null);
     try {
-      const res = await fetch(`${API_URL}/api/v1/users/${userId}/role`, {
+      const res = await fetch(`/api/admin/users/${userId}/role`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole }),
       });
       const json = await res.json() as { success: boolean; error?: string };
@@ -120,9 +116,9 @@ export default function AdminUsersPage() {
     if (!window.confirm(`Delete "${userName}"? This cannot be undone.`)) return;
     setActionLoading(userId); setOpenMenu(null);
     try {
-      const res = await fetch(`${API_URL}/api/v1/users/${userId}`, {
+      const res = await fetch(`/api/admin/users/${userId}`, {
         method: "DELETE",
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        headers: {},
       });
       const json = await res.json() as { success: boolean; error?: string };
       if (!json.success) throw new Error(json.error ?? "Failed");

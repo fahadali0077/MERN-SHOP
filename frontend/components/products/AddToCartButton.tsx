@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { ShoppingCart, Check, Loader2, Minus } from "lucide-react";
+import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { addToCart, removeFromCart } from "@/app/actions/cart";
 import { useCartStore, type CartState } from "@/stores/cartStore";
@@ -12,39 +12,39 @@ import { useAuthStore } from "@/stores/authStore";
 
 interface AddToCartButtonProps {
   product: Product;
-  isInCartSession?: boolean;
   size?: "default" | "lg";
 }
 
-// Admins should not be able to add to cart
-export function AddToCartButton({ product, isInCartSession = false, size = "lg" }: AddToCartButtonProps) {
+/**
+ * FIX #1/B12: ONE canonical add-to-cart button. The server cookie cart is the
+ * source of truth (addToCart/removeFromCart server actions). The Zustand store is
+ * only a UI mirror and is synced from the action's returned cart — no more dual
+ * writes that drift. `ServerAddToCartButton` and `AddToCartActionButton` are
+ * removed in favour of this.
+ */
+export function AddToCartButton({ product, size = "lg" }: AddToCartButtonProps) {
   const [isPending, startTransition] = useTransition();
-  const addItemToStore    = useCartStore((s: CartState) => s.addItem);
-  const removeItemFromStore = useCartStore((s: CartState) => s.removeItem);
-  const openDrawer        = useCartStore((s: CartState) => s.openDrawer);
-  const isInStore         = useCartStore((s: CartState) =>
-    s.items.some((i: CartState["items"][number]) => i.product.id === product.id),
-  );
-
-  const isInCart = isInCartSession || isInStore;
+  const setItems = useCartStore((s: CartState) => s.setItems);
+  const openDrawer = useCartStore((s: CartState) => s.openDrawer);
+  const isInCart = useCartStore((s: CartState) => s.items.some((i) => i.product.id === product.id));
   const role = useAuthStore((s) => s.user?.role);
 
-  // Admins cannot shop — return nothing so the button simply doesn't appear
+  // Admins cannot shop.
   if (role === "admin") return null;
 
   const handleClick = () => {
     startTransition(async () => {
-      if (isInCart) {
-        removeItemFromStore(product.id);
-        const result = await removeFromCart(product.id);
-        if (result.success) toast.info("Removed from cart", `${product.name} removed.`);
-        else toast.error("Could not remove", result.message);
+      const result = isInCart ? await removeFromCart(product.id) : await addToCart(product.id, 1);
+      if (result.success && result.data) {
+        setItems(result.data.items); // single source-of-truth sync
+        if (!isInCart) {
+          openDrawer();
+          toast.success("Added to cart", `${product.name} added!`);
+        } else {
+          toast.info("Removed from cart", `${product.name} removed.`);
+        }
       } else {
-        addItemToStore(product, 1);
-        openDrawer();
-        const result = await addToCart(product.id, 1);
-        if (result.success) toast.success("Added to cart", `${product.name} added!`);
-        else toast.error("Could not add to cart", result.message);
+        toast.error("Could not update cart", result.message);
       }
     });
   };
@@ -61,7 +61,7 @@ export function AddToCartButton({ product, isInCartSession = false, size = "lg" 
         size === "lg" ? "h-12 text-sm" : "h-10 text-sm",
         isInCart
           ? "bg-green-600 text-white hover:bg-green-700"
-          : "bg-ink text-white hover:bg-ink-soft dark:bg-amber dark:hover:bg-amber-600",
+          : "bg-ink text-white hover:bg-ink-soft dark:bg-amber dark:hover:bg-amber-600"
       )}
     >
       {isPending ? (

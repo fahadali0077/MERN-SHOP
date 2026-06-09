@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
-import type { CartItem, Product } from "@/types";
+import type { CartItem, Product, Role } from "@/types";
 
-export const CART_COOKIE    = "mern_cart";
+export const CART_COOKIE = "mern_cart";
 export const SESSION_COOKIE = "session";
 
 export type SessionCartItem = CartItem;
@@ -10,7 +10,7 @@ export type SessionCart = SessionCartItem[];
 export interface SessionUser {
   name?: string;
   email: string;
-  role: "customer" | "admin";
+  role: Role; // FIX #13: was "customer" | "admin" — moderator was missing.
 }
 
 // ── Session readers ───────────────────────────────────────────────────────────
@@ -74,16 +74,10 @@ export async function clearSessionCart(): Promise<void> {
 
 // ── Pure cart helpers (no I/O) ────────────────────────────────────────────────
 
-export function addItemToCart(
-  cart: SessionCart,
-  product: Product,
-  qty: number,
-): SessionCart {
+export function addItemToCart(cart: SessionCart, product: Product, qty: number): SessionCart {
   const existing = cart.find((i) => i.product.id === product.id);
   if (existing) {
-    return cart.map((i) =>
-      i.product.id === product.id ? { ...i, qty: i.qty + qty } : i,
-    );
+    return cart.map((i) => (i.product.id === product.id ? { ...i, qty: i.qty + qty } : i));
   }
   return [...cart, { product, qty }];
 }
@@ -92,11 +86,7 @@ export function removeItemFromCart(cart: SessionCart, productId: string): Sessio
   return cart.filter((i) => i.product.id !== productId);
 }
 
-export function updateItemQtyInCart(
-  cart: SessionCart,
-  productId: string,
-  qty: number,
-): SessionCart {
+export function updateItemQtyInCart(cart: SessionCart, productId: string, qty: number): SessionCart {
   if (qty <= 0) return removeItemFromCart(cart, productId);
   return cart.map((i) => (i.product.id === productId ? { ...i, qty } : i));
 }

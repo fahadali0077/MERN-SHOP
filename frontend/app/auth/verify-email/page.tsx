@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { verifyEmailAction } from "@/app/actions/auth";
 import { useAuthStore } from "@/stores/authStore";
-import type { User } from "@/types";
 
 function VerifyEmailInner() {
   const searchParams = useSearchParams();
@@ -22,24 +21,29 @@ function VerifyEmailInner() {
       return;
     }
 
-    verifyEmailAction(token).then((result) => {
-      if (result.success && result.data) {
-        setAuth(result.data.user as unknown as User, result.data.accessToken);
-        // Store welcome name for the banner
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem("mernshop_welcome", result.data.user.name);
+    verifyEmailAction(token)
+      .then((result) => {
+        if (result.success && result.data) {
+          // verifyEmailAction already set the session + accessToken cookies.
+          // Set the client user for instant UI, then refresh server components so
+          // the Navbar / middleware-aware views immediately reflect the session.
+          setAuth(result.data.user, result.data.accessToken);
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem("mernshop_welcome", result.data.user.name);
+          }
+          setStatus("success");
+          router.refresh();
+          setTimeout(() => router.push("/"), 1500);
+        } else {
+          setStatus("error");
+          setErrorMsg(result.message ?? "Verification failed.");
         }
-        setStatus("success");
-        setTimeout(() => router.push("/"), 2000);
-      } else {
+      })
+      .catch(() => {
         setStatus("error");
-        setErrorMsg(result.message ?? "Verification failed.");
-      }
-    }).catch(() => {
-      setStatus("error");
-      setErrorMsg("An unexpected error occurred.");
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+        setErrorMsg("An unexpected error occurred.");
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -52,7 +56,6 @@ function VerifyEmailInner() {
             <p className="mt-2 text-sm text-ink-muted">Please wait a moment.</p>
           </>
         )}
-
         {status === "success" && (
           <>
             <CheckCircle2 size={40} className="mx-auto mb-4 text-green-500" strokeWidth={1.5} />
@@ -60,16 +63,12 @@ function VerifyEmailInner() {
             <p className="mt-2 text-sm text-ink-muted">Redirecting you to the store…</p>
           </>
         )}
-
         {status === "error" && (
           <>
             <XCircle size={40} className="mx-auto mb-4 text-red-500" strokeWidth={1.5} />
             <h1 className="font-serif text-2xl font-normal text-ink dark:text-white">Verification failed</h1>
             <p className="mt-2 text-sm text-ink-muted">{errorMsg}</p>
-            <a
-              href="/auth/verify-email-sent"
-              className="mt-5 inline-block rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-600"
-            >
+            <a href="/auth/verify-email-sent" className="mt-5 inline-block rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-amber-600">
               Request a new link
             </a>
           </>

@@ -6,7 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Package, MapPin, Clock } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
 const STATUS_STEPS = ["pending", "processing", "shipped", "delivered"];
 const STATUS_STYLES: Record<string, string> = {
@@ -29,7 +28,6 @@ interface Order {
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const accessToken = useAuthStore((s) => s.accessToken);
   const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,11 +38,10 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!accessToken) { router.push("/auth/login"); return; }
     const fetch_ = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/v1/orders/${id}`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
+        const res = await fetch(`/api/admin/orders/${id}`, {
+          headers: {},
         });
         const data = await res.json() as { success: boolean; data: Order };
         if (!data.success) throw new Error();
@@ -56,7 +53,7 @@ export default function OrderDetailPage() {
       }
     };
     void fetch_();
-  }, [id, accessToken, router, hydrated]);
+  }, [id, router, hydrated]);
 
   const stepIndex = order ? STATUS_STEPS.indexOf(order.status) : -1;
 

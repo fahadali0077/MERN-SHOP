@@ -1,223 +1,177 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  User, ShoppingBag, Heart, LayoutDashboard, LogOut,
-  ArrowRight, Package, Settings, MapPin, CreditCard,
-  ChevronRight, Star, Bell, Shield
-} from "lucide-react";
+import { ArrowLeft, Lock, Eye, EyeOff, Shield, AlertTriangle } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
-import { useCartStore, type CartState } from "@/stores/cartStore";
-import { useWishlistStore } from "@/stores/wishlistStore";
-import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { toast } from "@/stores/toastStore";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
-function getInitials(name?: string | null) {
-  if (!name) return "?";
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+// ── Must be outside SecurityPage to keep a stable identity across renders ─────
+function PwField({ field, label, showKey, form, show, errors, onFormChange, onShowToggle }: {
+  field: "currentPassword" | "newPassword" | "confirmPassword";
+  label: string;
+  showKey: "current" | "new" | "confirm";
+  form: { currentPassword: string; newPassword: string; confirmPassword: string };
+  show: { current: boolean; new: boolean; confirm: boolean };
+  errors: Partial<{ currentPassword: string; newPassword: string; confirmPassword: string }>;
+  onFormChange: (field: string, value: string) => void;
+  onShowToggle: (key: string) => void;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-medium text-ink-muted dark:text-white/50">{label}</label>
+      <div className="relative">
+        <input
+          type={show[showKey] ? "text" : "password"}
+          value={form[field]}
+          onChange={e => onFormChange(field, e.target.value)}
+          className={`w-full rounded-lg border pr-10 pl-3 py-2.5 text-sm outline-none focus:border-primary dark:bg-dark-surface-2 dark:text-white ${errors[field] ? "border-red-400" : "border-border dark:border-dark-border"}`}
+        />
+        <button type="button" onClick={() => onShowToggle(showKey)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink">
+          {show[showKey] ? <EyeOff size={14} /> : <Eye size={14} />}
+        </button>
+      </div>
+      {errors[field] && <p className="mt-0.5 text-[11px] text-red-500">{errors[field]}</p>}
+    </div>
+  );
 }
 
-function getAvatarGradient(name?: string | null) {
-  const gradients = [
-    "from-violet-500 to-purple-600",
-    "from-blue-500 to-indigo-600",
-    "from-emerald-500 to-teal-600",
-    "from-orange-500 to-amber-600",
-    "from-pink-500 to-rose-600",
-  ];
-  if (!name) return gradients[0];
-  const idx = name.charCodeAt(0) % gradients.length;
-  return gradients[idx];
-}
+export default function SecurityPage() {
+  const [form, setForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [show, setShow] = useState({ current: false, new: false, confirm: false });
+  const [errors, setErrors] = useState<Partial<typeof form>>({});
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
 
-export default function AccountPage() {
-  const user        = useAuthStore((s) => s.user);
-  const setAuth     = useAuthStore((s) => s.setAuth);
-  const accessToken = useAuthStore((s) => s.accessToken);
-  const logout      = useAuthStore((s) => s.logout);
-  const cartCount   = useCartStore((s: CartState) => s.totalItems());
-  const cartTotal   = useCartStore((s: CartState) => s.totalPrice());
-  const wishlistCount = useWishlistStore((s) => s.count());
-  const router      = useRouter();
-
-  const [fetchedUser, setFetchedUser] = useState(user);
-  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-
-  useEffect(() => {
-    if (user) { setFetchedUser(user); return; }
-    if (!accessToken) return;
-    const fetchMe = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/v1/auth/me`, {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (!res.ok) return;
-        const data = await res.json() as { success: boolean; data?: { id: string; name: string; email: string; role: "customer" | "admin"; createdAt: string } };
-        if (data.success && data.data) {
-          setAuth(data.data, accessToken);
-          setFetchedUser(data.data);
-        }
-      } catch { /* silently skip */ }
-    };
-    void fetchMe();
-  }, [user, accessToken, setAuth]);
-
-  const displayUser = fetchedUser ?? user;
-  const gradient = getAvatarGradient(displayUser?.name);
-  const initials = getInitials(displayUser?.name);
-  const memberSince = displayUser && "createdAt" in displayUser
-    ? new Date((displayUser as { createdAt: string }).createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
-    : null;
-
-  const handleLogoutConfirm = () => {
-    setShowLogoutDialog(false);
-    logout();
-    toast.success("Signed out", "See you next time!");
-    router.push("/auth/login");
+  const validate = () => {
+    const e: Partial<typeof form> = {};
+    if (!form.currentPassword) e.currentPassword = "Required";
+    if (form.newPassword.length < 8) e.newPassword = "At least 8 characters";
+    else if (!/[A-Z]/.test(form.newPassword)) e.newPassword = "Must contain an uppercase letter";
+    else if (!/[0-9]/.test(form.newPassword)) e.newPassword = "Must contain a number";
+    else if (!/[^A-Za-z0-9]/.test(form.newPassword)) e.newPassword = "Must contain a special character (!@#$...)";
+    else if (form.newPassword === form.currentPassword) e.newPassword = "New password must be different";
+    if (form.newPassword !== form.confirmPassword) e.confirmPassword = "Passwords don't match";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const quickLinks = [
-    { href: "/cart",     icon: ShoppingBag, label: "My Cart",     value: cartCount,     sub: cartCount > 0 ? `$${cartTotal.toFixed(2)} total` : "Empty", color: "text-blue-500",   bg: "bg-blue-50 dark:bg-blue-500/10",   border: "group-hover:border-blue-200" },
-    { href: "/wishlist", icon: Heart,       label: "Wishlist",    value: wishlistCount, sub: wishlistCount === 1 ? "1 item saved" : `${wishlistCount} items saved`, color: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-500/10", border: "group-hover:border-rose-200" },
-  ];
+  const handleSubmit = async () => {
+    if (!validate()) return;
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword: form.currentPassword, newPassword: form.newPassword }),
+      });
+      const data = await res.json() as { success: boolean; message: string };
+      if (!data.success) throw new Error(data.message ?? "Failed");
+      setStatus("success");
+      setMessage("Password changed successfully!");
+      setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err) {
+      setStatus("error");
+      setMessage(err instanceof Error ? err.message : "Something went wrong");
+    }
+  };
 
-  const menuItems = [
-    { icon: Package,    label: "My Orders",         sub: "Track & manage orders",     href: "/account/orders" },
-    { icon: MapPin,     label: "Addresses",          sub: "Shipping & billing info",   href: "/account/addresses" },
-    { icon: CreditCard, label: "Payment Methods",    sub: "Cards & payment options",   href: "/account/payments" },
-    { icon: Bell,       label: "Notifications",      sub: "Email & push preferences",  href: "/account/notifications" },
-    { icon: Shield,     label: "Security",           sub: "Password & 2FA",           href: "/account/security" },
-    { icon: Settings,   label: "Account Settings",   sub: "Personal info & privacy",   href: "/account/settings" },
-  ];
+  const strength = (p: string) => {
+    if (!p) return 0;
+    let s = 0;
+    if (p.length >= 8) s++;
+    if (/[A-Z]/.test(p)) s++;
+    if (/[0-9]/.test(p)) s++;
+    if (/[^A-Za-z0-9]/.test(p)) s++;
+    return s;
+  };
+
+  const pw_strength = strength(form.newPassword);
+  const strength_colors = ["", "bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-green-500"];
+  const strength_labels = ["", "Weak", "Fair", "Good", "Strong"];
+
+  const handleFormChange = (field: string, value: string) => {
+    setForm(p => ({ ...p, [field]: value }));
+    setStatus("idle");
+  };
+
+  const handleShowToggle = (key: string) => {
+    setShow(s => ({ ...s, [key]: !s[key as keyof typeof s] }));
+  };
 
   return (
-    <>
-      <ConfirmDialog
-        open={showLogoutDialog}
-        title="Sign out of MERNShop?"
-        description="You'll need to sign in again to access your cart, orders, and account settings."
-        confirmLabel="Sign out"
-        cancelLabel="Stay signed in"
-        variant="warning"
-        onConfirm={handleLogoutConfirm}
-        onCancel={() => setShowLogoutDialog(false)}
-      />
-
-      <div className="mx-auto max-w-4xl pb-20">
-
-        {/* ── Hero banner ──────────────────────────────────────────────────── */}
-        <div className="relative mb-8 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-8 py-10">
-          {/* Background pattern */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.04]"
-            style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "32px 32px" }} />
-          {/* Glow blobs */}
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
-          <div className="absolute -bottom-10 left-10 h-48 w-48 rounded-full bg-purple-500/15 blur-3xl" />
-
-          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
-            {/* Avatar */}
-            <div className={`flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} shadow-lg text-2xl font-bold text-white ring-4 ring-white/10`}>
-              {initials}
-            </div>
-
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-bold text-white">
-                  {displayUser?.name ?? "Guest"}
-                </h1>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                  displayUser?.role === "admin"
-                    ? "bg-amber-400/20 text-amber-300 ring-1 ring-amber-400/30"
-                    : "bg-white/10 text-white/70 ring-1 ring-white/15"
-                }`}>
-                  {displayUser?.role === "admin" ? "⚡ Admin" : "Customer"}
-                </span>
-              </div>
-              <p className="mt-1 text-sm text-white/60">{displayUser?.email}</p>
-              {memberSince && (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-white/40">
-                  <Star size={10} fill="currentColor" /> Member since {memberSince}
-                </p>
-              )}
-            </div>
-
-            {/* Sign out button */}
-            <button
-              onClick={() => setShowLogoutDialog(true)}
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white/70 backdrop-blur-sm transition-all hover:bg-red-500/20 hover:text-red-300 hover:border-red-400/30"
-            >
-              <LogOut size={14} /> Sign out
-            </button>
-          </div>
+    <div className="mx-auto max-w-lg">
+      <div className="mb-6 flex items-center gap-3">
+        <Link href="/account" className="flex h-9 w-9 items-center justify-center rounded-lg border border-border hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
+          <ArrowLeft size={16} className="text-ink dark:text-white" />
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold text-ink dark:text-white">Security</h1>
+          <p className="text-sm text-ink-muted">Password & account protection</p>
         </div>
-
-        {/* ── Quick stats ───────────────────────────────────────────────────── */}
-        <div className="mb-6 grid grid-cols-2 gap-4">
-          {quickLinks.map(({ href, icon: Icon, label, value, sub, color, bg, border }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`group relative overflow-hidden rounded-2xl border border-border bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${border} dark:border-dark-border dark:bg-dark-surface`}
-            >
-              <div className={`mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl ${bg}`}>
-                <Icon size={20} className={color} strokeWidth={2} />
-              </div>
-              <p className="text-3xl font-bold tabular-nums text-ink dark:text-white">{value}</p>
-              <p className="mt-0.5 text-sm font-medium text-ink-soft dark:text-white/70">{label}</p>
-              <p className="mt-0.5 text-xs text-ink-muted">{sub}</p>
-              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-primary opacity-0 transition-all group-hover:opacity-100">
-                View <ArrowRight size={11} />
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* ── Admin shortcut ────────────────────────────────────────────────── */}
-        {displayUser?.role === "admin" && (
-          <Link
-            href="/admin"
-            className="group mb-6 flex items-center justify-between rounded-2xl border border-amber/30 bg-gradient-to-r from-amber-50 to-orange-50 p-5 transition-all hover:shadow-md dark:border-amber/20 dark:from-amber/10 dark:to-orange-500/5"
-          >
-            <div className="flex items-center gap-4">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber text-white shadow-sm">
-                <LayoutDashboard size={18} strokeWidth={2} />
-              </div>
-              <div>
-                <p className="font-semibold text-ink dark:text-white">Admin Dashboard</p>
-                <p className="text-sm text-ink-muted">Stats · Products · Live Orders</p>
-              </div>
-            </div>
-            <ChevronRight size={18} className="text-amber transition-transform group-hover:translate-x-1" />
-          </Link>
-        )}
-
-        {/* ── Menu items ────────────────────────────────────────────────────── */}
-        <div className="rounded-2xl border border-border bg-white dark:border-dark-border dark:bg-dark-surface">
-          {menuItems.map(({ icon: Icon, label, sub, href }, i) => (
-            <Link
-              key={href}
-              href={href}
-              className={`group flex items-center gap-4 px-6 py-4 transition-colors hover:bg-surface-raised dark:hover:bg-dark-surface-2 ${
-                i !== menuItems.length - 1 ? "border-b border-border dark:border-dark-border" : ""
-              }`}
-            >
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-surface-raised dark:bg-dark-surface-2">
-                <Icon size={16} className="text-ink-muted dark:text-white/50" strokeWidth={2} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-ink dark:text-white">{label}</p>
-                <p className="text-xs text-ink-muted">{sub}</p>
-              </div>
-              <ChevronRight size={15} className="text-ink-muted opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100 dark:text-white/30" />
-            </Link>
-          ))}
-        </div>
-
       </div>
-    </>
+
+      {/* Change password */}
+      <div className="rounded-2xl border border-border bg-white dark:border-dark-border dark:bg-dark-surface">
+        <div className="flex items-center gap-2 border-b border-border px-6 py-4 dark:border-dark-border">
+          <Lock size={15} className="text-primary" />
+          <h2 className="text-sm font-semibold text-ink dark:text-white">Change Password</h2>
+        </div>
+        <div className="space-y-4 p-6">
+          <PwField field="currentPassword" label="Current Password" showKey="current" form={form} show={show} errors={errors} onFormChange={handleFormChange} onShowToggle={handleShowToggle} />
+          <PwField field="newPassword" label="New Password" showKey="new" form={form} show={show} errors={errors} onFormChange={handleFormChange} onShowToggle={handleShowToggle} />
+
+          {/* Strength meter */}
+          {form.newPassword && (
+            <div>
+              <div className="flex gap-1 mb-1">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= pw_strength ? strength_colors[pw_strength] : "bg-border dark:bg-dark-border"}`} />
+                ))}
+              </div>
+              <p className="text-[11px] text-ink-muted">{strength_labels[pw_strength]}</p>
+            </div>
+          )}
+
+          <PwField field="confirmPassword" label="Confirm New Password" showKey="confirm" form={form} show={show} errors={errors} onFormChange={handleFormChange} onShowToggle={handleShowToggle} />
+
+          {status === "success" && (
+            <div className="rounded-xl bg-green-50 p-3 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400">✓ {message}</div>
+          )}
+          {status === "error" && (
+            <div className="rounded-xl bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              <div className="flex items-center gap-2"><AlertTriangle size={14} /> {message}</div>
+            </div>
+          )}
+
+          <button onClick={() => { void handleSubmit(); }} disabled={status === "loading"}
+            className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-white hover:bg-primary-600 disabled:opacity-60">
+            {status === "loading" ? "Updating..." : "Update Password"}
+          </button>
+        </div>
+      </div>
+
+      {/* Security tips */}
+      <div className="mt-5 rounded-2xl border border-border bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
+        <div className="flex items-center gap-2 mb-4">
+          <Shield size={15} className="text-primary" />
+          <h2 className="text-sm font-semibold text-ink dark:text-white">Security Tips</h2>
+        </div>
+        <ul className="space-y-2 text-sm text-ink-muted">
+          {[
+            "Use at least 8 characters with uppercase, numbers & symbols",
+            "Never reuse passwords across different websites",
+            "Enable notifications for sign-in activity",
+            "Sign out from shared or public devices",
+          ].map(tip => (
+            <li key={tip} className="flex items-start gap-2">
+              <span className="mt-0.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }

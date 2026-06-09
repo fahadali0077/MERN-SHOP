@@ -8,11 +8,9 @@ import { AppError } from "../middleware/errorHandler.js";
 export const createReview = asyncHandler(async (req: Request, res: Response) => {
   const { rating, comment } = req.body as { rating: number; comment?: string };
 
-  // Verify product exists
   const product = await Product.findById(req.params["id"]);
   if (!product) throw new AppError("Product not found", 404);
 
-  // Check if user already reviewed this product
   const existing = await Review.findOne({
     product: req.params["id"],
     user: req.user!.userId,
@@ -21,12 +19,11 @@ export const createReview = asyncHandler(async (req: Request, res: Response) => 
 
   const review = await Review.create({
     product: req.params["id"],
-    user:    req.user!.userId,
+    user: req.user!.userId,
     rating,
     comment: comment ?? "",
   });
 
-  // Populate user name for response
   await review.populate("user", "name avatarUrl");
 
   res.status(201).json({
@@ -47,13 +44,23 @@ export const getProductReviews = asyncHandler(async (req: Request, res: Response
 });
 
 // ── DELETE /api/v1/products/:productId/reviews/:reviewId ─────────────────────
+// FIX #4: the route is admin-protected, but the query previously hardcoded
+// `user: req.user.userId`, so an admin deleting someone else's review always 404'd.
+// Build the filter by role: admins match by _id only; non-admins must own it.
 export const deleteReview = asyncHandler(async (req: Request, res: Response) => {
-  const review = await Review.findOneAndDelete({
-    _id:     req.params["reviewId"],
-    user:    req.user!.userId,   // only owner can delete
-  });
+  const isAdmin = req.user!.role === "admin";
 
-  if (!review) throw new AppError("Review not found or not yours to delete", 404);
+  const filter: Record<string, unknown> = { _id: req.params["reviewId"] };
+  if (!isAdmin) filter["user"] = req.user!.userId; // owners-only for non-admins
+
+  const review = await Review.findOneAndDelete(filter);
+
+  if (!review) {
+    throw new AppError(
+      isAdmin ? "Review not found" : "Review not found or not yours to delete",
+      404
+    );
+  }
 
   res.json({ success: true, message: "Review deleted" });
 });

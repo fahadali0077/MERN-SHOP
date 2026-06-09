@@ -1,14 +1,34 @@
 "use server";
 
 import { cookies } from "next/headers";
-import type { ActionResult } from "@/types";
+import type { ActionResult, User } from "@/types";
 
 const API = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
+
+// FIX #14: the backend `login` returns the full user via toJSON. Parse the full
+// shape (id, createdAt, avatarUrl, isEmailVerified) instead of dropping all but
+// name/email/role — so admin login no longer fabricates empty id/createdAt.
+type BackendUser = User;
+
+const ACCESS_COOKIE = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  path: "/",
+  secure: process.env["NODE_ENV"] === "production",
+  maxAge: 60 * 15,
+};
+const SESSION_COOKIE = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  path: "/",
+  secure: process.env["NODE_ENV"] === "production",
+  maxAge: 60 * 60 * 24 * 7,
+};
 
 export async function loginAction(
   email: string,
   password: string
-): Promise<ActionResult<{ accessToken: string; user: { name: string; email: string; role: string } }>> {
+): Promise<ActionResult<{ accessToken: string; user: BackendUser }>> {
   try {
     const res = await fetch(`${API}/api/v1/auth/login`, {
       method: "POST",
@@ -16,42 +36,27 @@ export async function loginAction(
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       success: boolean;
-      data?: { accessToken: string; user: { name: string; email: string; role: string } };
+      data?: { accessToken: string; user: BackendUser };
       error?: string;
-      status?: number;
     };
 
     if (!data.success || !data.data) {
-      return {
-        success: false,
-        message: data.error ?? "Login failed",
-        statusCode: res.status,
-      };
+      return { success: false, message: data.error ?? "Login failed", statusCode: res.status };
     }
 
     const cookieStore = await cookies();
-
-    cookieStore.set("accessToken", data.data.accessToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      secure: process.env["NODE_ENV"] === "production",
-      maxAge: 60 * 15,
-    });
-
-    cookieStore.set("session", JSON.stringify({
-      name: data.data.user.name,
-      email: data.data.user.email,
-      role: data.data.user.role,
-    }), {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      secure: process.env["NODE_ENV"] === "production",
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    cookieStore.set("accessToken", data.data.accessToken, ACCESS_COOKIE);
+    cookieStore.set(
+      "session",
+      JSON.stringify({
+        name: data.data.user.name,
+        email: data.data.user.email,
+        role: data.data.user.role,
+      }),
+      SESSION_COOKIE
+    );
 
     return { success: true, message: "Welcome back!", data: data.data };
   } catch (err) {
@@ -72,24 +77,23 @@ export async function registerAction(
       body: JSON.stringify({ name, email, password }),
     });
 
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       success: boolean;
       data?: { email: string; name: string };
+      message?: string; // FIX #7: backend sends the success message here.
       error?: string;
       details?: Record<string, string[]>;
     };
 
     if (!data.success) {
-      return {
-        success: false,
-        message: data.error ?? "Registration failed",
-        fieldErrors: data.details,
-      };
+      return { success: false, message: data.error ?? "Registration failed", fieldErrors: data.details };
     }
 
     return {
       success: true,
-      message: data.error ?? "Check your email to verify your account.",
+      // FIX #7: was `data.error` (always undefined on success → silently dropped
+      // the real message). Use `data.message`.
+      message: data.message ?? "Check your email to verify your account.",
       data: data.data ?? { email, name },
     };
   } catch (err) {
@@ -98,15 +102,17 @@ export async function registerAction(
   }
 }
 
-export async function verifyEmailAction(token: string): Promise<ActionResult<{ accessToken: string; user: { name: string; email: string; role: string } }>> {
+export async function verifyEmailAction(
+  token: string
+): Promise<ActionResult<{ accessToken: string; user: BackendUser }>> {
   try {
     const res = await fetch(`${API}/api/v1/auth/verify-email?token=${encodeURIComponent(token)}`, {
       method: "GET",
     });
 
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       success: boolean;
-      data?: { accessToken: string; user: { name: string; email: string; role: string } };
+      data?: { accessToken: string; user: BackendUser };
       error?: string;
     };
 
@@ -115,20 +121,16 @@ export async function verifyEmailAction(token: string): Promise<ActionResult<{ a
     }
 
     const cookieStore = await cookies();
-    cookieStore.set("accessToken", data.data.accessToken, {
-      httpOnly: true, sameSite: "lax", path: "/",
-      secure: process.env["NODE_ENV"] === "production",
-      maxAge: 60 * 15,
-    });
-    cookieStore.set("session", JSON.stringify({
-      name: data.data.user.name,
-      email: data.data.user.email,
-      role: data.data.user.role,
-    }), {
-      httpOnly: true, sameSite: "lax", path: "/",
-      secure: process.env["NODE_ENV"] === "production",
-      maxAge: 60 * 60 * 24 * 7,
-    });
+    cookieStore.set("accessToken", data.data.accessToken, ACCESS_COOKIE);
+    cookieStore.set(
+      "session",
+      JSON.stringify({
+        name: data.data.user.name,
+        email: data.data.user.email,
+        role: data.data.user.role,
+      }),
+      SESSION_COOKIE
+    );
 
     return { success: true, message: "Email verified!", data: data.data };
   } catch (err) {
@@ -144,7 +146,7 @@ export async function resendVerificationAction(email: string): Promise<ActionRes
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-    const data = await res.json() as { success: boolean; message?: string };
+    const data = (await res.json()) as { success: boolean; message?: string };
     return { success: data.success, message: data.message ?? "Done" };
   } catch {
     return { success: false, message: "Failed to resend. Please try again." };
@@ -153,11 +155,18 @@ export async function resendVerificationAction(email: string): Promise<ActionRes
 
 export async function logoutAction(): Promise<ActionResult> {
   try {
-    await fetch(`${API}/api/v1/auth/logout`, { method: "POST" });
-
     const cookieStore = await cookies();
+    const refreshToken = cookieStore.get("refreshToken")?.value;
+
+    // Tell the backend to clear the stored refresh token (forward the cookie).
+    await fetch(`${API}/api/v1/auth/logout`, {
+      method: "POST",
+      headers: refreshToken ? { Cookie: `refreshToken=${refreshToken}` } : {},
+    }).catch(() => null);
+
     cookieStore.delete("session");
     cookieStore.delete("accessToken");
+    cookieStore.delete("refreshToken");
     cookieStore.delete("mern_cart");
 
     return { success: true, message: "Logged out." };
@@ -167,28 +176,22 @@ export async function logoutAction(): Promise<ActionResult> {
   }
 }
 
+// FIX #14: pass the full backend user through (no more `{ id: "", createdAt: "" }`).
 export async function adminLoginAction(
   email: string,
   password: string
-): Promise<ActionResult<{ accessToken: string; user: { id: string; name: string; email: string; role: string; createdAt: string } }>> {
+): Promise<ActionResult<{ accessToken: string; user: BackendUser }>> {
   const result = await loginAction(email, password);
 
   if (!result.success || !result.data) {
-    return { success: false, message: result.message ?? "Login failed" };
+    return { success: false, message: result.message ?? "Login failed", statusCode: result.statusCode };
   }
 
   if (result.data.user.role !== "admin") {
     return { success: false, message: "Access denied. Admin role required." };
   }
 
-  return {
-    success: true,
-    message: "Welcome, Admin!",
-    data: {
-      accessToken: result.data.accessToken,
-      user: { id: "", createdAt: "", ...result.data.user },
-    },
-  };
+  return { success: true, message: "Welcome, Admin!", data: result.data };
 }
 
 export async function adminLogoutAction(): Promise<ActionResult> {

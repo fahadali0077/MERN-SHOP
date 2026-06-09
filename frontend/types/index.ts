@@ -6,17 +6,22 @@ export type Category =
   | "Books"
   | "Sports";
 
+// FIX #13: roles must match the backend (customer | admin | moderator).
+export type Role = "customer" | "admin" | "moderator";
+
 export interface Product {
   readonly id: string;
   readonly name: string;
   readonly price: number;
   readonly image: string;
-  readonly rating: number;        // 0–5, one decimal
+  readonly rating: number; // 0–5, one decimal
   readonly reviewCount: number;
   readonly category: Category;
   readonly badge?: "New" | "Sale" | "Hot";
   readonly originalPrice?: number;
   readonly description?: string;
+  // FIX C22: surface stock so the cart/checkout can reason about availability.
+  readonly stock?: number;
 }
 
 // ── Cart ───────────────────────────────────────────────────────────────────────
@@ -30,7 +35,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "customer" | "admin";
+  role: Role; // FIX #13
   createdAt: string;
   avatarUrl?: string;
   isEmailVerified?: boolean;

@@ -2,11 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Package, ChevronRight, ArrowLeft, RefreshCw, ShoppingBag } from "lucide-react";
-import { useAuthStore } from "@/stores/authStore";
-
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
+import { getMyOrdersAction, type MyOrder } from "@/app/actions/account";
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -16,56 +13,36 @@ const STATUS_STYLES: Record<string, string> = {
   cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
 };
 
-interface OrderItem { product: string; name: string; image?: string; price: number; qty: number; }
-interface Order {
-  id: string; _id: string;
-  items: OrderItem[];
-  totalAmount: number;
-  status: string;
-  createdAt: string;
-  shippingAddress?: { street: string; city: string; country: string };
-}
-
 export default function OrdersPage() {
-  const accessToken = useAuthStore((s) => s.accessToken);
-  const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<MyOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => { setHydrated(true); }, []);
-
+  // FIX B14: no Zustand token. The server action reads the HttpOnly cookie and
+  // refreshes on 401, so a fresh page load (where the token isn't in memory) works.
   const fetchOrders = useCallback(async (p = 1) => {
-    if (!accessToken) { router.push("/auth/login"); return; }
-    setLoading(true); setError("");
-    try {
-      const res = await fetch(`${API_URL}/api/v1/orders/my?page=${p}&limit=8`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      if (res.status === 401) {
-        setError("Your session has expired. Please sign in again.");
-        setLoading(false);
-        return;
-      }
-      const data = await res.json() as { success: boolean; data: Order[]; pagination: { pages: number } };
-      if (!data.success) throw new Error("Failed to fetch orders");
-      setOrders(data.data);
-      setTotalPages(data.pagination.pages);
-    } catch (err) {
-      if (err instanceof Response && err.status === 401) {
-        setError("Your session has expired. Please sign in again.");
-      } else {
-        setError("Failed to load orders. Please try again.");
-      }
-    } finally {
+    setLoading(true);
+    setError("");
+    const result = await getMyOrdersAction(p, 8);
+    if (!result.success || !result.data) {
+      setError(
+        result.statusCode === 401
+          ? "Your session has expired. Please sign in again."
+          : result.message
+      );
       setLoading(false);
+      return;
     }
-  }, [accessToken, router]);
+    setOrders(result.data.orders);
+    setTotalPages(result.data.pages);
+    setLoading(false);
+  }, []);
 
-  useEffect(() => { if (hydrated) { void fetchOrders(page); } }, [fetchOrders, page, hydrated]);
+  useEffect(() => {
+    void fetchOrders(page);
+  }, [fetchOrders, page]);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -96,9 +73,7 @@ export default function OrdersPage() {
         <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center dark:border-red-900/30 dark:bg-red-900/10">
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           {error.includes("session") ? (
-            <Link href="/auth/login" className="mt-3 inline-block text-sm font-medium text-primary hover:underline">
-              Sign in again →
-            </Link>
+            <Link href="/auth/login" className="mt-3 inline-block text-sm font-medium text-primary hover:underline">Sign in again →</Link>
           ) : (
             <button onClick={() => { void fetchOrders(page); }} className="mt-3 text-sm font-medium text-primary hover:underline">Retry</button>
           )}
@@ -112,31 +87,22 @@ export default function OrdersPage() {
           </div>
           <h3 className="font-semibold text-ink dark:text-white">No orders yet</h3>
           <p className="mt-1 text-sm text-ink-muted">Your placed orders will appear here</p>
-          <Link href="/products" className="mt-5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-600">
-            Browse Products
-          </Link>
+          <Link href="/products" className="mt-5 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-600">Browse Products</Link>
         </div>
       )}
 
       {!loading && !error && orders.length > 0 && (
         <div className="space-y-3">
           {orders.map((order) => (
-            <Link
-              key={order.id ?? order._id}
-              href={`/account/orders/${order.id ?? order._id}`}
-              className="group flex items-center gap-4 rounded-xl border border-border bg-white p-5 transition-all hover:border-primary/30 hover:shadow-sm dark:border-dark-border dark:bg-dark-surface"
-            >
+            <Link key={order.id ?? order._id} href={`/account/orders/${order.id ?? order._id}`}
+              className="group flex items-center gap-4 rounded-xl border border-border bg-white p-5 transition-all hover:border-primary/30 hover:shadow-sm dark:border-dark-border dark:bg-dark-surface">
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-surface-raised dark:bg-dark-surface-2">
                 <Package size={18} className="text-ink-muted" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-semibold text-ink dark:text-white">
-                    #{(order.id ?? order._id).slice(-8).toUpperCase()}
-                  </p>
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${STATUS_STYLES[order.status] ?? ""}`}>
-                    {order.status}
-                  </span>
+                  <p className="text-sm font-semibold text-ink dark:text-white">#{(order.id ?? order._id).slice(-8).toUpperCase()}</p>
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${STATUS_STYLES[order.status] ?? ""}`}>{order.status}</span>
                 </div>
                 <p className="mt-0.5 text-xs text-ink-muted">
                   {order.items.length} item{order.items.length !== 1 ? "s" : ""} · {new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -151,13 +117,9 @@ export default function OrdersPage() {
 
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-4">
-              <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="rounded-lg border border-border px-4 py-2 text-sm disabled:opacity-40 hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
-                Previous
-              </button>
+              <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="rounded-lg border border-border px-4 py-2 text-sm disabled:opacity-40 hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">Previous</button>
               <span className="text-sm text-ink-muted">Page {page} of {totalPages}</span>
-              <button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} className="rounded-lg border border-border px-4 py-2 text-sm disabled:opacity-40 hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">
-                Next
-              </button>
+              <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)} className="rounded-lg border border-border px-4 py-2 text-sm disabled:opacity-40 hover:bg-surface-raised dark:border-dark-border dark:hover:bg-dark-surface-2">Next</button>
             </div>
           )}
         </div>

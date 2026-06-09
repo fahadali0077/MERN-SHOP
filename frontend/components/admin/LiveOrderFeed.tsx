@@ -7,7 +7,6 @@ import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
 import { Loader2, RefreshCw, Package } from "lucide-react";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
 const STATUS_STYLES: Record<string, string> = {
   pending:    "bg-amber-50 text-amber-700   dark:bg-amber/10  dark:text-amber-300",
@@ -54,7 +53,6 @@ function apiOrderToLive(o: ApiOrder): LiveOrder {
 
 export function LiveOrderFeed() {
   // ── Wait for Zustand to hydrate before reading token ─────────────────────
-  const accessToken   = useAuthStore((s) => s.accessToken);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
 
@@ -71,9 +69,8 @@ export function LiveOrderFeed() {
     setFetchError(null);
     try {
       const headers: Record<string, string> = {};
-      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
 
-      const res = await fetch(`${API_URL}/api/v1/orders`, { headers });
+      const res = await fetch("/api/admin/orders", { headers });
 
       if (res.status === 401) {
         setFetchError("Session expired — please sign in again.");
@@ -98,7 +95,7 @@ export function LiveOrderFeed() {
     if (hasFetched.current) return;
     hasFetched.current = true;
     void fetchRecentOrders();
-  }, [hydrated, accessToken]);
+  }, [hydrated]);
 
   // Merge: socket (live) orders on top, DB orders below — deduplicate by id
   const seen = new Set<string>();

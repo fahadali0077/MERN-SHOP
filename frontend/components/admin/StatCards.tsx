@@ -5,7 +5,6 @@ import { TrendingUp, DollarSign, ShoppingCart, Users, Package, Loader2 } from "l
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 
-const API_URL = process.env["NEXT_PUBLIC_API_URL"] ?? "http://localhost:5000";
 
 interface StatData {
   id:      string;
@@ -61,7 +60,6 @@ const DEFAULT_STATS: StatData[] = [
 ];
 
 export function StatCards() {
-  const accessToken = useAuthStore((s) => s.accessToken);
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => { setHydrated(true); }, []);
 
@@ -72,12 +70,11 @@ export function StatCards() {
 
     const fetchStats = async () => {
       const headers: Record<string, string> = {};
-      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
 
       const [ordersRes, usersRes, productsRes] = await Promise.allSettled([
-        fetch(`${API_URL}/api/v1/orders/stats`,    { headers }),
-        fetch(`${API_URL}/api/v1/users?limit=1`,   { headers }),
-        fetch(`${API_URL}/api/v1/products?limit=1`),
+        fetch("/api/admin/stats",    { headers }),
+        fetch("/api/admin/users?limit=1",   { headers }),
+        fetch("/api/admin/products?limit=1"),
       ]);
 
       setStats((prev) => {
@@ -165,7 +162,7 @@ export function StatCards() {
     };
 
     void fetchStats();
-  }, [hydrated, accessToken]);
+  }, [hydrated]);
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

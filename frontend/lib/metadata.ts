@@ -12,6 +12,20 @@ export const DEFAULT_METADATA: Metadata = {
     template: `%s | ${env.NEXT_PUBLIC_APP_NAME}`,
   },
   description: "Production-grade e-commerce frontend built with Next.js 15.",
+  // ── Icons ──────────────────────────────────────────────────────────────────
+  // Next.js picks up app/icon.tsx (32×32 PNG) and app/apple-icon.tsx (180×180)
+  // automatically. The SVG entry below covers modern browsers that prefer vectors.
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.png",    type: "image/png", sizes: "32x32" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", type: "image/png", sizes: "180x180" },
+    ],
+    shortcut: "/favicon.svg",
+  },
+  manifest: "/manifest.json",
   openGraph: {
     type: "website",
     siteName: env.NEXT_PUBLIC_APP_NAME,
@@ -22,7 +36,6 @@ export const DEFAULT_METADATA: Metadata = {
     card: "summary_large_image",
     images: [{ url: "/og-image.jpg", alt: "MERNShop" }],
   },
-
 };
 
 export function buildProductMetadata(product: Product): Metadata {
